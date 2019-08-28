@@ -1,15 +1,14 @@
 (ns minasss-games.core
-    (:require [cljsjs.pixi]))
+  "A small experimetn with PIXI javascript library"
+  (:require [minasss-games.pixi :as pixi]))
 
 (enable-console-print!)
 
-(println "This text is printed from src/minasss-games/core.cljs. Go ahead and edit it and see reloading in action.")
-
 ;; define your app data so that it doesn't get over-written on reload
 
-(defonce app-state (atom {:pixi (new js/PIXI.Application)}))
+(defonce app-state (atom {:pixi (pixi/create-app 800 600)}))
 
-(js/document.body.appendChild (.-view (:pixi @app-state)))
+(pixi/add-app-to-dom (:pixi @app-state))
 
 (defn on-js-reload []
   ;; optionally touch your app-state to force rerendering depending on
