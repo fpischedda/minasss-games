@@ -8,9 +8,12 @@
 
 (defonce app-state (atom {:pixi (pixi/make-app 512 512)}))
 
-(pixi/load-resources ["images/background.png"]
-  (fn []
-    (def background (pixi/make-sprite "images/background.png"))))
+(defn ^:export callback []
+  (println "load callback")
+  (let [background (pixi/make-sprite "images/background.png")]
+    (.addChild (.-stage (:pixi @app-state)) background)))
+
+(pixi/load-resources ["images/background.png"] callback)
 
 (pixi/add-app-to-dom (:pixi @app-state))
 
