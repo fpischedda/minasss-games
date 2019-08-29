@@ -6,7 +6,11 @@
 
 ;; define your app data so that it doesn't get over-written on reload
 
-(defonce app-state (atom {:pixi (pixi/create-app 800 600)}))
+(defonce app-state (atom {:pixi (pixi/make-app 512 512)}))
+
+(pixi/load-resources ["images/background.png"]
+  (fn []
+    (def background (pixi/make-sprite "images/background.png"))))
 
 (pixi/add-app-to-dom (:pixi @app-state))
 
