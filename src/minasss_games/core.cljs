@@ -7,10 +7,10 @@
 
 ;; define your app data so that it doesn't get over-written on reload
 
-(defonce app-state (atom {:pixi (pixi/make-app 512 512)}))
+(def app (pixi/make-app 512 512))
 
-(pixi/add-app-to-dom (:pixi @app-state))
-(harvest-bot/init (:pixi @app-state))
+(pixi/add-app-to-dom app)
+(harvest-bot/init app)
 
 (defn on-js-reload []
   ;; optionally touch your app-state to force rerendering depending on
