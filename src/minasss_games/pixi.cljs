@@ -37,21 +37,22 @@
       (println "could not find texture " texture-name)
       (.-texture tex))))
 
-(defn ma-container
+(defn make-container
   "Create a PIXI container"
-  (sj/PIXI.Container.))
+  []
+  (js/PIXI.Container.))
 
 (defn make-sprite
   "Create a sprite prividing a texture name"
   [texture-name]
   (js/PIXI.Sprite. (get-texture texture-name)))
 
-(defn add-to-app-stage
-  "Add container to application main stage"
-  [app container]
-  (add-to-stage (.-stage app) container))
-
 (defn add-to-stage
   "Add container to provided stage"
   [stage container]
   (.addChild stage container))
+
+(defn add-to-app-stage
+  "Add container to application main stage"
+  [app container]
+  (add-to-stage (.-stage app) container))

@@ -1,7 +1,7 @@
 (ns minasss-games.core
   "A small experimetn with PIXI javascript library"
   (:require [minasss-games.pixi :as pixi]
-            [minasss-games.pixi.experiments.harvest-bot :as harvest-bot]))
+            [minasss-games.experiments.harvest-bot :as harvest-bot]))
 
 (enable-console-print!)
 
