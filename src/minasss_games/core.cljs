@@ -1,6 +1,7 @@
 (ns minasss-games.core
   "A small experimetn with PIXI javascript library"
-  (:require [minasss-games.pixi :as pixi]))
+  (:require [minasss-games.pixi :as pixi]
+            [minasss-games.pixi.experiments.harvest-bot :as harvest-bot]))
 
 (enable-console-print!)
 
@@ -8,17 +9,8 @@
 
 (defonce app-state (atom {:pixi (pixi/make-app 512 512)}))
 
-(defn ^:export loaded-callback []
-  (println "load callback")
-  (let [background (pixi/make-sprite "images/background.png")
-        sprite (pixi/make-sprite "images/sprite.png")
-        stage (.-stage (:pixi @app-state))]
-    (.addChild stage background)
-    (.addChild stage sprite)))
-
 (pixi/add-app-to-dom (:pixi @app-state))
-
-(pixi/load-resources ["images/background.png" "images/sprite.png"] loaded-callback)
+(harvest-bot/init (:pixi @app-state))
 
 (defn on-js-reload []
   ;; optionally touch your app-state to force rerendering depending on
