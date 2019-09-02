@@ -51,7 +51,7 @@ GUI:
 (defn make-area-row
   "creates a area row"
   [row-index width]
-  (vec (map #(make-cell row-index row-index % (rand-int 5) (rand-int 10)) (range width))))
+  (vec (map #(make-cell row-index % (rand-int 5) (rand-int 10)) (range width))))
 
 (defn make-area
   "create area cells matrix of dimensions width X height"

@@ -6,15 +6,21 @@
 (def Loader js/PIXI.Loader.shared)
 (def Resources js/PIXI.Loader.shared.resources)
 
-(defn make-app
-  "Instantiate a PIXI app"
-  [width height]
-  (js/PIXI.Application. #js {:width width :height height}))
-
 (defn add-app-to-dom
   "Add the specified app to the DOM"
   [app]
   (js/document.body.appendChild (.-view app)))
+
+(defn make-app
+  "Instantiate a PIXI app"
+  ([options-map]
+   (let [app (js/PIXI.Application. (clj->js options-map))]
+     (add-app-to-dom app)
+     app))
+  ([width height]
+   (let [app (js/PIXI.Application. #js {:width width :height height})]
+     (add-app-to-dom app)
+     app)))
 
 (defn ^:export load-resources-progress-callback
   [loader resource]

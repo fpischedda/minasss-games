@@ -7,9 +7,9 @@
 
 ;; define your app data so that it doesn't get over-written on reload
 
-(def app (pixi/make-app 512 512))
+(defonce app (pixi/make-app {:width 512
+                             :height 512}))
 
-(pixi/add-app-to-dom app)
 (harvest-bot/init app)
 
 (defn on-js-reload []
