@@ -42,18 +42,21 @@ GUI:
   [x y energy]
   {:x x :y y :energy energy})
 
-(defn make-cell [traversal-cost energy]
-  {:traversal-cost traversal-cost :energy energy})
+(defn make-cell [row col traversal-cost energy]
+  {:row row
+   :col col
+   :traversal-cost traversal-cost
+   :energy energy})
 
 (defn make-area-row
   "creates a area row"
-  [size]
-  (vec (repeatedly size #(make-cell (rand-int 5) (rand-int 10)))))
+  [row-index width]
+  (vec (map #(make-cell row-index row-index % (rand-int 5) (rand-int 10)) (range width))))
 
 (defn make-area
   "create area cells matrix of dimensions width X height"
   [width height]
-  (vec (repeatedly height #(make-area-row width))))
+  (vec (map #(make-area-row % width) (range height))))
 
 (defn make-world
   "A world is a width X height area, where each item is a cell,
