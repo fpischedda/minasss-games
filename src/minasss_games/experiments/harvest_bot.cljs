@@ -66,8 +66,8 @@ GUI:
 (defn ^:export loaded-callback []
   (let [background (pixi/make-sprite "images/background.png")
         sprite (pixi/make-sprite "images/sprite.png")]
-    (.addChild main-stage background)
-    (.addChild main-stage sprite)))
+    (pixi/add-to-stage main-stage background)
+    (pixi/add-to-stage main-stage sprite)))
 
 (defn init [app]
   (pixi/load-resources resources loaded-callback)
