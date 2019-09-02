@@ -45,23 +45,25 @@ GUI:
 (defn make-cell [traversal-cost energy]
   {:traversal-cost traversal-cost :energy energy})
 
-(defn make-area-row [size]
+(defn make-area-row
   "creates a area row"
-  (vec (repeatedly size (make-cell 1 3))))
+  [size]
+  (vec (repeatedly size #(make-cell (rand-int 5) (rand-int 10)))))
 
-(defn make-area [width height]
+(defn make-area
   "create area cells matrix of dimensions width X height"
-  (vec (repeatedly height (fn [] (make-area-row width)))))
+  [width height]
+  (vec (repeatedly height #(make-area-row width))))
 
 (defn make-world
-  "A world is a width X wheight area, where each item is a cell,
+  "A world is a width X height area, where each item is a cell,
   plus a player and a score"
-  [width height]
-  {:player (make-player 0 0 10)
+  [width height bot-x bot-y]
+  {:player (make-bot bot-x bot-y 10)
    :score 0
    :area (make-area width height)})
 
-(def world (make-world 5 5))
+(def world (make-world 5 5 2 2))
 
 (defn ^:export loaded-callback []
   (let [background (pixi/make-sprite "images/background.png")
