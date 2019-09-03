@@ -62,3 +62,18 @@
   "Add container to application main stage"
   [app container]
   (add-to-stage (.-stage app) container))
+
+(defn make-text-style
+  "Create a text style to be used to create Text objects"
+  [options-map]
+  (js/PIXI.TextStyle. (clj->js options-map)))
+
+(defn make-text
+  "Create a text style to be used to create Text objects"
+  [text style]
+  (js/PIXI.Text. text style))
+
+(defn make-graphics
+  "Create a Graphics object, used to draw shapes"
+  []
+  (js/PIXI.Graphics.))

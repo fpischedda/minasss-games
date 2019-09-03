@@ -60,19 +60,45 @@ GUI:
 
 (defn make-world
   "A world is a width X height area, where each item is a cell,
-  plus a player and a score"
+  plus a player controlled bot and a score"
   [width height bot-x bot-y]
-  {:player (make-bot bot-x bot-y 10)
+  {:bot (make-bot bot-x bot-y 10)
    :score 0
    :area (make-area width height)})
 
 (def world (make-world 5 5 2 2))
 
+(defn make-bot-view [bot]
+  (let [bot-container (pixi/make-container)
+        bot (pixi/make-graphics)
+        text-style (pixi/make-text-style {:fill  "#cf2323"})
+        text (pixi/make-text (str "Energy " (:energy bot)) text-style)]
+    (pixi/add-to-stage bot-container bot)
+    (pixi/add-to-stage bot-container text)
+    bot-container))
+
+(defn make-world-view
+  "A world is a width X height area, where each item is a cell,
+  plus a player and a score, the view is composed as follows:
+  - the world is represented as a tilemap, in each tile shows the cost and
+  available energy;
+  - the bot is just a sprite container showing bot sprite and available energy;
+  - score is just a text somewhere"
+  [world]
+  {:player (make-bot-view (:bot world))
+   :score (make-score-view (:score world))
+   :area (make-area-view (:area world))})
+
+(def )
+
 (defn ^:export loaded-callback []
   (let [background (pixi/make-sprite "images/background.png")
-        sprite (pixi/make-sprite "images/sprite.png")]
+        sprite (pixi/make-sprite "images/sprite.png")
+        world-view (make-world-view world)]
     (pixi/add-to-stage main-stage background)
-    (pixi/add-to-stage main-stage sprite)))
+    (pixi/add-to-stage main-stage (:area world-view))
+    (pixi/add-to-stage main-stage (:bot world-view))
+    (pixi/add-to-stage main-stage (:score world-view))))
 
 (defn init [app]
   (pixi/load-resources resources loaded-callback)
