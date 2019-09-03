@@ -1,6 +1,6 @@
 (ns minasss-games.experiments.harvest-bot
   "
-***** basic mining
+  * basic mining game experiment
 
 User controls a bot or creature that can extract some kind of minerals which
 in turn must be used (directly or after some kind of refinement) to feed the
@@ -68,6 +68,12 @@ GUI:
 
 (def world (make-world 5 5 2 2))
 
+(defn make-area-view [area]
+  (pixi/make-container))
+
+(defn make-score-view [initial-score]
+  (pixi/make-container))
+
 (defn make-bot-view [bot]
   (let [bot-container (pixi/make-container)
         bot (pixi/make-graphics)
@@ -88,8 +94,6 @@ GUI:
   {:player (make-bot-view (:bot world))
    :score (make-score-view (:score world))
    :area (make-area-view (:area world))})
-
-(def )
 
 (defn ^:export loaded-callback []
   (let [background (pixi/make-sprite "images/background.png")
