@@ -79,6 +79,9 @@ GUI:
         bot (pixi/make-graphics)
         text-style (pixi/make-text-style {:fill  "#cf2323"})
         text (pixi/make-text (str "Energy " (:energy bot)) text-style)]
+    (.beginFill bot 0xffffffff)
+    (.drawCircle bot 0 0 100)
+    (.endFill bot)
     (pixi/add-to-stage bot-container bot)
     (pixi/add-to-stage bot-container text)
     bot-container))
@@ -97,7 +100,6 @@ GUI:
 
 (defn ^:export loaded-callback []
   (let [background (pixi/make-sprite "images/background.png")
-        sprite (pixi/make-sprite "images/sprite.png")
         world-view (make-world-view world)]
     (pixi/add-to-stage main-stage background)
     (pixi/add-to-stage main-stage (:area world-view))

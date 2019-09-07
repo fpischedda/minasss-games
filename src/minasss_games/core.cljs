@@ -7,8 +7,8 @@
 
 ;; define your app data so that it doesn't get over-written on reload
 
-(defonce app (pixi/make-app {:width 512
-                             :height 512}))
+(defonce app (pixi/make-app {:width (.-innerWidth js/window)
+                             :height (.-innerHeight js/window)}))
 
 (harvest-bot/init app)
 
