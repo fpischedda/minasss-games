@@ -74,9 +74,9 @@ GUI:
 (defn make-score-view [initial-score]
   (let [score-container (pixi/make-container)
         text-style (pixi/make-text-style {:fill  "#cf2323"})
-        text (pixi/make-text (str "Score " (:energy bot)) text-style)]
+        text (pixi/make-text (str "Score " initial-score) text-style)]
     (pixi/add-to-stage score-container text)
-    bot-container))
+    score-container))
 
 (defn make-bot-view [bot]
   (let [bot-container (pixi/make-container)
@@ -86,6 +86,7 @@ GUI:
     (.beginFill bot 0xffffffff)
     (.drawCircle bot 0 0 100)
     (.endFill bot)
+    (pixi/set-position bot-container 100 100)
     (pixi/add-to-stage bot-container bot)
     (pixi/add-to-stage bot-container text)
     bot-container))
@@ -98,7 +99,7 @@ GUI:
   - the bot is just a sprite container showing bot sprite and available energy;
   - score is just a text somewhere"
   [world]
-  {:player (make-bot-view (:bot world))
+  {:bot (make-bot-view (:bot world))
    :score (make-score-view (:score world))
    :area (make-area-view (:area world))})
 
