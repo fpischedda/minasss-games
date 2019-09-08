@@ -72,7 +72,11 @@ GUI:
   (pixi/make-container))
 
 (defn make-score-view [initial-score]
-  (pixi/make-container))
+  (let [score-container (pixi/make-container)
+        text-style (pixi/make-text-style {:fill  "#cf2323"})
+        text (pixi/make-text (str "Score " (:energy bot)) text-style)]
+    (pixi/add-to-stage score-container text)
+    bot-container))
 
 (defn make-bot-view [bot]
   (let [bot-container (pixi/make-container)
