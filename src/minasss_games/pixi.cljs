@@ -77,3 +77,8 @@
   "Create a Graphics object, used to draw shapes"
   []
   (js/PIXI.Graphics.))
+
+(defn set-position
+  "Set position of any PIXI/Container subclass"
+  [container x y]
+  (.set (.-position container) x y))
