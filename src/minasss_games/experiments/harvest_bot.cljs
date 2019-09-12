@@ -68,8 +68,19 @@ GUI:
 
 (def world (make-world 5 5 2 2))
 
+(defn make-tile
+  [row col energy cost]
+  (let [tile-container (pixi/make-container)
+        text-style (pixi/make-text-style {:fill  "#cf2323"})
+        energy-cost (pixi/make-text (str "Energy " energy) text-style)
+        energy-text (pixi/make-text (str "Cost " cost) text-style)]))
+
 (defn make-area-view [area]
-  (pixi/make-container))
+  (let [area-container (pixi/make-container)
+        text-style (pixi/make-text-style {:fill  "#cf2323"})
+        energy-cost (pixi/make-text (str "Score " initial-score) text-style)
+        energy-text (pixi/make-text (str "Score " initial-score) text-style)]
+    area-container))
 
 (defn make-score-view [initial-score]
   (let [score-container (pixi/make-container)
