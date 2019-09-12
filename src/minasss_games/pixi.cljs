@@ -53,17 +53,20 @@
   [texture-name]
   (js/PIXI.Sprite. (get-texture texture-name)))
 
+(defn add-child
+  "Add child to provided parent container"
+  [parent child]
+  (.addChild parent child))
+
 (defn add-children
   "Add children to provided parent container"
-  ([parent children]
-   (map #(.addChild parent %) children))
-  ([parent & children]
-   (map #(.addChild parent %) children)))
+  [parent children]
+  (map #(add-child parent %) children))
 
 (defn add-to-app-stage
   "Add container to application main stage"
   [app container]
-  (add-children (.-stage app) container))
+  (.addChild (.-stage app) container))
 
 (defn make-text-style
   "Create a text style to be used to create Text objects"

@@ -75,19 +75,20 @@ GUI:
         energy-text (pixi/make-text (str "Energy " energy) text-style)
         cost-text (pixi/make-text (str "Cost " cost) text-style)]
     (pixi/set-position tile-container (* 64 col) (* 64 row))
-    (pixi/add-children tile-container energy-text cost-text)
+    (pixi/add-child tile-container energy-text)
+    (pixi/add-child tile-container cost-text)
     tile-container))
 
 (defn make-area-view [area]
   (let [area-container (pixi/make-container)]
-    (pixi/add-children area-container (map make-tile (flatten area)))
+    (map #(pixi/add-child area-container (make-tile %)) (flatten area))
     area-container))
 
 (defn make-score-view [initial-score]
   (let [score-container (pixi/make-container)
         text-style (pixi/make-text-style {:fill  "#cf2323"})
         text (pixi/make-text (str "Score " initial-score) text-style)]
-    (pixi/add-children score-container text)
+    (pixi/add-child score-container text)
     score-container))
 
 (defn make-bot-view [bot]
@@ -99,7 +100,8 @@ GUI:
     (.drawCircle bot 0 0 100)
     (.endFill bot)
     (pixi/set-position bot-container 100 100)
-    (pixi/add-children bot-container bot text)
+    (pixi/add-child bot-container bot)
+    (pixi/add-child bot-container text)
     bot-container))
 
 (defn make-world-view
@@ -117,8 +119,11 @@ GUI:
 (defn ^:export loaded-callback []
   (let [background (pixi/make-sprite "images/background.png")
         {:keys [area bot score]} (make-world-view world)]
-    (pixi/add-children main-stage
-      background area bot score)))
+    (pixi/add-child main-stage background)
+    (pixi/add-child main-stage area)
+    (pixi/add-child main-stage bot)
+    (pixi/add-child main-stage score)))
+    ;; (pixi/add-children main-stage background area bot score)))
 
 (defn init [app]
   (pixi/load-resources resources loaded-callback)
