@@ -50,8 +50,8 @@ GUI:
 
 (defn make-area-row
   "creates a area row"
-  [row-index width]
-  (vec (map #(make-cell row-index % (rand-int 5) (rand-int 10)) (range width))))
+  [row width]
+  (vec (map #(make-cell row % (rand-int 5) (rand-int 10)) (range width))))
 
 (defn make-area
   "create area cells matrix of dimensions width X height"
@@ -69,24 +69,25 @@ GUI:
 (def world (make-world 5 5 2 2))
 
 (defn make-tile
-  [row col energy cost]
+  [{:keys [row col energy cost]}]
   (let [tile-container (pixi/make-container)
         text-style (pixi/make-text-style {:fill  "#cf2323"})
-        energy-cost (pixi/make-text (str "Energy " energy) text-style)
-        energy-text (pixi/make-text (str "Cost " cost) text-style)]))
+        energy-text (pixi/make-text (str "Energy " energy) text-style)
+        cost-text (pixi/make-text (str "Cost " cost) text-style)]
+    (pixi/set-position tile-container (* 64 col) (* 64 row))
+    (pixi/add-children tile-container energy-text cost-text)
+    tile-container))
 
 (defn make-area-view [area]
-  (let [area-container (pixi/make-container)
-        text-style (pixi/make-text-style {:fill  "#cf2323"})
-        energy-cost (pixi/make-text (str "Score " initial-score) text-style)
-        energy-text (pixi/make-text (str "Score " initial-score) text-style)]
+  (let [area-container (pixi/make-container)]
+    (pixi/add-children area-container (map make-tile (flatten area)))
     area-container))
 
 (defn make-score-view [initial-score]
   (let [score-container (pixi/make-container)
         text-style (pixi/make-text-style {:fill  "#cf2323"})
         text (pixi/make-text (str "Score " initial-score) text-style)]
-    (pixi/add-to-stage score-container text)
+    (pixi/add-children score-container text)
     score-container))
 
 (defn make-bot-view [bot]
@@ -98,8 +99,7 @@ GUI:
     (.drawCircle bot 0 0 100)
     (.endFill bot)
     (pixi/set-position bot-container 100 100)
-    (pixi/add-to-stage bot-container bot)
-    (pixi/add-to-stage bot-container text)
+    (pixi/add-children bot-container bot text)
     bot-container))
 
 (defn make-world-view
@@ -116,11 +116,9 @@ GUI:
 
 (defn ^:export loaded-callback []
   (let [background (pixi/make-sprite "images/background.png")
-        world-view (make-world-view world)]
-    (pixi/add-to-stage main-stage background)
-    (pixi/add-to-stage main-stage (:area world-view))
-    (pixi/add-to-stage main-stage (:bot world-view))
-    (pixi/add-to-stage main-stage (:score world-view))))
+        {:keys [area bot score]} (make-world-view world)]
+    (pixi/add-children main-stage
+      background area bot score)))
 
 (defn init [app]
   (pixi/load-resources resources loaded-callback)
