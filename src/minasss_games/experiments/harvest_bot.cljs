@@ -130,13 +130,28 @@ GUI:
    :score (make-score-view (:score world))
    :area (make-area-view (:area world))})
 
+(defonce ^:private world-view_ (atom {}))
+
+(defonce ^:private time_ (atom 0.0))
+
+(defn ^:export game-tick
+  "Update function called in the game loop
+  parameter delta-time refers to time passed from last update"
+  [delta-time]
+  (let [time (swap! time_ + (/ delta-time 50))
+        view @world-view_]
+    (pixi/set-position (get-in view [:bot :view]) (* 64 (Math/cos time)) (* 64 (Math/sin time)))))
+
 (defn ^:export loaded-callback []
   (let [background (pixi/make-sprite "images/background.png")
-        {:keys [area bot score]} (make-world-view world)]
+        view (make-world-view world)
+        {:keys [area bot score]} view]
     (pixi/add-child main-stage background)
     (pixi/add-child-view (:view area) bot)
     (pixi/add-child-view main-stage area)
-    (pixi/add-child-view main-stage score)))
+    (pixi/add-child-view main-stage score)
+    (swap! world-view_ (fn [_] view))
+    (.start (pixi/make-ticker game-tick))))
 
 (defn init [app]
   (pixi/load-resources resources loaded-callback)

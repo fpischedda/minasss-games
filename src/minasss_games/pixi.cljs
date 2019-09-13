@@ -100,3 +100,9 @@
   "Set anchor of any PIXI/Container subclass"
   [container x y]
   (.set (.-anchor container) x y))
+
+(defn make-ticker
+  "Create a ticker registering an handler"
+  [handler-fn]
+  (let [ticker (js/PIXI.Ticker.)]
+    (.add ticker handler-fn)))
