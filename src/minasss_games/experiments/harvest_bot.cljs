@@ -69,19 +69,26 @@ GUI:
 (def world (make-world 5 5 2 2))
 
 (defn make-tile
-  [{:keys [row col energy cost]}]
+  [{:keys [row col energy traversal-cost] :as tile}]
   (let [tile-container (pixi/make-container)
-        text-style (pixi/make-text-style {:fill  "#cf2323"})
+        tile (pixi/make-graphics)
+        text-style (pixi/make-text-style {:fill  "#12ae2a" "fontSize" 16})
         energy-text (pixi/make-text (str "Energy " energy) text-style)
-        cost-text (pixi/make-text (str "Cost " cost) text-style)]
+        cost-text (pixi/make-text (str "Cost " traversal-cost) text-style)]
+    (.beginFill tile 0xffff00ff)
+    (.drawRect tile 0 0 64 64)
+    (.endFill tile)
+    (pixi/set-position cost-text 0 30)
     (pixi/set-position tile-container (* 64 col) (* 64 row))
+    (pixi/add-child tile-container tile)
     (pixi/add-child tile-container energy-text)
     (pixi/add-child tile-container cost-text)
     tile-container))
 
 (defn make-area-view [area]
   (let [area-container (pixi/make-container)]
-    (map #(pixi/add-child area-container (make-tile %)) (flatten area))
+    (vec (map (fn [row] (vec (map #(pixi/add-child area-container (make-tile %)) row))) area))
+    (pixi/set-position area-container 200 200)
     area-container))
 
 (defn make-score-view [initial-score]
@@ -94,14 +101,15 @@ GUI:
 (defn make-bot-view [bot]
   (let [bot-container (pixi/make-container)
         bot (pixi/make-graphics)
-        text-style (pixi/make-text-style {:fill  "#cf2323"})
+        text-style (pixi/make-text-style {:fill  "#4" "fontSize" 16})
         text (pixi/make-text (str "Energy " (:energy bot)) text-style)]
-    (.beginFill bot 0xffffffff)
-    (.drawCircle bot 0 0 100)
+    (.beginFill bot 0xff00ffff)
+    (.drawCircle bot 0 0 32)
     (.endFill bot)
     (pixi/set-position bot-container 100 100)
     (pixi/add-child bot-container bot)
     (pixi/add-child bot-container text)
+    (pixi/set-anchor text 0.5 0.5)
     bot-container))
 
 (defn make-world-view
@@ -120,8 +128,8 @@ GUI:
   (let [background (pixi/make-sprite "images/background.png")
         {:keys [area bot score]} (make-world-view world)]
     (pixi/add-child main-stage background)
+    (pixi/add-child area bot)
     (pixi/add-child main-stage area)
-    (pixi/add-child main-stage bot)
     (pixi/add-child main-stage score)))
     ;; (pixi/add-children main-stage background area bot score)))
 

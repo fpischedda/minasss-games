@@ -87,3 +87,8 @@
   "Set position of any PIXI/Container subclass"
   [container x y]
   (.set (.-position container) x y))
+
+(defn set-anchor
+  "Set anchor of any PIXI/Container subclass"
+  [container x y]
+  (.set (.-anchor container) x y))
