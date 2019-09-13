@@ -72,13 +72,15 @@ GUI:
   [{:keys [row col energy traversal-cost] :as tile}]
   (let [tile-container (pixi/make-container)
         tile (pixi/make-graphics)
-        text-style (pixi/make-text-style {:fill  "#12ae2a" "fontSize" 16})
-        energy-text (pixi/make-text (str "Energy " energy) text-style)
-        cost-text (pixi/make-text (str "Cost " traversal-cost) text-style)]
-    (.beginFill tile 0xffff00ff)
+        energy-text (pixi/make-text (str energy) (pixi/make-text-style {:fill  "#12ae2a" "fontSize" 16}))
+        cost-text (pixi/make-text (str traversal-cost) (pixi/make-text-style {:fill  "#d73637" "fontSize" 16}))]
+    (.beginFill tile 0xff550055)
     (.drawRect tile 0 0 64 64)
     (.endFill tile)
-    (pixi/set-position cost-text 0 30)
+    (pixi/set-anchor energy-text 1 0)
+    (pixi/set-position energy-text 64 0)
+    (pixi/set-anchor cost-text 1 1)
+    (pixi/set-position cost-text 64 64)
     (pixi/set-position tile-container (* 64 col) (* 64 row))
     (pixi/add-child tile-container tile)
     (pixi/add-child tile-container energy-text)
