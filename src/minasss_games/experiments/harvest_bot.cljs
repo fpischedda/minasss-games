@@ -83,20 +83,24 @@ GUI:
     (pixi/add-child tile-container tile)
     (pixi/add-child tile-container energy-text)
     (pixi/add-child tile-container cost-text)
-    tile-container))
+    {:view tile-container
+     :entities {:energy energy-text
+                :cost cost-text}}))
 
 (defn make-area-view [area]
-  (let [area-container (pixi/make-container)]
-    (vec (map (fn [row] (vec (map #(pixi/add-child area-container (make-tile %)) row))) area))
+  (let [area-container (pixi/make-container)
+        tiles (vec (map (fn [row] (vec (map #(pixi/add-child-view area-container (make-tile %)) row))) area))]
     (pixi/set-position area-container 200 200)
-    area-container))
+    {:view area-container
+     :entities {:tiles tiles}}))
 
 (defn make-score-view [initial-score]
   (let [score-container (pixi/make-container)
         text-style (pixi/make-text-style {:fill  "#cf2323"})
         text (pixi/make-text (str "Score " initial-score) text-style)]
     (pixi/add-child score-container text)
-    score-container))
+    {:view score-container
+     :entities {:text text}}))
 
 (defn make-bot-view [bot]
   (let [bot-container (pixi/make-container)
@@ -110,7 +114,9 @@ GUI:
     (pixi/add-child bot-container bot)
     (pixi/add-child bot-container text)
     (pixi/set-anchor text 0.5 0.5)
-    bot-container))
+    {:view bot-container
+     :entities {:text text
+                :bot bot}}))
 
 (defn make-world-view
   "A world is a width X height area, where each item is a cell,
@@ -128,10 +134,9 @@ GUI:
   (let [background (pixi/make-sprite "images/background.png")
         {:keys [area bot score]} (make-world-view world)]
     (pixi/add-child main-stage background)
-    (pixi/add-child area bot)
-    (pixi/add-child main-stage area)
-    (pixi/add-child main-stage score)))
-    ;; (pixi/add-children main-stage background area bot score)))
+    (pixi/add-child-view (:view area) bot)
+    (pixi/add-child-view main-stage area)
+    (pixi/add-child-view main-stage score)))
 
 (defn init [app]
   (pixi/load-resources resources loaded-callback)

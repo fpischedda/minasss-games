@@ -58,6 +58,14 @@
   [parent child]
   (.addChild parent child))
 
+(defn add-child-view
+  "Add child to provided parent container
+  this uses a higher level concept of `view`
+  a view is a map that contains a main container in the
+  :view key and a map of entities in the entities key"
+  [parent child]
+  (.addChild parent (:view child)))
+
 (defn add-children
   "Add children to provided parent container"
   [parent children]
