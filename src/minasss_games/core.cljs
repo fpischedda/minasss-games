@@ -7,10 +7,14 @@
 
 ;; define your app data so that it doesn't get over-written on reload
 
-(defonce ^:export app (pixi/make-app {:width (.-innerWidth js/window)
-                                      :height (.-innerHeight js/window)}))
+(defn init
+  []
+  (let [app (pixi/make-app {:width (.-innerWidth js/window)
+                            :height (.-innerHeight js/window)})]
+    (harvest-bot/init app)
+    app))
 
-(harvest-bot/init app)
+(defonce ^:export app (init))
 
 (defn on-js-reload []
   ;; optionally touch your app-state to force rerendering depending on
