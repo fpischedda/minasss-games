@@ -33,7 +33,7 @@ GUI:
   "
   (:require [minasss-games.pixi :as pixi]))
 
-(def resources ["images/background.png" "images/sprite.png"])
+(def resources ["images/background.png" "images/sprite.png" "images/tile.png"])
 
 (def main-stage (pixi/make-container))
 
@@ -71,17 +71,15 @@ GUI:
 (defn make-tile
   [{:keys [row col energy traversal-cost] :as tile}]
   (let [tile-container (pixi/make-container)
-        tile (pixi/make-graphics)
+        tile (pixi/make-sprite "images/tile.png")
         energy-text (pixi/make-text (str energy) (pixi/make-text-style {:fill  "#12ae2a" "fontSize" 16}))
         cost-text (pixi/make-text (str traversal-cost) (pixi/make-text-style {:fill  "#d73637" "fontSize" 16}))]
-    (.beginFill tile 0xff550055)
-    (.drawRect tile 0 0 64 64)
-    (.endFill tile)
     (pixi/set-anchor energy-text 1 0)
     (pixi/set-position energy-text 64 0)
     (pixi/set-anchor cost-text 1 1)
     (pixi/set-position cost-text 64 64)
     (pixi/set-position tile-container (* 64 col) (* 64 row))
+    (pixi/set-scale tile 2 2)
     (pixi/add-child tile-container tile)
     (pixi/add-child tile-container energy-text)
     (pixi/add-child tile-container cost-text)
