@@ -64,17 +64,20 @@
   a view is a map that contains a main container in the
   :view key and a map of entities in the entities key"
   [parent child]
-  (.addChild parent (:view child)))
+  (.addChild parent (:view child))
+  parent)
 
 (defn add-children
   "Add children to provided parent container"
   [parent children]
-  (map #(add-child parent %) children))
+  (map #(add-child parent %) children)
+  parent)
 
 (defn add-to-app-stage
   "Add container to application main stage"
   [app container]
-  (.addChild (.-stage app) container))
+  (.addChild (.-stage app) container)
+  container)
 
 (defn make-text-style
   "Create a text style to be used to create Text objects"
@@ -94,20 +97,24 @@
 (defn set-position
   "Set position of any PIXI/Container subclass"
   [container x y]
-  (.set (.-position container) x y))
+  (.set (.-position container) x y)
+  container)
 
 (defn set-anchor
   "Set anchor of any PIXI/Container subclass"
   [container x y]
-  (.set (.-anchor container) x y))
+  (.set (.-anchor container) x y)
+  container)
 
 (defn set-scale
   "Set scale of any PIXI/Container subclass"
   [container x y]
-  (.set (.-scale container) x y))
+  (.set (.-scale container) x y)
+  container)
 
 (defn make-ticker
   "Create a ticker registering an handler"
   [handler-fn]
   (let [ticker (js/PIXI.Ticker.)]
-    (.add ticker handler-fn)))
+    (.add ticker handler-fn)
+    ticker))
