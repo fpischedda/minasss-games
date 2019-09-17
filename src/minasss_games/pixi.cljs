@@ -64,17 +64,20 @@
   a view is a map that contains a main container in the
   :view key and a map of entities in the entities key"
   [parent child]
-  (.addChild parent (:view child)))
+  (.addChild parent (:view child))
+  parent)
 
 (defn add-children
   "Add children to provided parent container"
   [parent children]
-  (map #(add-child parent %) children))
+  (map #(add-child parent %) children)
+  parent)
 
 (defn add-to-app-stage
   "Add container to application main stage"
   [app container]
-  (.addChild (.-stage app) container))
+  (.addChild (.-stage app) container)
+  container)
 
 (defn make-text-style
   "Create a text style to be used to create Text objects"
@@ -83,8 +86,10 @@
 
 (defn make-text
   "Create a text style to be used to create Text objects"
-  [text style]
-  (js/PIXI.Text. text style))
+  ([text]
+   (js/PIXI.Text. text))
+  ([text style]
+   (js/PIXI.Text. text style)))
 
 (defn make-graphics
   "Create a Graphics object, used to draw shapes"
@@ -94,20 +99,65 @@
 (defn set-position
   "Set position of any PIXI/Container subclass"
   [container x y]
-  (.set (.-position container) x y))
+  (.set (.-position container) x y)
+  container)
 
 (defn set-anchor
   "Set anchor of any PIXI/Container subclass"
   [container x y]
-  (.set (.-anchor container) x y))
+  (.set (.-anchor container) x y)
+  container)
+
+(defn set-pivot
+  "Set pivot of any PIXI/Container subclass"
+  [container x y]
+  (.set (.-pivot container) x y)
+  container)
 
 (defn set-scale
   "Set scale of any PIXI/Container subclass"
   [container x y]
-  (.set (.-scale container) x y))
+  (.set (.-scale container) x y)
+  container)
 
 (defn make-ticker
   "Create a ticker registering an handler"
   [handler-fn]
   (let [ticker (js/PIXI.Ticker.)]
-    (.add ticker handler-fn)))
+    (.add ticker handler-fn)
+    ticker))
+
+(defmulti set-attribute
+  (fn [container attribute value] attribute))
+
+(defmethod set-attribute :default
+  [container _attribute _value]
+  (println "default handler!" _attribute _value)
+  container)
+
+(defmethod set-attribute :position
+  [container _attribute [x y]]
+  (println "position handler!" _attribute x y)
+  (set-position container x y))
+
+(defmethod set-attribute :scale
+  [container _attribute [x y]]
+  (println "scale handler!" _attribute x y)
+  (set-scale container x y))
+
+(defmethod set-attribute :anchor
+  [container _attribute [x y]]
+  (println "anchor handler!" _attribute x y)
+  (set-anchor container x y))
+
+(defmethod set-attribute :pivot
+  [container _attribute [x y]]
+  (set-pivot container x y))
+
+(defn set-attributes
+  "Given a container subclass set its attributes by attributes map,
+  there is no type checking so trying to set properties not available
+  to some classes may or may not break everything"
+  [container attributes]
+  (map (fn [[attr value]] (set-attribute container attr value)) attributes)
+  container)

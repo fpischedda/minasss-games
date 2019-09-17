@@ -69,15 +69,13 @@ GUI:
 (def world (make-world 5 5 2 2))
 
 (defn make-tile
-  [{:keys [row col energy traversal-cost] :as tile}]
+  [{:keys [row col energy traversal-cost]}]
   (let [tile-container (pixi/make-container)
         tile (pixi/make-sprite "images/tile.png")
         energy-text (pixi/make-text (str energy) (pixi/make-text-style {:fill  "#12ae2a" "fontSize" 16}))
         cost-text (pixi/make-text (str traversal-cost) (pixi/make-text-style {:fill  "#d73637" "fontSize" 16}))]
-    (pixi/set-anchor energy-text 1 0)
-    (pixi/set-position energy-text 64 0)
-    (pixi/set-anchor cost-text 1 1)
-    (pixi/set-position cost-text 64 64)
+    (pixi/set-attributes energy-text {:anchor [1 0] :position [64 0]})
+    (pixi/set-attributes cost-text {:anchor [1 1] :position [64 64]})
     (pixi/set-position tile-container (* 64 col) (* 64 row))
     (pixi/set-scale tile 2 2)
     (pixi/add-child tile-container tile)
