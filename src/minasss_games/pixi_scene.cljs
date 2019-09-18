@@ -49,7 +49,7 @@
        (remove nil?)))
 
 (defn element
-  "An element is composed by a tag and a content vector
+  "An element is composed by a tag, attributes and a children vector
   content vector can hold:
   - an attribute map which will hold element attributes/properties (such as position, anchor etc)
   - a collection holding this container's children
@@ -70,7 +70,7 @@
        (children content)])))
 
 (defmulti make-element
-  (fn [element] first))
+  first)
 
 (defn make-element-children
   [element children]

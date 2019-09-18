@@ -31,7 +31,8 @@ GUI:
  - each tile should show the cost to move there
  - player should show available energy and total collected energy
   "
-  (:require [minasss-games.pixi :as pixi]))
+  (:require [minasss-games.pixi :as pixi]
+            [minasss-games.pixi_scene :as scene]))
 
 (def resources ["images/background.png" "images/sprite.png" "images/tile.png"])
 
@@ -70,18 +71,17 @@ GUI:
 
 (defn make-tile
   [{:keys [row col energy traversal-cost]}]
-  (let [tile-container (pixi/make-container)
-        tile (pixi/make-sprite "images/tile.png")
-        energy-text (pixi/make-text (str energy) (pixi/make-text-style {:fill  "#12ae2a" "fontSize" 16}))
-        cost-text (pixi/make-text (str traversal-cost) (pixi/make-text-style {:fill  "#d73637" "fontSize" 16}))]
-    (pixi/set-attributes energy-text {:anchor [1 0] :position [64 0]})
-    (pixi/set-attributes cost-text {:anchor [1 1] :position [64 64]})
-    (pixi/set-position tile-container (* 64 col) (* 64 row))
-    (pixi/set-scale tile 2 2)
-    (pixi/add-children tile-container [tile energy-text cost-text])
-    {:view tile-container
-     :entities {:energy energy-text
-                :cost cost-text}}))
+  {:view (scene/make-element
+           [:container {:position [(* 64 col) (* 64 row)]}
+            [:sprite {:texture "images/tile.png"
+                      :scale [2 2]}]
+            [:text {:text (str energy)
+                    :position [64 0]
+                    :anchor [1 0]}]
+            [:text {:text (str traversal-cost)
+                    :position [64 64]
+                    :anchor [1 1]}]])
+     :entities {}})
 
 (defn make-area-view [area]
   (let [area-container (pixi/make-container)
