@@ -159,5 +159,5 @@
   there is no type checking so trying to set properties not available
   to some classes may or may not break everything"
   [container attributes]
-  (map (fn [[attr value]] (set-attribute container attr value)) attributes)
+  (mapv (fn [[attr value]] (set-attribute container attr value)) attributes)
   container)
