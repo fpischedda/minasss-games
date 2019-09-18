@@ -78,9 +78,7 @@ GUI:
     (pixi/set-attributes cost-text {:anchor [1 1] :position [64 64]})
     (pixi/set-position tile-container (* 64 col) (* 64 row))
     (pixi/set-scale tile 2 2)
-    (pixi/add-child tile-container tile)
-    (pixi/add-child tile-container energy-text)
-    (pixi/add-child tile-container cost-text)
+    (pixi/add-children tile-container [tile energy-text cost-text])
     {:view tile-container
      :entities {:energy energy-text
                 :cost cost-text}}))
@@ -109,9 +107,8 @@ GUI:
     (.drawCircle bot 0 0 32)
     (.endFill bot)
     (pixi/set-position bot-container 100 100)
-    (pixi/add-child bot-container bot)
-    (pixi/add-child bot-container text)
     (pixi/set-anchor text 0.5 0.5)
+    (pixi/add-children bot-container [bot text])
     {:view bot-container
      :entities {:text text
                 :bot bot}}))
@@ -146,8 +143,7 @@ GUI:
         {:keys [area bot score]} view]
     (pixi/add-child main-stage background)
     (pixi/add-child-view (:view area) bot)
-    (pixi/add-child-view main-stage area)
-    (pixi/add-child-view main-stage score)
+    (pixi/add-children-view main-stage [area score])
     (swap! world-view_ (fn [_] view))
     (.start (pixi/make-ticker game-tick))))
 

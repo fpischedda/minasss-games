@@ -58,6 +58,12 @@
   [parent child]
   (.addChild parent child))
 
+(defn add-children
+  "Add children to provided parent container"
+  [parent children]
+  (mapv #(add-child parent %) children)
+  parent)
+
 (defn add-child-view
   "Add child to provided parent container
   this uses a higher level concept of `view`
@@ -67,10 +73,10 @@
   (.addChild parent (:view child))
   parent)
 
-(defn add-children
-  "Add children to provided parent container"
+(defn add-children-view
+  "Add children `view` to provided parent container"
   [parent children]
-  (map #(add-child parent %) children)
+  (mapv #(add-child-view parent %) children)
   parent)
 
 (defn add-to-app-stage
