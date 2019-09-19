@@ -126,6 +126,12 @@
   (.set (.-scale container) x y)
   container)
 
+(defn set-name
+  "Set name of any PIXI/DisplayObject subclass"
+  [container name]
+  (aset container "name" name)
+  container)
+
 (defn make-ticker
   "Create a ticker registering an handler"
   [handler-fn]
@@ -138,27 +144,27 @@
 
 (defmethod set-attribute :default
   [container _attribute _value]
-  (println "default handler!" _attribute _value)
   container)
 
 (defmethod set-attribute :position
   [container _attribute [x y]]
-  (println "position handler!" _attribute x y)
   (set-position container x y))
 
 (defmethod set-attribute :scale
   [container _attribute [x y]]
-  (println "scale handler!" _attribute x y)
   (set-scale container x y))
 
 (defmethod set-attribute :anchor
   [container _attribute [x y]]
-  (println "anchor handler!" _attribute x y)
   (set-anchor container x y))
 
 (defmethod set-attribute :pivot
   [container _attribute [x y]]
   (set-pivot container x y))
+
+(defmethod set-attribute :name
+  [container _attribute name]
+  (set-name container name))
 
 (defn set-attributes
   "Given a container subclass set its attributes by attributes map,
