@@ -69,19 +69,35 @@ GUI:
 
 (def world (make-world 5 5 2 2))
 
-(defn make-tile
-  [{:keys [row col energy traversal-cost]}]
-  {:view (scene/make-element
+(comment
+  (scene/render
            [:container {:position [(* 64 col) (* 64 row)]}
             [:sprite {:texture "images/tile.png"
                       :scale [2 2]}]
             [:text {:text (str energy)
                     :position [64 0]
-                    :anchor [1 0]}]
+                    :anchor [1 0]
+                    :style {"fontSize" 16}}]
             [:text {:text (str traversal-cost)
                     :position [64 64]
-                    :anchor [1 1]}]])
-     :entities {}})
+                    :anchor [1 1]
+                    :style {"fontSize" 16}}]]))
+
+(defn make-tile
+  [{:keys [row col energy traversal-cost]}]
+  {:view (scene/render
+           [:container {:position [(* 64 col) (* 64 row)]}
+            [:sprite {:texture "images/tile.png"
+                      :scale [2 2]}]
+            [:text {:text (str energy)
+                    :position [64 0]
+                    :anchor [1 0]
+                    :style {"fill" "#62f479" "fontSize" 16}}]
+            [:text {:text (str traversal-cost)
+                    :position [64 64]
+                    :anchor [1 1]
+                    :style {"fill" "#ce4b17" "fontSize" 16}}]])
+   :entities {}})
 
 (defn make-area-view [area]
   (let [area-container (pixi/make-container)
