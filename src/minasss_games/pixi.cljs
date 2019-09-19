@@ -173,3 +173,8 @@
   [container attributes]
   (mapv (fn [[attr value]] (set-attribute container attr value)) attributes)
   container)
+
+(defn get-child-by-name
+  "return, if any, the container's child identified by name"
+  [container child-name]
+  (.getChildByName container child-name))
