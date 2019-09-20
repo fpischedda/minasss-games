@@ -40,8 +40,8 @@ GUI:
 
 (defn make-bot
   "a bot have a position (expressed in grid coordinates) and some energy"
-  [x y energy]
-  {:x x :y y :energy energy})
+  [row col energy]
+  {:row row :col col :energy energy})
 
 (defn make-cell [row col traversal-cost energy]
   {:row row
@@ -62,12 +62,14 @@ GUI:
 (defn make-world
   "A world is a width X height area, where each item is a cell,
   plus a player controlled bot and a score"
-  [width height bot-x bot-y]
-  {:bot (make-bot bot-x bot-y 10)
+  [width height bot-row bot-col bot-energy]
+  {:bot (make-bot bot-row bot-col bot-energy)
    :score 0
    :area (make-area width height)})
 
-(def world (make-world 5 5 2 2))
+;; make-world parameters are sooo meaningless for the reader...
+;; must find a better way!
+(def world (make-world 5 5 0 0 10))
 
 (defn make-tile
   [{:keys [row col energy traversal-cost]}]
@@ -111,9 +113,9 @@ GUI:
                                :scale [2 2]
                                :name "bot"}]
                      [:text {:text (:energy bot)
-                             :anchor [1 0]
-                             :position [64 0]
-                             :style {"fill" "#62f479" "fontSize" 16}
+                             :anchor [0 0]
+                             :position [0 0]
+                             :style {"fill" "#d751c9" "fontSize" 16}
                              :name "energy"}]
                      ])]
     {:view container
@@ -140,9 +142,11 @@ GUI:
   "Update function called in the game loop
   parameter delta-time refers to time passed from last update"
   [delta-time]
-  (let [time (swap! time_ + (/ delta-time 50))
-        view @world-view_]
-    (pixi/set-position (get-in view [:bot :view]) (* 64 (Math/cos time)) (* 64 (Math/sin time)))))
+  (let [next-pos (get-in @world [:bot :next-pos])
+        bot-view (get-in view [:bot :view])]
+    (when next-pos
+      (pixi/set-position bot-view (* 64 (:x next-pos)) (* 64 (:y next-pos)))
+      (swap! world update :bot dissoc :next-pos))))
 
 (defn ^:export loaded-callback []
   (let [background (pixi/make-sprite "images/background.png")
