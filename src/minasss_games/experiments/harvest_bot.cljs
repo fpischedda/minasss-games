@@ -69,20 +69,6 @@ GUI:
 
 (def world (make-world 5 5 2 2))
 
-(comment
-  (scene/render
-           [:container {:position [(* 64 col) (* 64 row)]}
-            [:sprite {:texture "images/tile.png"
-                      :scale [2 2]}]
-            [:text {:text (str energy)
-                    :position [64 0]
-                    :anchor [1 0]
-                    :style {"fontSize" 16}}]
-            [:text {:text (str traversal-cost)
-                    :position [64 64]
-                    :anchor [1 1]
-                    :style {"fontSize" 16}}]]))
-
 (defn make-tile
   [{:keys [row col energy traversal-cost]}]
   (let [container (scene/render
@@ -119,19 +105,20 @@ GUI:
      :entities {:text text}}))
 
 (defn make-bot-view [bot]
-  (let [bot-container (pixi/make-container)
-        bot (pixi/make-graphics)
-        text-style (pixi/make-text-style {:fill  "#4" "fontSize" 16})
-        text (pixi/make-text (str "Energy " (:energy bot)) text-style)]
-    (.beginFill bot 0xff00ffff)
-    (.drawCircle bot 0 0 32)
-    (.endFill bot)
-    (pixi/set-position bot-container 100 100)
-    (pixi/set-anchor text 0.5 0.5)
-    (pixi/add-children bot-container [bot text])
-    {:view bot-container
-     :entities {:text text
-                :bot bot}}))
+  (let [container (scene/render
+                    [:container {:position [64 64]}
+                     [:sprite {:texture "images/sprite.png"
+                               :scale [2 2]
+                               :name "bot"}]
+                     [:text {:text (:energy bot)
+                             :anchor [1 0]
+                             :position [64 0]
+                             :style {"fill" "#62f479" "fontSize" 16}
+                             :name "energy"}]
+                     ])]
+    {:view container
+     :entities {:text (pixi/get-child-by-name container "energy")
+                :bot (pixi/get-child-by-name container "bot")}}))
 
 (defn make-world-view
   "A world is a width X height area, where each item is a cell,
