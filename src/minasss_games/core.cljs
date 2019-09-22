@@ -11,6 +11,7 @@
   []
   (let [app (pixi/make-app {:width (.-innerWidth js/window)
                             :height (.-innerHeight js/window)})]
+    (pixi/change-setting :scale-mode :nearest)
     (harvest-bot/init app)
     app))
 
