@@ -32,7 +32,8 @@ GUI:
  - player should show available energy and total collected energy
   "
   (:require [minasss-games.pixi :as pixi]
-            [minasss-games.pixi_scene :as scene]))
+            [minasss-games.pixi.settings :as settings]
+            [minasss-games.pixi.scene :as scene]))
 
 (def resources ["images/background.png" "images/sprite.png" "images/tile.png"])
 
@@ -69,7 +70,7 @@ GUI:
 
 ;; make-world parameters are sooo meaningless for the reader...
 ;; must find a better way!
-(def world (make-world 5 5 0 0 10))
+(def world_ (atom (make-world 5 5 0 0 10)))
 
 (defn make-tile
   [{:keys [row col energy traversal-cost]}]
@@ -142,22 +143,23 @@ GUI:
   "Update function called in the game loop
   parameter delta-time refers to time passed from last update"
   [delta-time]
-  (let [next-pos (get-in @world [:bot :next-pos])
-        bot-view (get-in view [:bot :view])]
+  (let [next-pos (get-in @world_ [:bot :next-pos])
+        bot-view (get-in @world-view_ [:bot :view])]
     (when next-pos
       (pixi/set-position bot-view (* 64 (:x next-pos)) (* 64 (:y next-pos)))
-      (swap! world update :bot dissoc :next-pos))))
+      (swap! world_ update :bot dissoc :next-pos))))
 
 (defn ^:export loaded-callback []
   (let [background (pixi/make-sprite "images/background.png")
-        view (make-world-view world)
+        view (make-world-view @world_)
         {:keys [area bot score]} view]
     (pixi/add-child main-stage background)
     (pixi/add-child-view (:view area) bot)
     (pixi/add-children-view main-stage [area score])
-    (swap! world-view_ (fn [_] view))
+    (reset! world-view_ view)
     (.start (pixi/make-ticker game-tick))))
 
 (defn init [app]
+  (settings/set! :scale-mode :nearest)
   (pixi/load-resources resources loaded-callback)
   (pixi/add-to-app-stage app main-stage))

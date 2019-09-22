@@ -178,13 +178,3 @@
   "return, if any, the container's child identified by name"
   [container child-name]
   (.getChildByName container child-name))
-
-(defmulti change-setting
-  (fn [setting _param] setting))
-
-(defmethod change-setting :scale-mode
-  [_setting scale-mode]
-  (let [mode (if (= :nearest scale-mode)
-               js/PIXI.SCALE_MODES.NEAREST
-               js/PIXI.SCALE_MODES.LINEAR)]
-    (aset js/PIXI.settings "SCALE_MODE" mode)))

@@ -1,4 +1,4 @@
-(ns minasss-games.pixi-scene
+(ns minasss-games.pixi.scene
   "It would be AWESOME to use a language like hiccup to define a scene or a
   container, it could look something like this
   `[:container {:anchor [0 0] :position [100 100]}
