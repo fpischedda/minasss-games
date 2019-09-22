@@ -139,6 +139,16 @@ GUI:
 
 (defonce ^:private time_ (atom 0.0))
 
+(defn move-bot
+  [dir]
+  (swap! world_ assoc-in [:bot :next-pos]
+    (condp = dir
+      :left {:x 0 :y 1}
+      :right {:x 2 :y 1}
+      :up {:x 1 :y 0}
+      :down {:x 1 :y 2}
+      {:x 0 :y 1})))
+
 (defn ^:export game-tick
   "Update function called in the game loop
   parameter delta-time refers to time passed from last update"
