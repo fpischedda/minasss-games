@@ -8,7 +8,9 @@
   It would be even more handy with graphics
   [:graphic
      [:fill-mode 0xff00ff
-        [rect 0 0 100 100]]]"
+        [rect 0 0 100 100]]]
+
+  This namespace contains functions to provide such a declarative API"
   (:require [minasss-games.pixi :as pixi]))
 
 (defn fix-children
@@ -20,8 +22,8 @@
 (defn normalize
   "An element is composed by a tag, attributes and a children collection.
   content vector can hold:
-  - an optionale attribute map which will hold element attributes/properties (such as position, anchor etc), this must be in the first place
-  - a optional collection children's definitions
+  - an optional attribute map which will contain element attributes/properties (such as position, anchor etc), this must be in the first place
+  - a optional collection of children's definitions
   This function ensures that an element is in the correct format"
   [[tag & content]]
   (when-not (or (keyword? tag)

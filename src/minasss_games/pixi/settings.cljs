@@ -1,4 +1,13 @@
-(ns minasss-games.pixi.settings)
+(ns minasss-games.pixi.settings
+  "Encapsulate PIXI.settings providing an easiear API
+  (compared to using js directly)
+
+  PIXI.settings is an associative array so it is possible to access and set its
+  properties using aget/aset")
+
+(defn get-by-name!
+  [name value]
+  (aget js/PIXI.settings name))
 
 (defn set-by-name!
   [name value]

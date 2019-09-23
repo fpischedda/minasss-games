@@ -42,7 +42,7 @@ GUI:
 (defn make-bot
   "a bot have a position (expressed in grid coordinates) and some energy"
   [row col energy]
-  {:row row :col col :energy energy})
+  {:position {:row row :col col} :energy energy})
 
 (defn make-cell [row col traversal-cost energy]
   {:row row
@@ -109,7 +109,8 @@ GUI:
 
 (defn make-bot-view [bot]
   (let [container (scene/render
-                    [:container {:position [64 64]}
+                    [:container {:position [(* 64 (get-in bot [:position :col]))
+                                            (* 64 (get-in bot [:position :row]))]}
                      [:sprite {:texture "images/sprite.png"
                                :scale [2 2]
                                :name "bot"}]
@@ -141,17 +142,25 @@ GUI:
 
 (defn move-bot
   [dir]
-  (swap! world_ assoc-in [:bot :next-pos]
+  (swap! world_ assoc-in [:bot :position]
+    (let [row (:row %)
+          col (:col %)])
     (condp = dir
-      :left {:x 0 :y 1}
-      :right {:x 2 :y 1}
-      :up {:x 1 :y 0}
-      :down {:x 1 :y 2}
-      {:x 0 :y 1})))
+      :left {:row row :col (dec col)}
+      :right {:row row :col (inc col)}
+      :up {:row (dec row) :col col}
+      :down {:row (inc row) :col col}
+      {:row row :col col})))
+
+(defn bot-changed-listener
+  "listens to changes of bot game entity, updates
+  graphical object accordingly"
+  [_key _ref old-value new-value]
+  (println "bot has changed!" old-value new-value))
 
 (defn ^:export game-tick
-  "Update function called in the game loop
-  parameter delta-time refers to time passed from last update"
+  "Update function called in the game loop;
+  parameter delta-time refers to time passed since last update"
   [delta-time]
   (let [next-pos (get-in @world_ [:bot :next-pos])
         bot-view (get-in @world-view_ [:bot :view])]
@@ -159,7 +168,7 @@ GUI:
       (pixi/set-position bot-view (* 64 (:x next-pos)) (* 64 (:y next-pos)))
       (swap! world_ update :bot dissoc :next-pos))))
 
-(defn ^:export loaded-callback []
+(defn setup []
   (let [background (pixi/make-sprite "images/background.png")
         view (make-world-view @world_)
         {:keys [area bot score]} view]
@@ -167,7 +176,11 @@ GUI:
     (pixi/add-child-view (:view area) bot)
     (pixi/add-children-view main-stage [area score])
     (reset! world-view_ view)
+    (add-watch world_ :bot bot-changed-listener)
     (.start (pixi/make-ticker game-tick))))
+
+(defn ^:export loaded-callback []
+  (setup))
 
 (defn init [app]
   (settings/set! :scale-mode :nearest)
