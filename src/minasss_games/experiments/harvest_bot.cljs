@@ -75,19 +75,19 @@ GUI:
 (defn make-tile
   [{:keys [row col energy traversal-cost]}]
   (let [container (scene/render
-             [:container {:position [(* 64 col) (* 64 row)]}
-              [:sprite {:texture "images/tile.png"
-                        :scale [2 2]}]
-              [:text {:text (str energy)
-                      :position [64 0]
-                      :anchor [1 0]
-                      :style {"fill" "#62f479" "fontSize" 16}
-                      :name "energy"}]
-              [:text {:text (str traversal-cost)
-                      :position [64 64]
-                      :anchor [1 1]
-                      :style {"fill" "#ce4b17" "fontSize" 16}
-                      :name "cost"}]])]
+                    [:container {:position [(* 64 col) (* 64 row)]}
+                     [:sprite {:texture "images/tile.png"
+                               :scale [2 2]}]
+                     [:text {:text (str energy)
+                             :position [64 0]
+                             :anchor [1 0]
+                             :style {"fill" "#62f479" "fontSize" 16}
+                             :name "energy"}]
+                     [:text {:text (str traversal-cost)
+                             :position [64 64]
+                             :anchor [1 1]
+                             :style {"fill" "#ce4b17" "fontSize" 16}
+                             :name "cost"}]])]
     {:view container
      :entities {:energy (pixi/get-child-by-name container "energy")
                 :cost (pixi/get-child-by-name container "cost")}}))
@@ -153,10 +153,7 @@ GUI:
 
 (defn move-bot
   [dir]
-  (swap! world_
-    (fn [w]
-      (let [pos (get-in w [:bot :position])]
-        (assoc-in w [:bot :position] (new-position pos dir))))))
+  (swap! world_ update-in [:bot :position] #(new-position % dir)))
 
 (defn bot-changed-listener
   "listens to changes of bot game entity, updates
