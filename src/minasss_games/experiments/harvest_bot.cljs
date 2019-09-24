@@ -140,11 +140,10 @@ GUI:
 
 (defonce ^:private time_ (atom 0.0))
 
-(defn move-bot
-  [dir]
-  (swap! world_ assoc-in [:bot :position]
-    (let [row (:row %)
-          col (:col %)])
+(defn new-position
+  [position dir]
+  (let [row (:row position)
+        col (:col position)]
     (condp = dir
       :left {:row row :col (dec col)}
       :right {:row row :col (inc col)}
@@ -152,11 +151,21 @@ GUI:
       :down {:row (inc row) :col col}
       {:row row :col col})))
 
+(defn move-bot
+  [dir]
+  (swap! world_
+    (fn [w]
+      (let [pos (get-in w [:bot :position])]
+        (assoc-in w [:bot :position] (new-position pos dir))))))
+
 (defn bot-changed-listener
   "listens to changes of bot game entity, updates
   graphical object accordingly"
   [_key _ref old-value new-value]
-  (println "bot has changed!" old-value new-value))
+  (let [pos (get-in new-value [:bot :position])
+        x (* 64 (:col pos))
+        y (* 64 (:row pos))]
+    (pixi/set-position (get-in @world-view_ [:bot :view]) x y)))
 
 (defn ^:export game-tick
   "Update function called in the game loop;
