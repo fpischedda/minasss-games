@@ -141,6 +141,9 @@ GUI:
 (defonce ^:private time_ (atom 0.0))
 
 (defn new-position
+  "calculate new position based on old one and provided direction,
+  acceptable values for dir are :left, :right, :up and :down,
+  with any other value for dir the old position will ve returned."
   [position dir]
   (let [row (:row position)
         col (:col position)]
