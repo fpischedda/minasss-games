@@ -31,7 +31,8 @@ GUI:
  - each tile should show the cost to move there
  - player should show available energy and total collected energy
   "
-  (:require [minasss-games.pixi :as pixi]
+  (:require [minasss-games.math :as math]
+            [minasss-games.pixi :as pixi]
             [minasss-games.pixi.settings :as settings]
             [minasss-games.pixi.scene :as scene]))
 
@@ -158,43 +159,24 @@ GUI:
   [dir]
   (swap! world_ update-in [:bot :position] #(new-position % dir)))
 
-(defn direction
-  [a b]
-  (let [dx (- (:x a) (:x b))
-        dy (- (:x a) (:x b))]
-    {:x dx :y dy}))
-
-(defn length
-  [v]
-  (let [x (:x v)
-        y (:y v)]
-    (Math/sqrt (+ (* x x) (* y y)))))
-
-(defn normalize-vector
-  [v]
-  (let [x (:x v)
-        y (:y v)
-        len (Math/sqrt (+ (* x x) (* y y)))]
-    {:x (/ x len) :y (/ y len)}))
-
 (defn make-move-to
   [container old-pos target-pos]
-  (let [dir (direction target-pos old-pos)
-        normalized-dir (normalize-vector dir)
+  (let [dir (math/direction target-pos old-pos)
+        normalized-dir (math/normalize dir)
         calculated-pos (atom old-pos)
-        prev-distance (atom (length dir))]
+        prev-distance (atom (math/length dir))]
     (fn [delta-time]
       (swap! calculated-pos (fn [pos]
                               {:x (+ (:x pos) (* delta-time (:x normalized-dir)))
                                :y (+ (:y pos) (* delta-time (:y normalized-dir)))}))
-      (let [distance (length (direction target-pos @calculated-pos))]
+      (let [distance (math/length (math/direction target-pos @calculated-pos))]
         (if (> distance @prev-distance)
           (do
             (pixi/set-position container (:x target-pos) (:y target-pos))
             false)
           (do
             (reset! prev-distance distance)
-            (pixi/set-position container (:x calculated-pos) (:y calculated-pos))
+            (pixi/set-position container (:x @calculated-pos) (:y @calculated-pos))
             true))))))
 
 (def view-updater-functions_ (atom (list)))
@@ -223,7 +205,7 @@ GUI:
   (let [next-pos (get-in @world_ [:bot :next-pos])
         bot-view (get-in @world-view_ [:bot :view])]
     (swap! view-updater-functions_ (fn [functions]
-                                     (filter (fn [f] (println "calling f") (f delta-time)) functions)))))
+                                     (into () (filter (fn [f] (f delta-time)) functions))))))
 
 (defn setup []
   (let [background (pixi/make-sprite "images/background.png")
