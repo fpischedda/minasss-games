@@ -158,14 +158,63 @@ GUI:
   [dir]
   (swap! world_ update-in [:bot :position] #(new-position % dir)))
 
+(defn direction
+  [a b]
+  (let [dx (- (:x a) (:x b))
+        dy (- (:x a) (:x b))]
+    {:x dx :y dy}))
+
+(defn length
+  [v]
+  (let [x (:x v)
+        y (:y v)]
+    (Math/sqrt (+ (* x x) (* y y)))))
+
+(defn normalize-vector
+  [v]
+  (let [x (:x v)
+        y (:y v)
+        len (Math/sqrt (+ (* x x) (* y y)))]
+    {:x (/ x len) :y (/ y len)}))
+
+(defn make-move-to
+  [container old-pos target-pos]
+  (let [dir (direction target-pos old-pos)
+        normalized-dir (normalize-vector dir)
+        calculated-pos (atom old-pos)
+        prev-distance (atom (length dir))]
+    (fn [delta-time]
+      (swap! calculated-pos (fn [pos]
+                              {:x (+ (:x pos) (* delta-time (:x normalized-dir)))
+                               :y (+ (:y pos) (* delta-time (:y normalized-dir)))}))
+      (let [distance (length (direction target-pos @calculated-pos))]
+        (if (> distance @prev-distance)
+          (do
+            (pixi/set-position container (:x target-pos) (:y target-pos))
+            false)
+          (do
+            (reset! prev-distance distance)
+            (pixi/set-position container (:x calculated-pos) (:y calculated-pos))
+            true))))))
+
+(def view-updater-functions_ (atom (list)))
+
+(defn add-view-updater-function
+  [f]
+  (swap! view-updater-functions_ conj f))
+
 (defn bot-changed-listener
   "listens to changes of bot game entity, updates
   graphical object accordingly"
   [_key _ref old-value new-value]
-  (let [pos (get-in new-value [:bot :position])
-        x (* 64 (:col pos))
-        y (* 64 (:row pos))]
-    (pixi/set-position (get-in @world-view_ [:bot :view]) x y)))
+  (let [old-pos (get-in old-value [:bot :position])
+        new-pos (get-in new-value [:bot :position])]
+    (when (not (= old-pos new-pos))
+      (let [old-x (* 64 (:col old-pos))
+            old-y (* 64 (:row old-pos))
+            x (* 64 (:col new-pos))
+            y (* 64 (:row new-pos))]
+        (add-view-updater-function (make-move-to (get-in @world-view_ [:bot :view]) {:x old-x :y old-y} {:x x :y y}))))))
 
 (defn ^:export game-tick
   "Update function called in the game loop;
@@ -173,9 +222,8 @@ GUI:
   [delta-time]
   (let [next-pos (get-in @world_ [:bot :next-pos])
         bot-view (get-in @world-view_ [:bot :view])]
-    (when next-pos
-      (pixi/set-position bot-view (* 64 (:x next-pos)) (* 64 (:y next-pos)))
-      (swap! world_ update :bot dissoc :next-pos))))
+    (swap! view-updater-functions_ (fn [functions]
+                                     (filter (fn [f] (println "calling f") (f delta-time)) functions)))))
 
 (defn setup []
   (let [background (pixi/make-sprite "images/background.png")
@@ -185,7 +233,7 @@ GUI:
     (pixi/add-child-view (:view area) bot)
     (pixi/add-children-view main-stage [area score])
     (reset! world-view_ view)
-    (add-watch world_ :bot bot-changed-listener)
+    (add-watch world_ :bot-handler bot-changed-listener)
     (.start (pixi/make-ticker game-tick))))
 
 (defn ^:export loaded-callback []
