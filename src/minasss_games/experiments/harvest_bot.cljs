@@ -33,6 +33,7 @@ GUI:
   "
   (:require [minasss-games.math :as math]
             [minasss-games.pixi :as pixi]
+            [minasss-games.pixi.input :as input]
             [minasss-games.pixi.settings :as settings]
             [minasss-games.pixi.scene :as scene]))
 
@@ -216,6 +217,7 @@ GUI:
     (pixi/add-children-view main-stage [area score])
     (reset! world-view_ view)
     (add-watch world_ :bot-handler bot-changed-listener)
+    (input/add-key-handler :key-up :bot-handler (fn [_] (move-bot :right)))
     (.start (pixi/make-ticker game-tick))))
 
 (defn ^:export loaded-callback []
