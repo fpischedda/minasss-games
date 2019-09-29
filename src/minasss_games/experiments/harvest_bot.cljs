@@ -70,6 +70,24 @@ GUI:
    :score 0
    :area (make-area width height)})
 
+(defn new-position
+  "calculate new position based on old one and provided direction,
+  acceptable values for dir are :left, :right, :up and :down,
+  with any other value for dir the old position will be returned."
+  [position dir]
+  (let [row (:row position)
+        col (:col position)]
+    (condp = dir
+      :left {:row row :col (dec col)}
+      :right {:row row :col (inc col)}
+      :up {:row (dec row) :col col}
+      :down {:row (inc row) :col col}
+      {:row row :col col})))
+
+(defn move-bot
+  [dir]
+  (swap! world_ update-in [:bot :position] #(new-position % dir)))
+
 ;; make-world parameters are sooo meaningless for the reader...
 ;; must find a better way!
 (def world_ (atom (make-world 5 5 0 0 10)))
@@ -141,24 +159,6 @@ GUI:
 (defonce ^:private world-view_ (atom {}))
 
 (defonce ^:private time_ (atom 0.0))
-
-(defn new-position
-  "calculate new position based on old one and provided direction,
-  acceptable values for dir are :left, :right, :up and :down,
-  with any other value for dir the old position will ve returned."
-  [position dir]
-  (let [row (:row position)
-        col (:col position)]
-    (condp = dir
-      :left {:row row :col (dec col)}
-      :right {:row row :col (inc col)}
-      :up {:row (dec row) :col col}
-      :down {:row (inc row) :col col}
-      {:row row :col col})))
-
-(defn move-bot
-  [dir]
-  (swap! world_ update-in [:bot :position] #(new-position % dir)))
 
 (defn make-move-to
   [container old-pos target-pos]
