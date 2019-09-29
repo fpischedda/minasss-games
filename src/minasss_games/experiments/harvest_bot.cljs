@@ -65,9 +65,11 @@ GUI:
 (defn make-world
   "A world is a width X height area, where each item is a cell,
   plus a player controlled bot and a score"
-  [width height bot-row bot-col bot-energy]
+  [{:keys [width height bot-row bot-col bot-energy]}]
   {:bot (make-bot bot-row bot-col bot-energy)
    :score 0
+   :width width
+   :height height
    :area (make-area width height)})
 
 (defn new-position
@@ -84,13 +86,27 @@ GUI:
       :down {:row (inc row) :col col}
       {:row row :col col})))
 
-(defn move-bot
-  [dir]
-  (swap! world_ update-in [:bot :position] #(new-position % dir)))
+(defn valid-position?
+  "return true if the provided position is valid, meaning it is inside
+  the area grid"
+  [{:keys [row col]} {:keys [width height]}]
+  (and (>= row 0) (< row height) (>= col 0) (< col width)))
 
 ;; make-world parameters are sooo meaningless for the reader...
 ;; must find a better way!
-(def world_ (atom (make-world 5 5 0 0 10)))
+;; ok, a map might be a bit better
+(def world_ (atom (make-world {:width 5 :height 5
+                               :bot-row 0 :bot-col 0 :bot-energy 10})))
+
+;; this still depends on the global world_ var,
+;; must find a way to get rid of it
+(defn move-bot
+  [dir]
+  (swap! world_ (fn [world]
+                  (let [new-pos (new-position (get-in world [:bot :position]) dir)]
+                    (if (valid-position? new-pos world)
+                      (assoc-in world [:bot :position] new-pos)
+                      world)))))
 
 (defn make-tile
   [{:keys [row col energy traversal-cost]}]
@@ -192,6 +208,7 @@ GUI:
   [_key _ref old-value new-value]
   (let [old-pos (get-in old-value [:bot :position])
         new-pos (get-in new-value [:bot :position])]
+    ;; position changed detection, must find a better way...
     (when (not (= old-pos new-pos))
       (let [old-x (* 64 (:col old-pos))
             old-y (* 64 (:row old-pos))
@@ -217,7 +234,14 @@ GUI:
     (pixi/add-children-view main-stage [area score])
     (reset! world-view_ view)
     (add-watch world_ :bot-handler bot-changed-listener)
-    (input/add-key-handler :key-up :bot-handler (fn [_] (move-bot :right)))
+    (input/register-keys {"ArrowUp" :up "k" :up
+                          "ArrowDown" :down "j" :down
+                          "ArrowLeft" :left "h" :left
+                          "ArrowRight" :right "l" :right}
+      :bot-handler
+      (fn [event-type _native translated]
+        (if (= :key-up event-type)
+          (move-bot translated))))
     (.start (pixi/make-ticker game-tick))))
 
 (defn ^:export loaded-callback []
