@@ -180,10 +180,10 @@ GUI:
   [container old-pos target-pos]
   (let [dir (math/direction target-pos old-pos)
         normalized-dir (math/normalize dir)
-        calculated-pos (atom old-pos)
-        prev-distance (atom (math/length dir))]
+        calculated-pos (volatile! old-pos)
+        prev-distance (volatile! (math/length dir))]
     (fn [delta-time]
-      (swap! calculated-pos (fn [pos]
+      (vswap! calculated-pos (fn [pos]
                               {:x (+ (:x pos) (* delta-time (:x normalized-dir)))
                                :y (+ (:y pos) (* delta-time (:y normalized-dir)))}))
       (let [distance (math/length (math/direction target-pos @calculated-pos))]
@@ -192,7 +192,7 @@ GUI:
             (pixi/set-position container (:x target-pos) (:y target-pos))
             false)
           (do
-            (reset! prev-distance distance)
+            (vreset! prev-distance distance)
             (pixi/set-position container (:x @calculated-pos) (:y @calculated-pos))
             true))))))
 
