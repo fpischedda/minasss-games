@@ -70,9 +70,10 @@
         new-bot (:bot new-state)
         old-score (:score old-state)
         new-score (:score new-state)]
-    (cond
-      (not (= old-bot new-bot)) (handle-bot-changed old-bot new-bot)
-      (not (= old-score new-score)) (pixi/set-text (get-in @world-view_ [:score :view]) new-score))))
+    (when (not (= old-bot new-bot))
+      (handle-bot-changed old-bot new-bot))
+    (when (not (= old-score new-score))
+      (pixi/set-text (get-in @world-view_ [:score :entities :text]) (str "Score " new-score)))))
 
 (defn make-tile
   [{:keys [row col energy cost]}]
