@@ -83,7 +83,7 @@
 ;; sometimes tile cost can be negative meaning that it is a recharging station
 ;; harvest, meaning points = points + tile energy, set tile enerty = 0
 (defmethod update-world :harvest
-  [_]
+  [_ _]
   (swap! world_
     (fn [world]
       (let [[row col] (get-in world [:bot :position])
@@ -96,4 +96,5 @@
 (defn harvest
   "just a small convenience wrapper for update-world :harvest"
   []
-  (update-world :harvest))
+  (swap! world_ assoc :score 10))
+  ;; (update-world :harvest nil))
