@@ -132,6 +132,12 @@
   (aset container "name" name)
   container)
 
+(defn set-text
+  "Set text content of PIXI/Text instance"
+  [container text]
+  (aset container "text" text)
+  container)
+
 (defn make-ticker
   "Create a ticker registering an handler"
   [handler-fn]
