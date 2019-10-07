@@ -2,7 +2,8 @@
   "this namespace collects all view related functions"
   (:require [minasss-games.math :as math]
             [minasss-games.pixi :as pixi]
-            [minasss-games.pixi.scene :as scene]))
+            [minasss-games.pixi.scene :as scene]
+            [minasss-games.experiments.harvest-bot.game :as game]))
 
 (def resources ["images/background.png" "images/sprite.png" "images/tile.png"])
 
@@ -22,7 +23,7 @@
   (swap! view-updater-functions_ conj f))
 
 (defn make-move-to
-  [container old-pos target-pos]
+  [container old-pos target-pos completed-fn]
   (let [dir (math/direction target-pos old-pos)
         normalized-dir (math/normalize dir)
         calculated-pos (volatile! old-pos)
@@ -35,7 +36,7 @@
         (if (> distance @prev-distance)
           (do
             (pixi/set-position container (:x target-pos) (:y target-pos))
-            false)
+            (completed-fn))
           (do
             (vreset! prev-distance distance)
             (pixi/set-position container (:x @calculated-pos) (:y @calculated-pos))
@@ -53,7 +54,8 @@
             old-y (* 64 (:row old-pos))
             x (* 64 (:col new-pos))
             y (* 64 (:row new-pos))]
-        (add-view-updater-function (make-move-to (get-in @world-view_ [:bot :view]) {:x old-x :y old-y} {:x x :y y}))))))
+        (add-view-updater-function
+          (make-move-to (get-in @world-view_ [:bot :view]) {:x old-x :y old-y} {:x x :y y} game/harvest))))))
 
 (defn make-tile
   [{:keys [row col energy traversal-cost]}]
