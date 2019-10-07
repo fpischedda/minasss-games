@@ -67,22 +67,25 @@
   graphical object accordingly"
   [_key _ref old-state new-state]
   (let [old-bot (:bot old-state)
-        new-bot (:bot new-state)]
+        new-bot (:bot new-state)
+        old-score (:score old-state)
+        new-score (:score new-state)]
     (cond
-      (not (= old-bot new-bot)) (handle-bot-changed old-bot new-bot))))
+      (not (= old-bot new-bot)) (handle-bot-changed old-bot new-bot)
+      (not (= old-score new-score)) (pixi/set-text (get-in @world-view_ [:score :view]) new-score))))
 
 (defn make-tile
-  [{:keys [row col energy traversal-cost]}]
+  [{:keys [row col energy cost]}]
   (let [container (scene/render
                     [:container {:position [(* 64 col) (* 64 row)]}
                      [:sprite {:texture "images/tile.png"
                                :scale [2 2]}]
-                     [:text {:text (str energy)
+                     [:text {:text energy
                              :position [64 0]
                              :anchor [1 0]
                              :style {"fill" "#62f479" "fontSize" 16}
                              :name "energy"}]
-                     [:text {:text (str traversal-cost)
+                     [:text {:text cost
                              :position [64 64]
                              :anchor [1 1]
                              :style {"fill" "#ce4b17" "fontSize" 16}
