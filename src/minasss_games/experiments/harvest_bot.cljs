@@ -116,13 +116,13 @@ GUI:
                       world)))))
 
 (defmulti update-world
-  [command & _payload] command)
+  (fn [command & _payload] command))
 
 (defmethod update-world :move-bot
-  [_ [dir]]
+  [_ dir]
   (move-bot dir))
 
-;; calculate bot energy = energy - tile cost
+;; calculate bot energy = energy - cell cost
 ;; sometimes tile cost can be negative meaning that it is a recharging station
 ;; harvest, meaning points = points + tile energy, set tile enerty = 0
 (defmethod update-world :harvest
@@ -130,11 +130,11 @@ GUI:
   (swap! world_
     (fn [world]
       (let [[row col] (get-in world [:bot :position])
-            tile (get-area-tile (:area world) row col)])
-      (-> world
-        (update-in [:bot :energy] - (:cost tile))
-        (update :score - (:energy tile))
-        (assoc-in [:bot :area row col] 0)))))
+            cell (get-area-tile (:area world) row col)]
+        (-> world
+          (update-in [:bot :energy] - (:cost cell))
+          (update :score - (:energy cell))
+          (assoc-in [:bot :area row col :energy] 0))))))
 
 (defn ^:export game-tick
   "Update function called in the game loop;
@@ -142,7 +142,7 @@ GUI:
   [delta-time]
   (view/update-step delta-time))
 
-(defn handle-input [event-type _ direction]
+(defn handle-input [event-type _native direction]
   (if (= :key-up event-type)
     (update-world :move-bot direction)))
 
