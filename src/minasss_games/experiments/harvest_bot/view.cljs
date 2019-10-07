@@ -42,20 +42,30 @@
             (pixi/set-position container (:x @calculated-pos) (:y @calculated-pos))
             true))))))
 
-(defn bot-changed-listener
-  "listens to changes of bot game entity, updates
-  graphical object accordingly"
-  [_key _ref old-value new-value]
-  (let [old-pos (get-in old-value [:bot :position])
-        new-pos (get-in new-value [:bot :position])]
+(defn handle-bot-changed
+  [old-bot new-bot]
+  (let [old-pos (:position old-bot)
+        new-pos (:position new-bot)]
     ;; position changed detection, must find a better way...
-    (when (not (= old-pos new-pos))
+    (cond
+      (not (= old-pos new-pos))
       (let [old-x (* 64 (:col old-pos))
             old-y (* 64 (:row old-pos))
             x (* 64 (:col new-pos))
             y (* 64 (:row new-pos))]
         (add-view-updater-function
-          (make-move-to (get-in @world-view_ [:bot :view]) {:x old-x :y old-y} {:x x :y y} game/harvest))))))
+          (make-move-to (get-in @world-view_ [:bot :view]) {:x old-x :y old-y} {:x x :y y} game/harvest)))
+      (not (= old-energy new-energy))
+      (pixi/set-text (get-in @world-view_ [:bot :elements :energy]) new-energy))))
+
+(defn bot-changed-listener
+  "listens to changes of bot game entity, updates
+  graphical object accordingly"
+  [_key _ref old-state new-state]
+  (let [old-bot (:bot old-state)
+        new-bot (:bot new-state)]
+    (cond
+      (not (= old-bot new-bot)) (handle-bot-changed old-bot new-bot))))
 
 (defn make-tile
   [{:keys [row col energy traversal-cost]}]
