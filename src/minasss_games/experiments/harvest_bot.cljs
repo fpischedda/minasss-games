@@ -48,10 +48,10 @@ GUI:
   [row col energy]
   {:position {:row row :col col} :energy energy})
 
-(defn make-cell [row col traversal-cost energy]
+(defn make-cell [row col cost energy]
   {:row row
    :col col
-   :traversal-cost traversal-cost
+   :cost cost
    :energy energy})
 
 (defn make-area-row
@@ -63,6 +63,11 @@ GUI:
   "create area cells matrix of dimensions width X height"
   [width height]
   (vec (map #(make-area-row % width) (range height))))
+
+(defn get-area-tile
+  "return the tile at the specified coordinates"
+  [area row col]
+  (get-in area [row col]))
 
 (defn make-world
   "A world is a width X height area, where each item is a cell,
@@ -110,11 +115,36 @@ GUI:
                       (assoc-in world [:bot :position] new-pos)
                       world)))))
 
+(defmulti update-world
+  [command & _payload] command)
+
+(defmethod update-world :move-bot
+  [_ [dir]]
+  (move-bot dir))
+
+;; calculate bot energy = energy - tile cost
+;; sometimes tile cost can be negative meaning that it is a recharging station
+;; harvest, meaning points = points + tile energy, set tile enerty = 0
+(defmethod update-world :harvest
+  [_ _]
+  (swap! world_
+    (fn [world]
+      (let [[row col] (get-in world [:bot :position])
+            tile (get-area-tile (:area world) row col)])
+      (-> world
+        (update-in [:bot :energy] - (:cost tile))
+        (update :score - (:energy tile))
+        (assoc-in [:bot :area row col] 0)))))
+
 (defn ^:export game-tick
   "Update function called in the game loop;
   parameter delta-time refers to time passed since last update"
   [delta-time]
   (view/update-step delta-time))
+
+(defn handle-input [event-type _ direction]
+  (if (= :key-up event-type)
+    (update-world :move-bot direction)))
 
 (defn ^:export loaded-callback []
   (view/setup world_ main-stage)
@@ -122,10 +152,7 @@ GUI:
                         "ArrowDown" :down "j" :down
                         "ArrowLeft" :left "h" :left
                         "ArrowRight" :right "l" :right}
-    :bot-handler
-    (fn [event-type _native translated]
-      (if (= :key-up event-type)
-        (move-bot translated))))
+    :bot-handler handle-input)
   (.start (pixi/make-ticker game-tick)))
 
 (defn init [app]
