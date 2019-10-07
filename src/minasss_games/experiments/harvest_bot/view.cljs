@@ -7,7 +7,7 @@
 
 (def resources ["images/background.png" "images/sprite.png" "images/tile.png"])
 
-(defonce ^:private world-view_ (atom {}))
+(defonce world-view_ (atom {}))
 
 (def view-updater-functions_ (atom (list)))
 
@@ -36,7 +36,9 @@
         (if (> distance @prev-distance)
           (do
             (pixi/set-position container (:x target-pos) (:y target-pos))
-            (completed-fn))
+            (when (some? completed-fn)
+              (completed-fn))
+            false)
           (do
             (vreset! prev-distance distance)
             (pixi/set-position container (:x @calculated-pos) (:y @calculated-pos))
@@ -45,7 +47,9 @@
 (defn handle-bot-changed
   [old-bot new-bot]
   (let [old-pos (:position old-bot)
-        new-pos (:position new-bot)]
+        new-pos (:position new-bot)
+        old-energy (:energy old-bot)
+        new-energy (:energy new-bot)]
     ;; position changed detection, must find a better way...
     (cond
       (not (= old-pos new-pos))
@@ -56,7 +60,7 @@
         (add-view-updater-function
           (make-move-to (get-in @world-view_ [:bot :view]) {:x old-x :y old-y} {:x x :y y} game/harvest)))
       (not (= old-energy new-energy))
-      (pixi/set-text (get-in @world-view_ [:bot :elements :energy]) new-energy))))
+      (pixi/set-text (get-in @world-view_ [:bot :entities :text]) new-energy))))
 
 (defn bot-changed-listener
   "listens to changes of bot game entity, updates

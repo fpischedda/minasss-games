@@ -82,19 +82,14 @@
 ;; calculate bot energy = energy - cell cost
 ;; sometimes tile cost can be negative meaning that it is a recharging station
 ;; harvest, meaning points = points + tile energy, set tile enerty = 0
-(defmethod update-world :harvest
-  [_ _]
+(defn harvest
+  "just a small convenience wrapper for update-world :harvest"
+  []
   (swap! world_
     (fn [world]
-      (let [[row col] (get-in world [:bot :position])
+      (let [{:keys [row col]} (get-in world [:bot :position])
             cell (get-area-tile (:area world) row col)]
         (-> world
           (update-in [:bot :energy] - (:cost cell))
           (update :score - (:energy cell))
           (assoc-in [:bot :area row col :energy] 0))))))
-
-(defn harvest
-  "just a small convenience wrapper for update-world :harvest"
-  []
-  (swap! world_ assoc :score 10))
-  ;; (update-world :harvest nil))
