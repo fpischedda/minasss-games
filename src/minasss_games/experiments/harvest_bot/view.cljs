@@ -44,6 +44,11 @@
             (pixi/set-position container (:x @calculated-pos) (:y @calculated-pos))
             true))))))
 
+(defn update-bot-energy
+  "helper function that update the text representing bot energy"
+  [energy]
+  (pixi/set-text (get-in @world-view_ [:bot :entities :text]) energy))
+
 (defn handle-bot-changed
   [old-bot new-bot]
   (let [old-pos (:position old-bot)
@@ -60,7 +65,12 @@
         (add-view-updater-function
           (make-move-to (get-in @world-view_ [:bot :view]) {:x old-x :y old-y} {:x x :y y} game/harvest)))
       (not (= old-energy new-energy))
-      (pixi/set-text (get-in @world-view_ [:bot :entities :text]) new-energy))))
+      (update-bot-energy new-energy))))
+
+(defn update-score-text
+  "helper function to update score text"
+  [score]
+  (pixi/set-text (get-in @world-view_ [:score :entities :text]) (str "Score " score)))
 
 (defn bot-changed-listener
   "listens to changes of bot game entity, updates
@@ -73,7 +83,7 @@
     (when (not (= old-bot new-bot))
       (handle-bot-changed old-bot new-bot))
     (when (not (= old-score new-score))
-      (pixi/set-text (get-in @world-view_ [:score :entities :text]) (str "Score " new-score)))))
+      (update-score-text new-score))))
 
 (defn make-tile
   [{:keys [row col energy cost]}]
