@@ -91,7 +91,7 @@
         (-> world
           (update-in [:bot :energy] - (:cost cell))
           (update :score + (:energy cell))
-          (assoc-in [:bot :area row col :energy] 0))))))
+          (assoc-in [:area row col :energy] 0))))))
 
 (defn harvest
   "just a small convenience wrapper for update-world :harvest"

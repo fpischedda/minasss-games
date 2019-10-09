@@ -72,7 +72,21 @@
   [score]
   (pixi/set-text (get-in @world-view_ [:score :entities :text]) (str "Score " score)))
 
-(defn bot-changed-listener
+(defn detect-changed-cell
+  "given the old and new states of the area return the cell that has changed"
+  [old-area new-area]
+  (->> (map vector (flatten new-area) (flatten old-area))
+    (filter (fn [[new old]] (not (= new old))))
+    first
+    first))
+
+(defn update-cell
+  "helper function to update a cell view"
+  [cell]
+  (let [{:keys [row col energy]} cell]
+    (pixi/set-text (get-in @world-view_ [:area :entities :cells row col :entities :energy]) energy)))
+
+(defn world-changed-listener
   "listens to changes of bot game entity, updates
   graphical object accordingly"
   [_key _ref old-state new-state]
@@ -83,9 +97,11 @@
     (when (not (= old-bot new-bot))
       (handle-bot-changed old-bot new-bot))
     (when (not (= old-score new-score))
-      (update-score-text new-score))))
+      (update-score-text new-score))
+    (when-let [cell (detect-changed-cell (:area old-state) (:area new-state))]
+      (update-cell cell))))
 
-(defn make-tile
+(defn make-cell
   [{:keys [row col energy cost]}]
   (let [container (scene/render
                     [:container {:position [(* 64 col) (* 64 row)]}
@@ -107,10 +123,16 @@
 
 (defn make-area-view [area]
   (let [area-container (pixi/make-container)
-        tiles (vec (map (fn [row] (vec (map #(pixi/add-child-view area-container (make-tile %)) row))) area))]
+        cells (vec (map
+                     (fn [row]
+                       (vec (map (fn [elem]
+                                   (let [cell (make-cell elem)]
+                                     (pixi/add-child-view area-container cell)
+                                     cell)) row)))
+                     area))]
     (pixi/set-position area-container 200 200)
     {:view area-container
-     :entities {:tiles tiles}}))
+     :entities {:cells cells}}))
 
 (defn make-score-view [initial-score]
   (let [score-container (pixi/make-container)
@@ -160,4 +182,4 @@
     (pixi/add-child-view (:view area) bot)
     (pixi/add-children-view main-stage [area score])
     (reset! world-view_ view)
-    (add-watch world_ :bot-handler bot-changed-listener)))
+    (add-watch world_ :world-changed-watch world-changed-listener)))
