@@ -1,48 +1,18 @@
 (ns minasss-games.experiments.harvest-bot.view
   "this namespace collects all view related functions"
-  (:require [minasss-games.math :as math]
-            [minasss-games.pixi :as pixi]
+  (:require [minasss-games.pixi :as pixi]
             [minasss-games.pixi.scene :as scene]
+            [minasss-games.tween :as tween]
             [minasss-games.experiments.harvest-bot.game :as game]))
 
 (def resources ["images/background.png" "images/sprite.png" "images/tile.png"])
 
 (defonce world-view_ (atom {}))
 
-(def view-updater-functions_ (atom (list)))
-
 (defn update-step
   "update view related stuff"
   [delta-time]
-  (swap! view-updater-functions_
-    (fn [functions]
-      (into () (filter (fn [f] (f delta-time)) functions)))))
-
-(defn add-view-updater-function
-  [f]
-  (swap! view-updater-functions_ conj f))
-
-(defn make-move-to
-  [container old-pos target-pos speed completed-fn]
-  (let [dir (math/direction target-pos old-pos)
-        normalized-dir (math/normalize dir)
-        calculated-pos (volatile! old-pos)
-        prev-distance (volatile! (math/length dir))]
-    (fn [delta-time]
-      (vswap! calculated-pos (fn [pos]
-                              {:x (+ (:x pos) (* delta-time speed (:x normalized-dir)))
-                               :y (+ (:y pos) (* delta-time speed (:y normalized-dir)))}))
-      (let [distance (math/length (math/direction target-pos @calculated-pos))]
-        (if (> distance @prev-distance)
-          (do
-            (pixi/set-position container (:x target-pos) (:y target-pos))
-            (when (some? completed-fn)
-              (completed-fn))
-            false)
-          (do
-            (vreset! prev-distance distance)
-            (pixi/set-position container (:x @calculated-pos) (:y @calculated-pos))
-            true))))))
+  (tween/update-tweens delta-time))
 
 (defn update-bot-energy
   "helper function that update the text representing bot energy"
@@ -62,8 +32,11 @@
             old-y (* 64 (:row old-pos))
             x (* 64 (:col new-pos))
             y (* 64 (:row new-pos))]
-        (add-view-updater-function
-          (make-move-to (get-in @world-view_ [:bot :view]) {:x old-x :y old-y} {:x x :y y} 1.5 game/harvest)))
+        (tween/move-to {:target (get-in @world-view_ [:bot :view])
+                        :starting-position {:x old-x :y old-y}
+                        :target-position {:x x :y y}
+                        :speed 1.5
+                        :on-complete game/harvest}))
       (not (= old-energy new-energy))
       (update-bot-energy new-energy))))
 
