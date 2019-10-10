@@ -27,9 +27,9 @@
         new-pos (:position new-bot)
         old-energy (:energy old-bot)
         new-energy (:energy new-bot)]
+
     ;; position changed detection, must find a better way...
-    (cond
-      (not (= old-pos new-pos))
+    (when (not (= old-pos new-pos))
       (let [old-x (* cell-size (:col old-pos))
             old-y (* cell-size (:row old-pos))
             x (* cell-size (:col new-pos))
@@ -38,8 +38,10 @@
                         :starting-position {:x old-x :y old-y}
                         :target-position {:x x :y y}
                         :speed 1.5
-                        :on-complete game/harvest}))
-      (not (= old-energy new-energy))
+                        :on-complete game/harvest})))
+
+    ;; eventually update bot energy text
+    (when (not (= old-energy new-energy))
       (update-bot-energy new-energy))))
 
 (defn update-score-text
