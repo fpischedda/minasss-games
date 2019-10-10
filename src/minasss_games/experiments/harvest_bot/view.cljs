@@ -9,6 +9,8 @@
 
 (defonce world-view_ (atom {}))
 
+(def cell-size 128)
+
 (defn update-step
   "update view related stuff"
   [delta-time]
@@ -28,10 +30,10 @@
     ;; position changed detection, must find a better way...
     (cond
       (not (= old-pos new-pos))
-      (let [old-x (* 64 (:col old-pos))
-            old-y (* 64 (:row old-pos))
-            x (* 64 (:col new-pos))
-            y (* 64 (:row new-pos))]
+      (let [old-x (* cell-size (:col old-pos))
+            old-y (* cell-size (:row old-pos))
+            x (* cell-size (:col new-pos))
+            y (* cell-size (:row new-pos))]
         (tween/move-to {:target (get-in @world-view_ [:bot :view])
                         :starting-position {:x old-x :y old-y}
                         :target-position {:x x :y y}
@@ -77,18 +79,18 @@
 (defn make-cell
   [{:keys [row col energy cost]}]
   (let [container (scene/render
-                    [:container {:position [(* 64 col) (* 64 row)]}
+                    [:container {:position [(* cell-size col) (* cell-size row)]}
                      [:sprite {:texture "images/tile.png"
-                               :scale [2 2]}]
+                               :scale [4 4]}]
                      [:text {:text energy
-                             :position [64 0]
+                             :position [cell-size 0]
                              :anchor [1 0]
-                             :style {"fill" "#62f479" "fontSize" 16}
+                             :style {"fill" "#62f479" "fontSize" 20}
                              :name "energy"}]
                      [:text {:text cost
-                             :position [64 64]
+                             :position [cell-size cell-size]
                              :anchor [1 1]
-                             :style {"fill" "#ce4b17" "fontSize" 16}
+                             :style {"fill" "#ce4b17" "fontSize" 20}
                              :name "cost"}]])]
     {:view container
      :entities {:energy (pixi/get-child-by-name container "energy")
@@ -103,7 +105,7 @@
                                      (pixi/add-child-view area-container cell)
                                      cell)) row)))
                      area))]
-    (pixi/set-position area-container 200 200)
+    (pixi/set-position area-container 300 200)
     {:view area-container
      :entities {:cells cells}}))
 
@@ -117,15 +119,15 @@
 
 (defn make-bot-view [bot]
   (let [container (scene/render
-                    [:container {:position [(* 64 (get-in bot [:position :col]))
-                                            (* 64 (get-in bot [:position :row]))]}
+                    [:container {:position [(* cell-size (get-in bot [:position :col]))
+                                            (* cell-size (get-in bot [:position :row]))]}
                      [:sprite {:texture "images/sprite.png"
-                               :scale [2 2]
+                               :scale [4 4]
                                :name "bot"}]
                      [:text {:text (:energy bot)
                              :anchor [0 0]
                              :position [0 0]
-                             :style {"fill" "#d751c9" "fontSize" 16}
+                             :style {"fill" "#d751c9" "fontSize" 20}
                              :name "energy"}]
                      ])]
     {:view container
