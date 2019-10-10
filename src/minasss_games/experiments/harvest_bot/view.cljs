@@ -23,15 +23,15 @@
   (swap! view-updater-functions_ conj f))
 
 (defn make-move-to
-  [container old-pos target-pos completed-fn]
+  [container old-pos target-pos speed completed-fn]
   (let [dir (math/direction target-pos old-pos)
         normalized-dir (math/normalize dir)
         calculated-pos (volatile! old-pos)
         prev-distance (volatile! (math/length dir))]
     (fn [delta-time]
       (vswap! calculated-pos (fn [pos]
-                              {:x (+ (:x pos) (* delta-time (:x normalized-dir)))
-                               :y (+ (:y pos) (* delta-time (:y normalized-dir)))}))
+                              {:x (+ (:x pos) (* delta-time speed (:x normalized-dir)))
+                               :y (+ (:y pos) (* delta-time speed (:y normalized-dir)))}))
       (let [distance (math/length (math/direction target-pos @calculated-pos))]
         (if (> distance @prev-distance)
           (do
@@ -63,7 +63,7 @@
             x (* 64 (:col new-pos))
             y (* 64 (:row new-pos))]
         (add-view-updater-function
-          (make-move-to (get-in @world-view_ [:bot :view]) {:x old-x :y old-y} {:x x :y y} game/harvest)))
+          (make-move-to (get-in @world-view_ [:bot :view]) {:x old-x :y old-y} {:x x :y y} 1.5 game/harvest)))
       (not (= old-energy new-energy))
       (update-bot-energy new-energy))))
 
