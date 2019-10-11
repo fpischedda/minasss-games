@@ -5,7 +5,7 @@
             [minasss-games.tween :as tween]
             [minasss-games.experiments.harvest-bot.game :as game]))
 
-(def resources ["images/background.png" "images/sprite.png" "images/tile.png"])
+(def resources ["images/background.png" "images/sprite.png" "images/tile.png" "images/gem.png"])
 
 (defonce world-view_ (atom {}))
 
@@ -60,8 +60,11 @@
 (defn update-cell
   "helper function to update a cell view"
   [cell]
-  (let [{:keys [row col energy]} cell]
-    (pixi/set-text (get-in @world-view_ [:area :entities :cells row col :entities :energy]) energy)))
+  (let [{:keys [row col energy]} cell
+        cell-view (get-in @world-view_ [:area :entities :cells row col :view])
+        energy-text (pixi/get-child-by-name cell-view "energy")]
+    (pixi/remove-child-by-name cell-view "gem")
+    (pixi/set-text energy-text energy)))
 
 (defn world-changed-listener
   "listens to changes of bot game entity, updates
@@ -93,7 +96,11 @@
                              :position [cell-size cell-size]
                              :anchor [1 1]
                              :style {"fill" "#ce4b17" "fontSize" 20}
-                             :name "cost"}]])]
+                             :name "cost"}]
+                     [:sprite {:texture "images/gem.png"
+                               :name "gem"
+                               :anchor [0.5 0.5]
+                               :position [(/ cell-size 2) (/ cell-size 2)]}]])]
     {:view container
      :entities {:energy (pixi/get-child-by-name container "energy")
                 :cost (pixi/get-child-by-name container "cost")}}))

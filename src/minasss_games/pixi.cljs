@@ -64,6 +64,22 @@
   (mapv #(add-child parent %) children)
   parent)
 
+(defn get-child-by-name
+  "return, if any, the container's child identified by name"
+  [container child-name]
+  (.getChildByName container child-name))
+
+(defn remove-container
+  "Remove a container from the scene"
+  [container]
+  (.removeChild (.-parent container) container))
+
+(defn remove-child-by-name
+  "Remove the child specified by name"
+  [parent child-name]
+  (if-let [child (get-child-by-name parent child-name)]
+    (.removeChild parent child)))
+
 (defn add-child-view
   "Add child to provided parent container
   this uses a higher level concept of `view`
@@ -179,8 +195,3 @@
   [container attributes]
   (mapv (fn [[attr value]] (set-attribute container attr value)) attributes)
   container)
-
-(defn get-child-by-name
-  "return, if any, the container's child identified by name"
-  [container child-name]
-  (.getChildByName container child-name))
