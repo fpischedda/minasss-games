@@ -56,10 +56,10 @@ GUI:
 
 (defn ^:export loaded-callback []
   (view/setup game/world_ main-stage)
-  (input/register-keys {"ArrowUp" :up "k" :up
-                        "ArrowDown" :down "j" :down
-                        "ArrowLeft" :left "h" :left
-                        "ArrowRight" :right "l" :right}
+  (input/register-keys {"ArrowUp" :up "k" :up "w" :up
+                        "ArrowDown" :down "j" :down "s" :down
+                        "ArrowLeft" :left "h" :left "a" :left
+                        "ArrowRight" :right "l" :right "d" :right}
     :bot-handler handle-input)
   (.start (pixi/make-ticker game-tick)))
 
