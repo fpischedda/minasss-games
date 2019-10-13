@@ -1,6 +1,7 @@
 (ns minasss-games.core
   "A small experimetn with PIXI javascript library"
   (:require [minasss-games.pixi :as pixi]
+            [minasss-games.experiments.awwwliens :as awwwliens]
             [minasss-games.experiments.harvest-bot :as harvest-bot]))
 
 (enable-console-print!)
@@ -11,7 +12,7 @@
   []
   (let [app (pixi/make-app {:width (.-innerWidth js/window)
                             :height (.-innerHeight js/window)})]
-    (harvest-bot/init app)
+    (awwwliens.intro/init app)
     app))
 
 (defonce ^:export app (init))

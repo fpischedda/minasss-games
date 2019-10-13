@@ -8,12 +8,6 @@
 
 (def cell-size 128)
 
-(defn update-step
-  "update view related stuff"
-  [delta-time]
-  (tween/update-tweens delta-time))
-
-
 (defn make-menu-entry
   [{:keys [text selected position]}]
   (let [color (if selected "#19d708" "#808284")]
@@ -42,12 +36,30 @@
     (pixi/remove-child-by-name main-stage "menu")
     (pixi/add-child main-stage menu)))
 
+(defn update-step
+  "update view related stuff"
+  [delta-time]
+  (tween/update-tweens delta-time))
+
 (defn setup
-  "setup the view based on the world_ atom; main-stage refers to the
+  "setup the view based on the menu-items_ atom; main-stage refers to the
   root container, where other graphical elements will be added"
-  [world_ main-stage]
+  [main-stage]
   (let [background (pixi/make-sprite "images/background.png")
         menu-container (make-menu @menu-items_)]
     (pixi/add-child main-stage background)
     (pixi/add-child-view main-stage menu-container)
     (add-watch menu-items_ :menu-changed-watch menu-changed-listener)))
+
+(defn ^:export loaded-callback []
+  (setup main-stage)
+  (input/register-keys {"ArrowUp" ::up "k" ::up "w" ::up
+                        "ArrowDown" ::down "j" ::down "s" ::down
+                        "Space" ::select}
+    :menu-handler handle-input)
+  (.start (pixi/make-ticker update-step)))
+
+(defn init [app]
+  (settings/set! :scale-mode :nearest)
+  (pixi/load-resources resources loaded-callback)
+  (pixi/add-to-app-stage app main-stage))
