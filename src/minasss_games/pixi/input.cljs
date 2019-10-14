@@ -26,7 +26,7 @@
   [event-name handler-identifier]
   (swap! event-registry_
     (fn [event-map]
-      (.removeEventListener js/document (get event-mappings event-name))
+      (.removeEventListener js/document (get event-mappings event-name) (get event-map handler-identifier))
       (dissoc event-map [event-name handler-identifier]))))
 
 (defn register-keys
