@@ -58,9 +58,16 @@
                            (assoc menu :selected-index (inc selected-index))
                            menu)))))
 
+(defn start-game
+  []
+  (let [app-stage (.-parent main-stage)]
+    (input/unregister-key-handler :menu-handler)
+    (pixi/remove-container main-stage)
+    (minasss-games.experiments.awwwliens.game/init app-stage)))
+
 (defmethod update-menu! ::select
   [_]
-  false)
+  (start-game))
 
 (defn handle-input
   [event-type _native action]
@@ -86,11 +93,11 @@
   (setup main-stage)
   (input/register-keys {"ArrowUp" ::move-up "k" ::move-up "w" ::move-up
                         "ArrowDown" ::move-down "j" ::move-down "s" ::move-down
-                        "Space" ::select}
+                        "Enter" ::select "Space" ::select}
     :menu-handler handle-input)
   (.start (pixi/make-ticker update-step)))
 
-(defn init [app]
+(defn init [parent-stage]
   (settings/set! :scale-mode :nearest)
   (pixi/load-resources resources loaded-callback)
-  (pixi/add-to-app-stage app main-stage))
+  (pixi/add-child parent-stage main-stage))

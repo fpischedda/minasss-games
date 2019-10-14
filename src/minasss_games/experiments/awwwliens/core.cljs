@@ -45,7 +45,7 @@
     :bot-handler handle-input)
   (.start (pixi/make-ticker game-tick)))
 
-(defn init [app]
+(defn init [parent-stage]
   (settings/set! :scale-mode :nearest)
   (pixi/load-resources view/resources loaded-callback)
-  (pixi/add-to-app-stage app main-stage))
+  (pixi/add-to-stage parent-stage main-stage))

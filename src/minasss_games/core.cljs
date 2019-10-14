@@ -12,7 +12,7 @@
   []
   (let [app (pixi/make-app {:width (.-innerWidth js/window)
                             :height (.-innerHeight js/window)})]
-    (awwwliens/init app)
+    (awwwliens/init (.-stage app))
     app))
 
 (defonce ^:export app (init))
