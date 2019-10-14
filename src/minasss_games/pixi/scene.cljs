@@ -15,9 +15,10 @@
 
 (defn fix-children
   [x]
-  (if (seq? x)
-    x
-    []))
+  (cond
+    (nil? x) []
+    (or (seq? x) (vector? x)) x
+    :else x))
 
 (defn normalize
   "An element is composed by a tag, attributes and a children collection.
@@ -35,10 +36,10 @@
     (if (map? map-attrs)
       [tag
        map-attrs
-       (fix-children (next content))]
+       (fix-children (second content))]
       [tag
        {}
-       (fix-children content)])))
+       (fix-children (first content))])))
 
 (defmulti make-element
   (fn [tag _attributes] tag))
