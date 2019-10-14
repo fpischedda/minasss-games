@@ -13,11 +13,30 @@
   This namespace contains functions to provide such a declarative API"
   (:require [minasss-games.pixi :as pixi]))
 
+(defn valid-tag?
+  "Return true if the provided parameter is a valid tag"
+  [tag]
+  (or (keyword? tag)
+    (symbol? tag)
+    (string? tag)))
+
+(defn un-nest-children
+  "Try to find the innermost sequence that make sense in the context
+  of scene creation. at most two levels of nesting are supported
+  meaning that sub elements of a scene can be provided at the same level of
+  the parent container or inside another sequence type of object"
+  [children]
+  (let [first-level (first children)]
+    (cond
+      (valid-tag? first-level) children
+      (valid-tag? (first first-level)) children
+      :else (un-nest-children first-level))))
+
 (defn fix-children
   [x]
   (cond
     (nil? x) []
-    (or (seq? x) (vector? x)) x
+    (or (seq? x) (vector? x)) (un-nest-children x)
     :else x))
 
 (defn normalize
@@ -27,19 +46,17 @@
   - a optional collection of children's definitions
   This function ensures that an element is in the correct format"
   [[tag & content]]
-  (when-not (or (keyword? tag)
-                (symbol? tag)
-                (string? tag))
+  (when-not (valid-tag? tag)
     (throw (ex-info (str tag " is not a valid element name.") {:tag tag :content content})))
 
   (let [map-attrs (first content)]
     (if (map? map-attrs)
       [tag
        map-attrs
-       (fix-children (second content))]
+       (fix-children (next content))]
       [tag
        {}
-       (fix-children (first content))])))
+       (fix-children content)])))
 
 (defmulti make-element
   (fn [tag _attributes] tag))
