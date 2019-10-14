@@ -40,3 +40,11 @@
     (add-key-handler :key-down handler-identifier (partial handler-fn :key-down))
     (add-key-handler :key-press handler-identifier (partial handler-fn :key-press))
     (add-key-handler :key-up handler-identifier (partial handler-fn :key-up))))
+
+(defn unregister-key-handler
+  "Remove all the handlers added by register-keys for the
+  specified handler identifier"
+  [handler-identifier]
+  (remove-key-handler :key-down handler-identifier)
+  (remove-key-handler :key-press handler-identifier)
+  (remove-key-handler :key-up handler-identifier))
