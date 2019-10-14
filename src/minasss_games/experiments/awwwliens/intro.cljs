@@ -6,7 +6,8 @@
             [minasss-games.pixi.input :as input]
             [minasss-games.pixi.scene :as scene]
             [minasss-games.pixi.settings :as settings]
-            [minasss-games.tween :as tween]))
+            [minasss-games.tween :as tween]
+            [minasss-games.experiments.awwwliens.core :as awwwliens]))
 
 (def resources ["images/background.png"])
 
@@ -63,7 +64,7 @@
   (let [app-stage (.-parent main-stage)]
     (input/unregister-key-handler :menu-handler)
     (pixi/remove-container main-stage)
-    (minasss-games.experiments.awwwliens.game/init app-stage)))
+    (awwwliens/init app-stage)))
 
 (defmethod update-menu! ::select
   [_]

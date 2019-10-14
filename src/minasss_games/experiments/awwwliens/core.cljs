@@ -17,8 +17,11 @@
   side effect, every time a cow moves she poops. Again this is not the end of
   the universe if you love cows as much this race does; cow manures will help
   to grow cow food!
-  How long will you be able to keep the cow alive?")
-
+  How long will you be able to keep the cow alive?"
+  (:require [minasss-games.pixi :as pixi]
+            [minasss-games.pixi.input :as input]
+            [minasss-games.experiments.awwwliens.game :as game]
+            [minasss-games.experiments.awwwliens.view :as view]))
 
 ;; main-stage is still in this namespace because in the future
 ;; the "game" may receive the main stage where to attach its own
@@ -46,6 +49,5 @@
   (.start (pixi/make-ticker game-tick)))
 
 (defn init [parent-stage]
-  (settings/set! :scale-mode :nearest)
   (pixi/load-resources view/resources loaded-callback)
-  (pixi/add-to-stage parent-stage main-stage))
+  (pixi/add-child parent-stage main-stage))

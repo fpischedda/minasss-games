@@ -4,7 +4,7 @@
             [minasss-games.tween :as tween]
             [minasss-games.experiments.awwwliens.game :as game]))
 
-(def resources ["images/background.png" "images/sprite.png" "images/tile.png" "images/gem.png"])
+(def resources ["images/awwwliens/background.png" "images/sprite.png" "images/tile.png" "images/gem.png"])
 
 (defonce world-view_ (atom {}))
 
@@ -158,7 +158,7 @@
   "setup the view based on the world_ atom; main-stage refers to the
   root container, where other graphical elements will be added"
   [world_ main-stage]
-  (let [background (pixi/make-sprite "images/background.png")
+  (let [background (pixi/make-sprite "images/awwwliens/background.png")
         view (make-world-view @world_)
         {:keys [area cow score]} view]
     (pixi/add-child main-stage background)
