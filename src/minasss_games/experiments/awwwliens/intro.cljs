@@ -1,6 +1,7 @@
 (ns minasss-games.experiments.awwwliens.intro
   "Here I am trying to animate the intro where the alien kidnap the cow
-  It should be super fun!"
+  It should be super fun!
+  Maybe the intro could go together with the main menu"
   (:require [minasss-games.pixi :as pixi]
             [minasss-games.pixi.input :as input]
             [minasss-games.pixi.scene :as scene]
@@ -11,25 +12,25 @@
 
 (def main-stage (pixi/make-container))
 
-(defn make-menu-entry
-  [{:keys [text selected position]}]
-  (let [color (if selected "#19d708" "#808284")]
-    (scene/render
-      [:text {:text text
-              :position position
-              :anchor [0.5 0.5]
-              :style {"fill" color "fontSize" 30}}])))
+(def menu-items_ (atom {:selected-index 0
+                        :items [{:text "Play" :position [0 100]}
+                                {:text "Credits" :position [0 200]}
+                                {:text "Vote" :position [0 300]}]}))
 
-(def menu-items_ (atom [{:text "Play" :position [0 100] :selected true}
-                       {:text "Credits" :position [0 200] :selected false}
-                       {:text "Vote" :position [0 300] :selected false}]))
+(defn make-menu-entry
+  [{:keys [text position]} selected]
+  (let [color (if selected "#19d708" "#808284")]
+    [:text {:text text
+            :position position
+            :anchor [0.5 0.5]
+            :style {"fill" color "fontSize" 30}}]))
 
 (defn make-menu
-  [menu-items]
+  [{:keys [selected-index items]}]
   (scene/render
     [:container {:name "menu"
                  :position [300 100]}
-     (into [] (map #(make-menu-entry %) menu-items))]))
+     (into [] (map-indexed #(make-menu-entry %2 (= %1 selected-index)) items))]))
 
 (defn menu-changed-listener
   "Update the menu when selection changes"
@@ -39,21 +40,32 @@
     (pixi/add-child main-stage menu)))
 
 (defmulti update-menu!
-  (fn [verb _param] verb))
+  (fn [action] action))
 
-(defmethod update-menu! ::move-selection
-  [_ direction]
-  (condp = direction
-    ::up (swap! menu-items_ (fn [menu]
-                              (let [selected-index (:selected-index menu)]
-                                (if (> 0 selected-index)
-                                  (assoc menu :selected-index (dec selected-index))
-                                  menu))))))
+(defmethod update-menu! ::move-up
+  [_]
+  (swap! menu-items_ (fn [menu]
+                       (let [selected-index (:selected-index menu)]
+                         (if (< 0 selected-index)
+                           (assoc menu :selected-index (dec selected-index))
+                           menu)))))
+
+(defmethod update-menu! ::move-down
+  [_]
+  (swap! menu-items_ (fn [menu]
+                       (let [selected-index (:selected-index menu)]
+                         (if (> (count (:items menu)) selected-index)
+                           (assoc menu :selected-index (inc selected-index))
+                           menu)))))
+
+(defmethod update-menu! ::select
+  [_]
+  false)
 
 (defn handle-input
-  [event-type _native direction]
+  [event-type _native action]
   (if (= :key-up event-type)
-    (update-menu! :move-selection direction)))
+    (update-menu! action)))
 
 (defn update-step
   "update view related stuff"
@@ -67,13 +79,13 @@
   (let [background (pixi/make-sprite "images/background.png")
         menu-container (make-menu @menu-items_)]
     (pixi/add-child main-stage background)
-    (pixi/add-child-view main-stage menu-container)
+    (pixi/add-child main-stage menu-container)
     (add-watch menu-items_ :menu-changed-watch menu-changed-listener)))
 
 (defn ^:export loaded-callback []
   (setup main-stage)
-  (input/register-keys {"ArrowUp" ::up "k" ::up "w" ::up
-                        "ArrowDown" ::down "j" ::down "s" ::down
+  (input/register-keys {"ArrowUp" ::move-up "k" ::move-up "w" ::move-up
+                        "ArrowDown" ::move-down "j" ::move-down "s" ::move-down
                         "Space" ::select}
     :menu-handler handle-input)
   (.start (pixi/make-ticker update-step)))
