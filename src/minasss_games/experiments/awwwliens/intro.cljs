@@ -1,12 +1,15 @@
 (ns minasss-games.experiments.awwwliens.intro
   "Here I am trying to animate the intro where the alien kidnap the cow
-  It should be super fun!")
+  It should be super fun!"
+  (:require [minasss-games.pixi :as pixi]
+            [minasss-games.pixi.input :as input]
+            [minasss-games.pixi.scene :as scene]
+            [minasss-games.pixi.settings :as settings]
+            [minasss-games.tween :as tween]))
 
-(def resources ["images/background.png" "images/cow.png" "images/ufo.png" "images/land.png" "images/grass.png" "images/manure.png"])
+(def resources ["images/background.png"])
 
-(defonce world-view_ (atom {}))
-
-(def cell-size 128)
+(def main-stage (pixi/make-container))
 
 (defn make-menu-entry
   [{:keys [text selected position]}]
@@ -14,7 +17,6 @@
     (scene/render
       [:text {:text text
               :position position
-              :position [cell-size 0]
               :anchor [0.5 0.5]
               :style {"fill" color "fontSize" 30}}])))
 
@@ -29,12 +31,29 @@
                  :position [300 100]}
      (into [] (map #(make-menu-entry %) menu-items))]))
 
-(defn menu-changed-listenr
+(defn menu-changed-listener
   "Update the menu when selection changes"
   [_key _ref _old new-menu]
   (let [menu (make-menu new-menu)]
     (pixi/remove-child-by-name main-stage "menu")
     (pixi/add-child main-stage menu)))
+
+(defmulti update-menu!
+  (fn [verb _param] verb))
+
+(defmethod update-menu! ::move-selection
+  [_ direction]
+  (condp = direction
+    ::up (swap! menu-items_ (fn [menu]
+                              (let [selected-index (:selected-index menu)]
+                                (if (> 0 selected-index)
+                                  (assoc menu :selected-index (dec selected-index))
+                                  menu))))))
+
+(defn handle-input
+  [event-type _native direction]
+  (if (= :key-up event-type)
+    (update-menu! :move-selection direction)))
 
 (defn update-step
   "update view related stuff"
