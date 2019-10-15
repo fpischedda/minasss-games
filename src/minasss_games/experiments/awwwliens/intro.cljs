@@ -5,7 +5,6 @@
   (:require [minasss-games.pixi :as pixi]
             [minasss-games.pixi.input :as input]
             [minasss-games.pixi.scene :as scene]
-            [minasss-games.pixi.settings :as settings]
             [minasss-games.tween :as tween]
             [minasss-games.experiments.awwwliens.core :as awwwliens]))
 
@@ -99,6 +98,5 @@
   (.start (pixi/make-ticker update-step)))
 
 (defn init [parent-stage]
-  (settings/set! :scale-mode :nearest)
   (pixi/load-resources resources loaded-callback)
   (pixi/add-child parent-stage main-stage))
