@@ -59,31 +59,32 @@
 ;; make-world parameters are sooo meaningless for the reader...
 ;; must find a better way!
 ;; ok, a map might be a bit better
-(def world_ (atom (make-world {:width 5 :height 5
+(def world_ (atom (make-world {:width 2 :height 1
                                :cow-row 0 :cow-col 0 :cow-energy 10})))
 
 ;; this still depends on the global world_ var,
 ;; must find a way to get rid of it
 (defn move-cow
-  [dir]
+  [world_ dir]
   (swap! world_ (fn [world]
-                  (let [new-pos (new-position (get-in world [:cow :position]) dir)]
+                  (let [old-pos (get-in world [:cow :position])
+                        new-pos (new-position old-pos dir)]
                     (if (valid-position? new-pos world)
                       (assoc-in world [:cow :position] new-pos)
                       world)))))
 
 (defmulti update-world
-  (fn [command & _payload] command))
+  (fn [command _world_ & _payload] command))
 
 (defmethod update-world :move-cow
-  [_ dir]
-  (move-cow dir))
+  [_ world_ dir]
+  (move-cow world_ dir))
 
 ;; calculate cow energy = energy - cell cost
 ;; sometimes tile cost can be negative meaning that it is a recharging station
 ;; harvest, meaning points = points + tile energy, set tile enerty = 0
 (defmethod update-world :harvest
-  [_ _]
+  [_ world_]
   (swap! world_
     (fn [world]
       (let [{:keys [row col]} (get-in world [:cow :position])
@@ -95,5 +96,5 @@
 
 (defn harvest
   "just a small convenience wrapper for update-world :harvest"
-  []
-  (update-world :harvest nil))
+  [world_]
+  (update-world world_ :harvest))
