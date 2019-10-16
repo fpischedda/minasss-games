@@ -35,17 +35,18 @@
   [delta-time]
   (view/update-step delta-time))
 
-(defn handle-input [event-type _native direction]
+(defn handle-input [world_ event-type _native direction]
   (if (= :key-up event-type)
-    (game/update-world :move-bot direction)))
+    (game/update-world world_ :move-bot direction)))
 
 (defn ^:export loaded-callback []
-  (view/setup game/world_ main-stage)
-  (input/register-keys {"ArrowUp" :up "k" :up "w" :up
-                        "ArrowDown" :down "j" :down "s" :down
-                        "ArrowLeft" :left "h" :left "a" :left
-                        "ArrowRight" :right "l" :right "d" :right}
-    :bot-handler handle-input)
+  (let [world_ (game/create-world )]
+    (view/setup game/world_ main-stage)
+    (input/register-keys {"ArrowUp" :up "k" :up "w" :up
+                          "ArrowDown" :down "j" :down "s" :down
+                          "ArrowLeft" :left "h" :left "a" :left
+                          "ArrowRight" :right "l" :right "d" :right}
+      :bot-handler (partial handle-input world_)))
   (.start (pixi/make-ticker game-tick)))
 
 (defn init [parent-stage]
