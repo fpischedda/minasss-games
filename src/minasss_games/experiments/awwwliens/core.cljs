@@ -36,18 +36,26 @@
   (view/update-step delta-time))
 
 (defn handle-input [world_ event-type _native direction]
+  (println "received " event-type direction)
   (if (= :key-up event-type)
-    (game/update-world world_ :move-bot direction)))
+    (swap! world_ game/update-world :move-cow direction)))
 
 (defn ^:export loaded-callback []
-  (let [world_ (game/create-world )]
-    (view/setup game/world_ main-stage)
+  (let [world_ (atom (game/make-world {:width 3 :height 1
+                                       :cow-row 0 :cow-col 0 :cow-energy 10}))]
+    (view/setup world_ main-stage)
     (input/register-keys {"ArrowUp" :up "k" :up "w" :up
                           "ArrowDown" :down "j" :down "s" :down
                           "ArrowLeft" :left "h" :left "a" :left
                           "ArrowRight" :right "l" :right "d" :right}
-      :bot-handler (partial handle-input world_)))
+      ::cow-handler (partial handle-input world_)))
   (.start (pixi/make-ticker game-tick)))
+
+(defn clean-up
+  "Remove input handler and main container"
+  []
+  (input/unregister-key-handler ::cow-handler)
+  (pixi/remove-container main-stage))
 
 (defn init [parent-stage]
   (pixi/load-resources view/resources loaded-callback)

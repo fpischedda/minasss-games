@@ -56,45 +56,30 @@
   [{:keys [row col]} {:keys [width height]}]
   (and (>= row 0) (< row height) (>= col 0) (< col width)))
 
-;; make-world parameters are sooo meaningless for the reader...
-;; must find a better way!
-;; ok, a map might be a bit better
-(def world_ (atom (make-world {:width 2 :height 1
-                               :cow-row 0 :cow-col 0 :cow-energy 10})))
-
-;; this still depends on the global world_ var,
-;; must find a way to get rid of it
-(defn move-cow
-  [world_ dir]
-  (swap! world_ (fn [world]
-                  (let [old-pos (get-in world [:cow :position])
-                        new-pos (new-position old-pos dir)]
-                    (if (valid-position? new-pos world)
-                      (assoc-in world [:cow :position] new-pos)
-                      world)))))
-
 (defmulti update-world
-  (fn [_world_ command & _payload] command))
+  (fn [_world command & _payload] command))
 
 (defmethod update-world :move-cow
-  [world_ _ dir]
-  (move-cow world_ dir))
+  [world _ dir]
+  (let [old-pos (get-in world [:cow :position])
+        new-pos (new-position old-pos dir)]
+    (if (valid-position? new-pos world)
+      (assoc-in world [:cow :position] new-pos)
+      world)))
 
 ;; calculate cow energy = energy - cell cost
 ;; sometimes tile cost can be negative meaning that it is a recharging station
 ;; harvest, meaning points = points + tile energy, set tile enerty = 0
 (defmethod update-world :harvest
-  [world_ _]
-  (swap! world_
-    (fn [world]
-      (let [{:keys [row col]} (get-in world [:cow :position])
+  [world _]
+  (let [{:keys [row col]} (get-in world [:cow :position])
             cell (get-area-tile (:area world) row col)]
         (-> world
           (update-in [:cow :energy] - (:cost cell))
           (update :score + (:energy cell))
-          (assoc-in [:area row col :energy] 0))))))
+          (assoc-in [:area row col :energy] 0))))
 
 (defn harvest
   "just a small convenience wrapper for update-world :harvest"
-  [world_]
-  (update-world world_ :harvest))
+  [world]
+  (update-world world :harvest))
