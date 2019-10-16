@@ -58,11 +58,16 @@
                            (assoc menu :selected-index (inc selected-index))
                            menu)))))
 
+(defn clean-up
+  "Remove key handler and main container"
+  []
+  (input/unregister-key-handler ::menu-handler)
+  (pixi/remove-container main-stage))
+
 (defn start-game
   []
   (let [app-stage (.-parent main-stage)]
-    (input/unregister-key-handler :menu-handler)
-    (pixi/remove-container main-stage)
+    (clean-up)
     (awwwliens/init app-stage)))
 
 (defmethod update-menu! ::select
@@ -94,7 +99,7 @@
   (input/register-keys {"ArrowUp" ::move-up "k" ::move-up "w" ::move-up
                         "ArrowDown" ::move-down "j" ::move-down "s" ::move-down
                         "Enter" ::select "Space" ::select}
-    :menu-handler handle-input)
+    ::menu-handler handle-input)
   (.start (pixi/make-ticker update-step)))
 
 (defn init [parent-stage]
