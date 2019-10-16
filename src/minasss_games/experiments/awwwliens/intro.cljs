@@ -8,7 +8,7 @@
             [minasss-games.tween :as tween]
             [minasss-games.experiments.awwwliens.core :as awwwliens]))
 
-(def resources ["images/background.png"])
+(def resources ["images/awwwliens/intro-bg.png"])
 
 (def main-stage (pixi/make-container))
 
@@ -88,7 +88,7 @@
   "setup the view based on the menu-items_ atom; main-stage refers to the
   root container, where other graphical elements will be added"
   [main-stage]
-  (let [background (pixi/make-sprite "images/background.png")
+  (let [background (pixi/make-sprite "images/awwwliens/intro-bg.png")
         menu-container (make-menu @menu-items_)]
     (pixi/add-child main-stage background)
     (pixi/add-child main-stage menu-container)
