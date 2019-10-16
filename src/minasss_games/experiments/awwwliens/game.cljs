@@ -70,7 +70,7 @@
 ;; calculate cow energy = energy - cell cost
 ;; sometimes tile cost can be negative meaning that it is a recharging station
 ;; harvest, meaning points = points + tile energy, set tile enerty = 0
-(defmethod update-world :harvest
+(defmethod update-world :eat
   [world _]
   (let [{:keys [row col]} (get-in world [:cow :position])
             cell (get-area-tile (:area world) row col)]
@@ -79,7 +79,7 @@
           (update :score + (:energy cell))
           (assoc-in [:area row col :energy] 0))))
 
-(defn harvest
+(defn eat
   "just a small convenience wrapper for update-world :harvest"
   [world]
-  (update-world world :harvest))
+  (update-world world :eat))

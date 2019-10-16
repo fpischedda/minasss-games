@@ -35,8 +35,8 @@
   [delta-time]
   (view/update-step delta-time))
 
-(defn handle-input [world_ event-type _native direction]
-  (println "received " event-type direction)
+(defn handle-input
+  [world_ event-type _native direction]
   (if (= :key-up event-type)
     (swap! world_ game/update-world :move-cow direction)))
 
@@ -48,13 +48,13 @@
                           "ArrowDown" :down "j" :down "s" :down
                           "ArrowLeft" :left "h" :left "a" :left
                           "ArrowRight" :right "l" :right "d" :right}
-      ::cow-handler (partial handle-input world_)))
+      ::game-input-handler (partial handle-input world_)))
   (.start (pixi/make-ticker game-tick)))
 
 (defn clean-up
   "Remove input handler and main container"
   []
-  (input/unregister-key-handler ::cow-handler)
+  (input/unregister-key-handler ::game-input-handler)
   (pixi/remove-container main-stage))
 
 (defn init [parent-stage]

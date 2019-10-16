@@ -22,7 +22,7 @@
   (pixi/set-text (get-in @world-view_ [:cow :entities :text]) energy))
 
 (defn handle-cow-changed
-  [old-cow new-cow]
+  [world_ old-cow new-cow]
   (let [old-pos (:position old-cow)
         new-pos (:position new-cow)
         old-energy (:energy old-cow)
@@ -38,7 +38,7 @@
                         :starting-position {:x old-x :y old-y}
                         :target-position {:x x :y y}
                         :speed 1.5
-                        :on-complete game/harvest})))
+                        :on-complete (fn [] (swap! world_ game/eat))})))
 
     ;; eventually update cow energy text
     (when (not (= old-energy new-energy))
@@ -69,13 +69,13 @@
 (defn world-changed-listener
   "listens to changes of cow game entity, updates
   graphical object accordingly"
-  [_key _ref old-state new-state]
+  [world_ _key old-state new-state]
   (let [old-cow (:cow old-state)
         new-cow (:cow new-state)
         old-score (:score old-state)
         new-score (:score new-state)]
     (when (not (= old-cow new-cow))
-      (handle-cow-changed old-cow new-cow))
+      (handle-cow-changed world_ old-cow new-cow))
     (when (not (= old-score new-score))
       (update-score-text new-score))
     (when-let [cell (detect-changed-cell (:area old-state) (:area new-state))]
@@ -166,4 +166,4 @@
     (pixi/add-child-view (:view area) cow)
     (pixi/add-children-view main-stage [area score])
     (reset! world-view_ view)
-    (add-watch world_ :world-changed-watch world-changed-listener)))
+    (add-watch world_ ::world-changed-watch (partial world-changed-listener world_))))
