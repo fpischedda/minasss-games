@@ -8,28 +8,29 @@
             [minasss-games.tween :as tween]
             [minasss-games.experiments.awwwliens.core :as awwwliens]))
 
-(def resources ["images/awwwliens/intro-bg.png"])
+(def resources ["images/awwwliens/intro-bg.png"
+                "images/awwwliens/menu-container.png"])
 
 (def main-stage (pixi/make-container))
 
 (def menu-items_ (atom {:selected-index 0
-                        :items [{:text "Play" :position [0 100]}
-                                {:text "Credits" :position [0 200]}
-                                {:text "Vote" :position [0 300]}]}))
+                        :items [{:text "Play" :position [150 200]}
+                                {:text "Credits" :position [150 300]}
+                                {:text "Vote" :position [150 400]}]}))
 
 (defn make-menu-entry
   [{:keys [text position]} selected]
   (let [color (if selected "#19d708" "#808284")]
     [:text {:text text
             :position position
-            :anchor [0.5 0.5]
             :style {"fill" color "fontSize" 30}}]))
 
 (defn make-menu
   [{:keys [selected-index items]}]
   (scene/render
-    [:container {:name "menu"
-                 :position [300 100]}
+    [:sprite {:name "menu"
+              :position [300 100]
+              :texture "images/awwwliens/menu-container.png"}
      (into [] (map-indexed #(make-menu-entry %2 (= %1 selected-index)) items))]))
 
 (defn menu-changed-listener
