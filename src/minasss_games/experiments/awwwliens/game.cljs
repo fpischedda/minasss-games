@@ -74,17 +74,17 @@
                       world)))))
 
 (defmulti update-world
-  (fn [command _world_ & _payload] command))
+  (fn [_world_ command & _payload] command))
 
 (defmethod update-world :move-cow
-  [_ world_ dir]
+  [world_ _ dir]
   (move-cow world_ dir))
 
 ;; calculate cow energy = energy - cell cost
 ;; sometimes tile cost can be negative meaning that it is a recharging station
 ;; harvest, meaning points = points + tile energy, set tile enerty = 0
 (defmethod update-world :harvest
-  [_ world_]
+  [world_ _]
   (swap! world_
     (fn [world]
       (let [{:keys [row col]} (get-in world [:cow :position])
