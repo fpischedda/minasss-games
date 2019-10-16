@@ -69,7 +69,7 @@
 (defn world-changed-listener
   "listens to changes of cow game entity, updates
   graphical object accordingly"
-  [world_ _key old-state new-state]
+  [_key world_ old-state new-state]
   (let [old-cow (:cow old-state)
         new-cow (:cow new-state)
         old-score (:score old-state)
@@ -166,4 +166,4 @@
     (pixi/add-child-view (:view area) cow)
     (pixi/add-children-view main-stage [area score])
     (reset! world-view_ view)
-    (add-watch world_ ::world-changed-watch (partial world-changed-listener world_))))
+    (add-watch world_ ::world-changed-watch world-changed-listener)))
