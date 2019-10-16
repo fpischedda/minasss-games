@@ -127,18 +127,19 @@
      :entities {:text text}}))
 
 (defn make-cow-view [cow]
-  (let [container (scene/render
-                    [:container {:position [(* cell-size (get-in cow [:position :col]))
-                                            (* cell-size (get-in cow [:position :row]))]}
-                     [:sprite {:texture "images/awwwliens/cow.png"
-                               :anchor [0 -0.5]
-                               :name "cow"}]
-                     [:text {:text (:energy cow)
-                             :anchor [0 0]
-                             :position [0 0]
-                             :style {"fill" "#d751c9" "fontSize" 20}
-                             :name "energy"}]
-                     ])]
+  (let [container
+        (scene/render
+          [:container {:position [(* cell-size (get-in cow [:position :col]))
+                                  (* cell-size (get-in cow [:position :row]))]}
+           [:sprite {:texture "images/awwwliens/cow.png"
+                     :anchor [0 -0.5]
+                     :name "cow"}]
+           [:text {:text (:energy cow)
+                   :anchor [0 0]
+                   :position [0 0]
+                   :style {"fill" "#d751c9" "fontSize" 20}
+                   :name "energy"}]
+           ])]
     {:view container
      :entities {:text (pixi/get-child-by-name container "energy")
                 :cow (pixi/get-child-by-name container "cow")}}))
