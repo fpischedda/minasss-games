@@ -4,7 +4,8 @@
             [minasss-games.tween :as tween]
             [minasss-games.experiments.awwwliens.game :as game]))
 
-(def resources ["images/awwwliens/background.png" "images/sprite.png" "images/tile.png" "images/gem.png"])
+(def resources ["images/awwwliens/background.png"
+                "images/awwwliens/cow.png" "images/tile.png" "images/gem.png"])
 
 (defonce world-view_ (atom {}))
 
@@ -129,8 +130,8 @@
   (let [container (scene/render
                     [:container {:position [(* cell-size (get-in cow [:position :col]))
                                             (* cell-size (get-in cow [:position :row]))]}
-                     [:sprite {:texture "images/sprite.png"
-                               :scale [4 4]
+                     [:sprite {:texture "images/awwwliens/cow.png"
+                               :anchor [0 -0.5]
                                :name "cow"}]
                      [:text {:text (:energy cow)
                              :anchor [0 0]
