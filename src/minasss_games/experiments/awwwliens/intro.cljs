@@ -2,11 +2,15 @@
   "Here I am trying to animate the intro where the alien kidnap the cow
   It should be super fun!
   Maybe the intro could go together with the main menu"
-  (:require [minasss-games.pixi :as pixi]
+  (:require [minasss-games.director :as director :refer [scene-init scene-cleanup]]
+            [minasss-games.pixi :as pixi]
             [minasss-games.pixi.input :as input]
             [minasss-games.pixi.scene :as scene]
             [minasss-games.tween :as tween]
-            [minasss-games.experiments.awwwliens.game :as awwwliens]))
+            [minasss-games.experiments.awwwliens.game :as game]))
+
+(def scene {:init-scene ::menu-scene
+            :cleanup-scene ::menu-scene})
 
 (def resources ["images/awwwliens/intro-bg.png"
                 "images/awwwliens/menu-container.png"])
@@ -58,18 +62,10 @@
                          (if (> (count (:items menu)) selected-index)
                            (assoc menu :selected-index (inc selected-index))
                            menu)))))
-
-(defn clean-up
-  "Remove key handler and main container"
-  []
-  (input/unregister-key-handler ::menu-handler)
-  (pixi/remove-container main-stage))
-
 (defn start-game
   []
   (let [app-stage (.-parent main-stage)]
-    (clean-up)
-    (awwwliens/init app-stage)))
+    (director/start-scene game/scene)))
 
 (defmethod update-menu! ::select
   [_]
@@ -103,6 +99,13 @@
     ::menu-handler handle-input)
   (.start (pixi/make-ticker update-step)))
 
-(defn init [parent-stage]
+(defmethod scene-cleanup ::menu-scene
+  [_]
+  (input/unregister-key-handler ::menu-handler)
+  (pixi/remove-container main-stage))
+
+
+(defmethod scene-init ::menu-scene
+  [_scene parent-stage]
   (pixi/load-resources resources loaded-callback)
   (pixi/add-child parent-stage main-stage))

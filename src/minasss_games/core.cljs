@@ -1,18 +1,18 @@
 (ns minasss-games.core
   "A small experimetn with PIXI javascript library"
-  (:require [minasss-games.pixi :as pixi]
+  (:require [minasss-games.director :as director]
+            [minasss-games.pixi :as pixi]
             [minasss-games.experiments.awwwliens.intro :as awwwliens]))
             ;; [minasss-games.experiments.harvest-bot :as harvest-bot]))
 
 (enable-console-print!)
 
-;; define your app data so that it doesn't get over-written on reload
-
 (defn init
   []
   (let [app (pixi/make-app {:width (.-innerWidth js/window)
                             :height (.-innerHeight js/window)})]
-    (awwwliens/init (.-stage app))
+    (director/init app)
+    (director/start-scene awwwliens/scene)
     app))
 
 (defonce ^:export app (init))

@@ -18,10 +18,14 @@
   the universe if you love cows as much this race does; cow manures will help
   to grow cow food!
   How long will you be able to keep the cow alive?"
-  (:require [minasss-games.pixi :as pixi]
+  (:require [minasss-games.director :as director :refer [scene-init scene-cleanup]]
+            [minasss-games.pixi :as pixi]
             [minasss-games.pixi.input :as input]
             [minasss-games.experiments.awwwliens.core :as core]
             [minasss-games.experiments.awwwliens.view :as view]))
+
+(def scene {:init-scene ::game-scene
+            :cleanup-scene ::game-scene})
 
 ;; main-stage is still in this namespace because in the future
 ;; the "game" may receive the main stage where to attach its own
@@ -51,12 +55,12 @@
       ::game-input-handler (partial handle-input world_)))
   (.start (pixi/make-ticker game-tick)))
 
-(defn clean-up
-  "Remove input handler and main container"
-  []
+(defmethod scene-cleanup ::game-scene
+  [_]
   (input/unregister-key-handler ::game-input-handler)
   (pixi/remove-container main-stage))
 
-(defn init [parent-stage]
+(defmethod scene-init ::game-scene
+  [_scene parent-stage]
   (pixi/load-resources view/resources loaded-callback)
   (pixi/add-child parent-stage main-stage))
