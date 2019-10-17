@@ -2,7 +2,7 @@
   (:require [minasss-games.pixi :as pixi]
             [minasss-games.pixi.scene :as scene]
             [minasss-games.tween :as tween]
-            [minasss-games.experiments.awwwliens.game :as game]))
+            [minasss-games.experiments.awwwliens.core :as core]))
 
 (def resources ["images/awwwliens/background.png"
                 "images/awwwliens/cow.png" "images/tile.png" "images/gem.png"])
@@ -38,7 +38,7 @@
                         :starting-position {:x old-x :y old-y}
                         :target-position {:x x :y y}
                         :speed 1.5
-                        :on-complete (fn [] (swap! world_ game/eat))})))
+                        :on-complete (fn [] (swap! world_ core/eat))})))
 
     ;; eventually update cow energy text
     (when (not (= old-energy new-energy))

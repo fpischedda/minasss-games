@@ -6,7 +6,7 @@
             [minasss-games.pixi.input :as input]
             [minasss-games.pixi.scene :as scene]
             [minasss-games.tween :as tween]
-            [minasss-games.experiments.awwwliens.core :as awwwliens]))
+            [minasss-games.experiments.awwwliens.game :as awwwliens]))
 
 (def resources ["images/awwwliens/intro-bg.png"
                 "images/awwwliens/menu-container.png"])
