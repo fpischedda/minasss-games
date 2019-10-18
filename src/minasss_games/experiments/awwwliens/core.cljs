@@ -14,7 +14,7 @@
 (defn make-area-row
   "creates a area row"
   [row width]
-  (vec (map #(make-cell row % 1 (rand-int 10)) (range width))))
+  (vec (map #(make-cell row % 1 (inc (rand-int 2))) (range width))))
 
 (defn make-area
   "create area cells matrix of dimensions width X height"
