@@ -72,6 +72,11 @@
         container (pixi/make-sprite texture)]
     (pixi/set-attributes container attrs)))
 
+(defmethod make-element :animated-sprite
+  [tag attrs]
+  (let [container (pixi/make-animated-sprite (:spritesheet attrs) (:animation-name attrs))]
+    (pixi/set-attributes container attrs)))
+
 (defmethod make-element :text
   [tag attrs]
   (let [style (when-let [style-attrs (:style attrs)] (pixi/make-text-style style-attrs))

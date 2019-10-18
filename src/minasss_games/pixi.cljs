@@ -44,6 +44,14 @@
       (println "could not find texture " texture-name)
       (.-texture tex))))
 
+(defn get-spritesheet
+  "Return a spritesheet from the texture cache, by name"
+  [resource-name]
+  (let [res (aget Resources resource-name)]
+    (if (nil? res)
+      (println "could not find spritesheet " resource-name)
+      (.-spritesheet res))))
+
 (defn make-container
   "Create a PIXI container"
   []
@@ -53,6 +61,11 @@
   "Create a sprite prividing a texture name"
   [texture-name]
   (js/PIXI.Sprite. (get-texture texture-name)))
+
+(defn make-animated-sprite
+  "Create a animated sprite prividing a spritesheet name"
+  [spritesheet-name animation-name]
+  (js/PIXI.AnimatedSprite. (aget (.-animations (get-spritesheet spritesheet-name)) animation-name)))
 
 (defn add-child
   "Add child to provided parent container"
@@ -155,6 +168,18 @@
   (aset container "text" text)
   container)
 
+(defn set-alpha
+  "Set alpha of any PIXI/DisplayObject subclass"
+  [container value]
+  (aset container "alpha" value)
+  container)
+
+(defn set-animation-speed
+  "Set animation-speed of a PIXI/AnimatedSprite instance"
+  [container value]
+  (aset container "animationSpeed" value)
+  container)
+
 (defn make-ticker
   "Create a ticker registering an handler"
   [handler-fn]
@@ -188,6 +213,14 @@
 (defmethod set-attribute :name
   [container _attribute name]
   (set-name container name))
+
+(defmethod set-attribute :alpha
+  [container _attribute value]
+  (set-alpha container value))
+
+(defmethod set-attribute :animation-speed
+  [container _attribute value]
+  (set-animation-speed container value))
 
 (defn set-attributes
   "Given a container subclass set its attributes by attributes map,
