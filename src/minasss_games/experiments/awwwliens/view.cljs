@@ -1,5 +1,6 @@
 (ns minasss-games.experiments.awwwliens.view
-  (:require [minasss-games.pixi :as pixi]
+  (:require [minasss-games.director :as director]
+            [minasss-games.pixi :as pixi]
             [minasss-games.pixi.scene :as scene]
             [minasss-games.tween :as tween]
             [minasss-games.experiments.awwwliens.core :as core]))
@@ -42,7 +43,9 @@
 
     ;; eventually update cow energy text
     (when (not (= old-energy new-energy))
-      (update-cow-energy new-energy))))
+      (if (>= 0 new-energy)
+        (director/start-scene minasss-games.experiments.awwwliens.intro/scene)
+        (update-cow-energy new-energy)))))
 
 (defn update-score-text
   "helper function to update score text"
