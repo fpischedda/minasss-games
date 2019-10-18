@@ -42,7 +42,10 @@
 (defn handle-input
   [world_ event-type _native direction]
   (if (= :key-up event-type)
-    (swap! world_ core/update-world :move-cow direction)))
+    (condp = direction
+      :exit (director/start-scene minasss-games.experiments.awwwliens.intro/scene)
+      :else (swap! world_ core/update-world :move-cow direction))
+    ))
 
 (defn ^:export loaded-callback []
   (let [world_ (atom (core/make-world {:width 3 :height 1
@@ -51,7 +54,8 @@
     (input/register-keys {"ArrowUp" :up "k" :up "w" :up
                           "ArrowDown" :down "j" :down "s" :down
                           "ArrowLeft" :left "h" :left "a" :left
-                          "ArrowRight" :right "l" :right "d" :right}
+                          "ArrowRight" :right "l" :right "d" :right
+                          "Escape" :exit}
       ::game-input-handler (partial handle-input world_)))
   (.start (pixi/make-ticker game-tick)))
 
