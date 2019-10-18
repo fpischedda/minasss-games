@@ -85,7 +85,7 @@
       (update-cell cell))))
 
 (defn make-cell
-  [{:keys [row col energy cost]}]
+  [{:keys [row col energy]}]
   (let [container (scene/render
                     [:container {:position [(* cell-size col) (* cell-size row)]}
                      [:sprite {:texture "images/tile.png"
@@ -95,11 +95,6 @@
                              :anchor [1 0]
                              :style {"fill" "#62f479" "fontSize" 20}
                              :name "energy"}]
-                     [:text {:text cost
-                             :position [cell-size cell-size]
-                             :anchor [1 1]
-                             :style {"fill" "#ce4b17" "fontSize" 20}
-                             :name "cost"}]
                      [:sprite {:texture "images/gem.png"
                                :name "gem"
                                :anchor [0.5 0.5]
