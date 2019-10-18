@@ -50,7 +50,7 @@
 (defn update-score-text
   "helper function to update score text"
   [score]
-  (pixi/set-text (get-in @world-view_ [:score :entities :text]) (str "Score " score)))
+  (pixi/set-text (get-in @world-view_ [:score :entities :text]) (str "Days Alive " score)))
 
 (defn detect-changed-cell
   "given the old and new states of the area return the cell that has changed"
@@ -74,13 +74,13 @@
   graphical object accordingly"
   [_key world_ old-state new-state]
   (let [old-cow (:cow old-state)
-        new-cow (:cow new-state)
-        old-score (:score old-state)
-        new-score (:score new-state)]
+        new-cow (:cow new-state)]
+    ;; the score is the amount of days the cow has been alive
+    (update-score-text (:days-alive new-state))
+
     (when (not (= old-cow new-cow))
       (handle-cow-changed world_ old-cow new-cow))
-    (when (not (= old-score new-score))
-      (update-score-text new-score))
+
     (when-let [cell (detect-changed-cell (:area old-state) (:area new-state))]
       (update-cell cell))))
 
@@ -124,7 +124,7 @@
 (defn make-score-view [initial-score]
   (let [score-container (pixi/make-container)
         text-style (pixi/make-text-style {:fill  "#cf2323"})
-        text (pixi/make-text (str "Score " initial-score) text-style)]
+        text (pixi/make-text (str "Days Alive " initial-score) text-style)]
     (pixi/add-child score-container text)
     {:view score-container
      :entities {:text text}}))
@@ -156,7 +156,7 @@
   - score is just a text somewhere"
   [world]
   {:cow (make-cow-view (:cow world))
-   :score (make-score-view (:score world))
+   :score (make-score-view (:days-alive world))
    :area (make-area-view (:area world))})
 
 (defn setup

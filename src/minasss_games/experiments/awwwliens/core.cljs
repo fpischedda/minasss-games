@@ -28,10 +28,10 @@
 
 (defn make-world
   "A world is a width X height area, where each item is a cell,
-  plus a player controlled cow and a score"
+  plus a player controlled cow and a score (days-alive)"
   [{:keys [width height cow-row cow-col cow-energy]}]
   {:cow (make-cow cow-row cow-col cow-energy)
-   :score 0
+   :days-alive 0
    :width width
    :height height
    :area (make-area width height)})
@@ -76,7 +76,7 @@
             cell (get-area-tile (:area world) row col)]
         (-> world
           (update-in [:cow :energy] - (:cost cell))
-          (update :score + (:energy cell))
+          (update :days-alive inc)
           (assoc-in [:area row col :energy] 0))))
 
 (defn eat
