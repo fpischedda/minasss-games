@@ -75,7 +75,7 @@
   (let [{:keys [row col]} (get-in world [:cow :position])
             cell (get-area-tile (:area world) row col)]
         (-> world
-          (update-in [:cow :energy] - (:cost cell))
+          (update-in [:cow :energy] + (- (:energy cell) (:cost cell)))
           (update :days-alive inc)
           (assoc-in [:area row col :energy] 0))))
 
