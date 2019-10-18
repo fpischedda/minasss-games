@@ -13,9 +13,23 @@
             :cleanup-scene ::menu-scene})
 
 (def resources ["images/awwwliens/intro-bg.png"
-                "images/awwwliens/menu-container.png"])
+                "images/awwwliens/menu-container.png"
+                "images/awwwliens/anim/cow-idle.json"])
 
 (def main-stage (pixi/make-container))
+
+(defn make-cow-animation
+  "Create cow animation"
+  []
+  (let [anim
+        (scene/render
+          [:animated-sprite {:spritesheet "images/awwwliens/anim/cow-idle.json"
+                             :animation-name "cow-idle"
+                             :animation-speed 0.08
+                             :position [0 300]
+                             :name "cow-idle"}])]
+    (.play anim)
+    anim))
 
 (def menu-items_ (atom {:selected-index 0
                         :items [{:text "Play" :position [150 200]}
@@ -34,6 +48,7 @@
   (scene/render
     [:sprite {:name "menu"
               :position [300 100]
+              :alpha 0.6
               :texture "images/awwwliens/menu-container.png"}
      (into [] (map-indexed #(make-menu-entry %2 (= %1 selected-index)) items))]))
 
@@ -62,14 +77,11 @@
                          (if (> (count (:items menu)) selected-index)
                            (assoc menu :selected-index (inc selected-index))
                            menu)))))
-(defn start-game
-  []
-  (let [app-stage (.-parent main-stage)]
-    (director/start-scene game/scene)))
 
 (defmethod update-menu! ::select
   [_]
-  (start-game))
+  (let [app-stage (.-parent main-stage)]
+    (director/start-scene game/scene)))
 
 (defn handle-input
   [event-type _native action]
@@ -85,10 +97,10 @@
   "setup the view based on the menu-items_ atom; main-stage refers to the
   root container, where other graphical elements will be added"
   [main-stage]
-  (let [background (pixi/make-sprite "images/awwwliens/intro-bg.png")
-        menu-container (make-menu @menu-items_)]
+  (let [background (pixi/make-sprite "images/awwwliens/intro-bg.png")]
     (pixi/add-child main-stage background)
-    (pixi/add-child main-stage menu-container)
+    (pixi/add-child main-stage (make-cow-animation))
+    (pixi/add-child main-stage (make-menu @menu-items_))
     (add-watch menu-items_ :menu-changed-watch menu-changed-listener)))
 
 (defn ^:export loaded-callback []

@@ -1,0 +1,60 @@
+{"frames": {
+
+"cow-idle-0.png":
+{
+	"frame": {"x":0,"y":0,"w":400,"h":250},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":400,"h":250},
+	"sourceSize": {"w":400,"h":250},
+	"anchor": {"x":0,"y":0}
+},
+"cow-idle-1.png":
+{
+	"frame": {"x":400,"y":0,"w":400,"h":250},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":0,"w":400,"h":250},
+	"sourceSize": {"w":400,"h":250},
+	"anchor": {"x":0,"y":0}
+},
+"cow-idle-2.png":
+{
+	"frame": {"x":800,"y":0,"w":400,"h":250},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":0,"w":400,"h":250},
+	"sourceSize": {"w":400,"h":250},
+	"anchor": {"x":0,"y":0}
+},
+"cow-idle-3.png":
+{
+	"frame": {"x":1200,"y":0,"w":400,"h":250},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":0,"w":400,"h":250},
+	"sourceSize": {"w":400,"h":250},
+	"anchor": {"x":0,"y":0}
+},
+"cow-idle-4.png":
+{
+	"frame": {"x":1600,"y":0,"w":400,"h":250},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":0,"w":400,"h":250},
+	"sourceSize": {"w":400,"h":250},
+	"anchor": {"x":0,"y":0}
+}},
+"animations": {
+	"cow-idle": ["cow-idle-0.png","cow-idle-1.png","cow-idle-2.png","cow-idle-3.png","cow-idle-4.png"]
+},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "cow-idle.png",
+	"format": "RGBA8888",
+	"size": {"w":2010,"h":252},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:64dc2a0fd0fc774aaa33f9db1e572166:ba3806fb98ec42104252d7b779676061:b4d5e34b24147ce1bc667bbe1df42d9e$"
+}
+}
