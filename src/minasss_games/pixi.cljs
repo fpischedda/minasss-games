@@ -30,10 +30,11 @@
   "Load resourse specified by `resources` array, when finished
   call loaded-fn callback"
   [resources loaded-fn]
-  (->
-    (.add Loader (clj->js resources))
-    (.on "progress" load-resources-progress-callback)
-    (.load loaded-fn)))
+  (let [to-load (filter #(nil? (aget Resources %)) resources)]
+    (->
+      (.add Loader (clj->js to-load))
+      (.on "progress" load-resources-progress-callback)
+      (.load loaded-fn))))
 
 (defn get-texture
   "Return a texture from the texture cache, by name"
