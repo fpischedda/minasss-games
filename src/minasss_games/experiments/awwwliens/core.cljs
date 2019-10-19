@@ -11,8 +11,8 @@
   {:row row
    :col col
    :cost 1
-   :energy (inc (rand-int 2))
-   :fertilizer (rand-int 2)})
+   :energy (dec (rand-int 3))
+   :fertilizer 0})
 
 (defn make-area-row
   "Create a area row"
@@ -71,12 +71,12 @@
   "Update cell with the following logic:
   - dec fertilizer, capping it to 0
   - increase energy by 1 if no fertilizer is present, by 2 if it is
-  - if energy > 4 it turns to compost increasing fertilizer by one and turning its energy to -1
+  - if energy > 4 it turns to compost increasing fertilizer by one and turning its energy to -2
   - if energy > 3 starts rotting meaning it counts as 1 when computing food"
   [{:keys [energy fertilizer] :as cell}]
   (let [temp-fertilizer (max 0 (dec fertilizer))
         temp-energy (+ energy (inc (min 1 temp-fertilizer))) ;; energy += if fertilizer > 0 then 2 else 1 :D
-        new-energy (if (> temp-energy 4) -1 temp-energy)
+        new-energy (if (> temp-energy 4) -2 temp-energy)
         new-fertilizer (if (> temp-energy 4) (inc temp-fertilizer) temp-fertilizer)]
     (assoc cell :fertilizer new-fertilizer :energy new-energy)))
 
