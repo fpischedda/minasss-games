@@ -39,7 +39,7 @@
                         :starting-position {:x old-x :y old-y}
                         :target-position {:x x :y y}
                         :speed 1.5
-                        :on-complete (fn [] (swap! world_ core/eat))})))
+                        :on-complete (fn [] (swap! world_ #(-> % core/eat core/grow)))})))
 
     ;; eventually update cow energy text
     (when (not (= old-energy new-energy))
@@ -51,14 +51,6 @@
   "helper function to update score text"
   [score]
   (pixi/set-text (get-in @world-view_ [:score :entities :text]) (str "Days Alive " score)))
-
-(defn detect-changed-cell
-  "given the old and new states of the area return the cell that has changed"
-  [old-area new-area]
-  (->> (map vector (flatten new-area) (flatten old-area))
-    (filter (fn [[new old]] (not (= new old))))
-    first
-    first))
 
 (defn update-cell
   "helper function to update a cell view"
@@ -81,8 +73,9 @@
     (when (not (= old-cow new-cow))
       (handle-cow-changed world_ old-cow new-cow))
 
-    (when-let [cell (detect-changed-cell (:area old-state) (:area new-state))]
-      (update-cell cell))))
+    (doseq [rows (:area new-state)]
+      (doseq [cell rows]
+        (update-cell cell)))))
 
 (defn make-cell
   [{:keys [row col energy]}]

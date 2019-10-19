@@ -71,37 +71,37 @@
   "Update cell with the following logic:
   - dec fertilizer, capping it to 0
   - increase energy by 1 if no fertilizer is present, by 2 if it is
-  - if energy > 5 starts rotting
-  - if energy > 6 it turns to compost increasing fertilizer by one and turning its energy to -1"
+  - if energy > 4 it turns to compost increasing fertilizer by one and turning its energy to -1
+  - if energy > 3 starts rotting meaning it counts as 1 when computing food"
   [{:keys [energy fertilizer] :as cell}]
   (let [temp-fertilizer (max 0 (dec fertilizer))
         temp-energy (+ energy (inc (min 1 temp-fertilizer))) ;; energy += if fertilizer > 0 then 2 else 1 :D
-        new-energy (if (> temp-energy 6) -1 temp-energy)
-        new-fertilizer (if (> temp-energy 6) (inc temp-fertilizer) temp-fertilizer)]
-    (assoc cell :manure new-fertilizer :energy new-energy)))
+        new-energy (if (> temp-energy 4) -1 temp-energy)
+        new-fertilizer (if (> temp-energy 4) (inc temp-fertilizer) temp-fertilizer)]
+    (assoc cell :fertilizer new-fertilizer :energy new-energy)))
 
 (defn update-area
-  "Update cell with the following logic:
+  "Update cells with the following logic:
   - dec fertilizer, capping it to 0
   - increase energy by 1 if no fertilizer is present, by 2 if it is
-  - if energy > 5 starts rotting
-  - if energy > 6 it turns to compost increasing fertilizer by one and turning its energy to -1"
+  - if energy > 4 it turns to compost increasing fertilizer by one and turning its energy to -1
+  - if energy > 3 starts rotting meaning it counts as 1 when computing food"
   [area]
-  (into []
-    (map #(into [] (map update-cell %)) area)))
+  (into [] (map #(into [] (map update-cell %)) area)))
 
 (defn cell-food
   "Return the amount of food that the cell can give to the cow
   there different cases:
   - poison? then -1
-  - energy <= 0 then 0
-  - energy = 1 or energy > 3 then 1
-  - else 2"
+  - energy 2 then 2, top of the form of the plant
+  - energy = 1 or energy > 2 then 1
+  - else 0"
   [{:keys [energy poison]}]
   (cond
     poison -1
+    (= 3 energy) 2
     (or (= 1 energy) (> energy 3)) 1
-    :else 2))
+    :else 0))
 
 (defn eat
   "Calculate cow energy = cell-food - cell cost
@@ -110,14 +110,14 @@
   eventually remove poison flag"
   [world]
   (let [{:keys [row col]} (get-in world [:cow :position])
-            cell (get-area-tile (:area world) row col)]
+        cell (get-area-tile (:area world) row col)]
         (-> world
           (update-in [:cow :energy] + (- (cell-food cell) (:cost cell)))
-          (update :days-alive inc)
-          (assoc-in [:area row col :energy] 0)
+          (update-in [:days-alive] inc)
+          (assoc-in [:area row col :energy] -1) ;; it will increase in the grow step anyway
           (update-in [:area row col] dissoc :poison))))
 
 (defn grow
   "Update cells meaning: grow plants"
   [world]
-  (update :area update-area))
+  (update-in world [:area] update-area))
