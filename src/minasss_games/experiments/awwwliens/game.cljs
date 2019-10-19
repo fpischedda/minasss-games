@@ -48,7 +48,7 @@
     ))
 
 (defn ^:export loaded-callback []
-  (let [world_ (atom (core/make-world {:width 3 :height 1
+  (let [world_ (atom (core/make-world {:width 3 :height 3
                                        :cow-row 0 :cow-col 0 :cow-energy 3}))]
     (view/setup world_ main-stage)
     (input/register-keys {"ArrowUp" :up "k" :up "w" :up
