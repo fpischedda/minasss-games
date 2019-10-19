@@ -44,7 +44,7 @@
   (if (= :key-up event-type)
     (condp = direction
       :exit (director/start-scene minasss-games.experiments.awwwliens.intro/scene)
-      :else (swap! world_ core/update-world :move-cow direction))
+      (swap! world_ core/move-cow direction))
     ))
 
 (defn ^:export loaded-callback []
