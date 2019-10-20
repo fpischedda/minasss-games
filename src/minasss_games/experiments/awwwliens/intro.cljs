@@ -12,43 +12,41 @@
 (def scene {:init-scene ::menu-scene
             :cleanup-scene ::menu-scene})
 
-(def resources ["images/awwwliens/intro-bg.png"
+(def resources ["images/awwwliens/menu/background.png"
                 "images/awwwliens/menu-container.png"
-                "images/awwwliens/anim/cow-idle.json"])
+                "images/awwwliens/menu/cow-still.png"
+                "images/awwwliens/anim/cow-kidnap.json"])
 
 (def main-stage (pixi/make-container))
 
-(defn make-cow-animation
-  "Create cow animation"
+(defn make-cow-still
+  "Create cow still element"
   []
-  (let [anim
-        (scene/render
-          [:animated-sprite {:spritesheet "images/awwwliens/anim/cow-idle.json"
-                             :animation-name "cow-idle"
-                             :animation-speed 0.08
-                             :position [0 300]
-                             :name "cow-idle"}])]
-    (.play anim)
-    anim))
+  (scene/render
+    [:sprite {:texture "images/awwwliens/menu/cow-still.png"
+              :position [248 400]
+              :name "cow-stil"}]))
 
 (def menu-items_ (atom {:selected-index 0
-                        :items [{:text "Play" :position [150 200]}
-                                {:text "Credits" :position [150 300]}
-                                {:text "Vote" :position [150 400]}]}))
+                        :items [{:text "Play" :position [-100 100]}
+                                {:text "Credits" :position [-100 200]}
+                                {:text "Vote" :position [-100 300]}]}))
 
 (defn make-menu-entry
   [{:keys [text position]} selected]
-  (let [color (if selected "#19d708" "#808284")]
+  (let [color (if selected "#19d708" "#808284")
+        [x y] position]
     [:text {:text text
-            :position position
+            :anchor [0.5 0.5]
+            :position [(if selected (- x 30) x) y]
             :style {"fill" color "fontSize" 30}}]))
 
 (defn make-menu
   [{:keys [selected-index items]}]
   (scene/render
     [:sprite {:name "menu"
-              :position [300 100]
-              :alpha 0.6
+              :anchor [1.0 0.0]
+              :position [590 50]
               :texture "images/awwwliens/menu-container.png"}
      (into [] (map-indexed #(make-menu-entry %2 (= %1 selected-index)) items))]))
 
@@ -74,7 +72,7 @@
   [_]
   (swap! menu-items_ (fn [menu]
                        (let [selected-index (:selected-index menu)]
-                         (if (> (count (:items menu)) selected-index)
+                         (if (> (dec (count (:items menu))) selected-index)
                            (assoc menu :selected-index (inc selected-index))
                            menu)))))
 
@@ -97,9 +95,9 @@
   "setup the view based on the menu-items_ atom; main-stage refers to the
   root container, where other graphical elements will be added"
   [main-stage]
-  (let [background (pixi/make-sprite "images/awwwliens/intro-bg.png")]
+  (let [background (pixi/make-sprite "images/awwwliens/menu/background.png")]
     (pixi/add-child main-stage background)
-    (pixi/add-child main-stage (make-cow-animation))
+    (pixi/add-child main-stage (make-cow-still))
     (pixi/add-child main-stage (make-menu @menu-items_))
     (add-watch menu-items_ :menu-changed-watch menu-changed-listener)))
 
