@@ -180,6 +180,12 @@
   (aset container "animationSpeed" value)
   container)
 
+(defn set-visible
+  "Set visibility of any PIXI/DisplayObject subclass"
+  [container value]
+  (aset container "visible" value)
+  container)
+
 (defn make-ticker
   "Create a ticker registering an handler"
   [handler-fn]
@@ -221,6 +227,10 @@
 (defmethod set-attribute :animation-speed
   [container _attribute value]
   (set-animation-speed container value))
+
+(defmethod set-attribute :visible
+  [container _attribute value]
+  (set-visible container value))
 
 (defn set-attributes
   "Given a container subclass set its attributes by attributes map,
