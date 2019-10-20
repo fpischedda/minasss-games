@@ -15,9 +15,23 @@
 (def resources ["images/awwwliens/menu/background.png"
                 "images/awwwliens/menu/baloon.png"
                 "images/awwwliens/menu/cow-still.png"
-                "images/awwwliens/anim/cow-kidnap.json"])
+                "images/awwwliens/anim/ufo.json"])
 
 (def main-stage (pixi/make-container))
+
+(defn make-animated-ufo
+  "Create animated ufo element"
+  []
+  (scene/render
+    [:animated-sprite {:spritesheet "images/awwwliens/anim/ufo.json"
+              :animation-speed 0.01
+              :position [300 200]
+              :name "ufo"}]))
+
+(def menu-items_ (atom {:selected-index 0
+                        :items [{:text "Press Enter\nTo Play" :position [-90 100]}
+                                {:text "Arrows\nWASD\nHJKL\nTo Move" :position [-90 200]}
+                                {:text "By Carmilla\nAnd Minasss" :position [-90 300]}]}))
 
 (defn make-cow-still
   "Create cow still element"

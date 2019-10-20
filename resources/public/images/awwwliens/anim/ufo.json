@@ -1,0 +1,39 @@
+{"frames": {
+
+"ufo-1.png":
+{
+	"frame": {"x":1,"y":1,"w":138,"h":90},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":138,"h":90},
+	"sourceSize": {"w":138,"h":90}
+},
+"ufo-2.png":
+{
+	"frame": {"x":141,"y":1,"w":138,"h":90},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":138,"h":90},
+	"sourceSize": {"w":138,"h":90}
+},
+"ufo-3.png":
+{
+	"frame": {"x":281,"y":1,"w":90,"h":54},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":90,"h":54},
+	"sourceSize": {"w":90,"h":54}
+}},
+"animations": {
+	"ufo": ["ufo-1.png","ufo-2.png","ufo-3.png"]
+},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "ufo.png",
+	"format": "RGBA8888",
+	"size": {"w":336,"h":92},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:d73c5b2e4896ba0ed045f71b185bc8c9:12aa15afc0a319b0c91910593ab68e4b:9a4865e58023cfbd5f985c000455d470$"
+}
+}
