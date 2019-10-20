@@ -11,7 +11,7 @@
   {:row row
    :col col
    :cost 1
-   :energy (dec (rand-int 3))
+   :energy (rand-int 5)
    :fertilizer 0})
 
 (defn make-area-row
@@ -93,15 +93,15 @@
   "Return the amount of food that the cell can give to the cow
   there different cases:
   - poison? then -1
-  - energy 2 then 2, top of the form of the plant
+  - energy 3 then 2, top of the form of the plant
   - energy = 1 or energy > 2 then 1
   - else 0"
   [{:keys [energy poison]}]
   (cond
     poison -1
+    (>= 0 energy) 0
     (= 3 energy) 2
-    (or (= 1 energy) (> energy 3)) 1
-    :else 0))
+    :else 1))
 
 (defn eat
   "Calculate cow energy = cell-food - cell cost

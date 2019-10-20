@@ -186,6 +186,12 @@
   (aset container "visible" value)
   container)
 
+(defn set-texture
+  "Set texture of any PIXI/Sprite subclass"
+  [container texture]
+  (aset container "texture" (get-texture texture))
+  container)
+
 (defn make-ticker
   "Create a ticker registering an handler"
   [handler-fn]

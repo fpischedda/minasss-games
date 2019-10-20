@@ -5,12 +5,32 @@
             [minasss-games.tween :as tween]
             [minasss-games.experiments.awwwliens.core :as core]))
 
-(def resources ["images/awwwliens/background.png"
-                "images/awwwliens/cow.png" "images/tile.png" "images/gem.png"])
+(def resources ["images/awwwliens/game/background.png"
+                "images/awwwliens/cow.png"
+                "images/awwwliens/game/tile.png"
+                "images/awwwliens/plants/plant-1.png"
+                "images/awwwliens/plants/plant-2.png"
+                "images/awwwliens/plants/plant-3.png"
+                "images/awwwliens/plants/plant-4.png"
+                "images/awwwliens/plants/plant-5.png"])
 
 (defonce world-view_ (atom {}))
 
-(def cell-size 128)
+(def cell-height 32)
+(def cell-width 128)
+
+(def plant-textures ["images/awwwliens/plants/plant-1.png"
+                     "images/awwwliens/plants/plant-2.png"
+                     "images/awwwliens/plants/plant-3.png"
+                     "images/awwwliens/plants/plant-4.png"
+                     "images/awwwliens/plants/plant-5.png"])
+
+(defn get-plant-texture
+  "Return the texture name base on plant energy"
+  [energy]
+  (cond
+    (<= energy 0) "images/awwwliens/plants/plant-1.png"
+    :else (nth plant-textures energy)))
 
 (defn update-step
   "update view related stuff"
@@ -31,10 +51,10 @@
 
     ;; position changed detection, must find a better way...
     (when (not (= old-pos new-pos))
-      (let [old-x (* cell-size (:col old-pos))
-            old-y (* cell-size (:row old-pos))
-            x (* cell-size (:col new-pos))
-            y (* cell-size (:row new-pos))]
+      (let [old-x (* cell-width (:col old-pos))
+            old-y (* cell-height (:row old-pos))
+            x (* cell-width (:col new-pos))
+            y (* cell-height (:row new-pos))]
         (tween/move-to {:target (get-in @world-view_ [:cow :view])
                         :starting-position {:x old-x :y old-y}
                         :target-position {:x x :y y}
@@ -57,8 +77,9 @@
   [cell]
   (let [{:keys [row col energy]} cell
         cell-view (get-in @world-view_ [:area :entities :cells row col :view])
-        energy-text (pixi/get-child-by-name cell-view "energy")]
-    (pixi/remove-child-by-name cell-view "gem")
+        energy-text (pixi/get-child-by-name cell-view "energy")
+        plant (pixi/get-child-by-name cell-view "plant")]
+    (pixi/set-texture plant (get-plant-texture energy))
     (pixi/set-text energy-text energy)))
 
 (defn world-changed-listener
@@ -80,21 +101,22 @@
 (defn make-cell
   [{:keys [row col energy]}]
   (let [container (scene/render
-                    [:container {:position [(* cell-size col) (* cell-size row)]}
-                     [:sprite {:texture "images/tile.png"
-                               :scale [4 4]}]
+                    [:container {:position [(* cell-width col) (* cell-height row)]}
+                     [:sprite {:texture "images/awwwliens/game/tile.png"
+                               :anchor [0 1]
+                               :position [0 cell-height]}]
                      [:text {:text energy
-                             :position [cell-size 0]
+                             :position [cell-width 0]
                              :anchor [1 0]
                              :style {"fill" "#62f479" "fontSize" 20}
                              :name "energy"}]
-                     [:sprite {:texture "images/gem.png"
-                               :name "gem"
-                               :anchor [0.5 0.5]
-                               :position [(/ cell-size 2) (/ cell-size 2)]}]])]
+                     [:sprite {:texture (get-plant-texture energy)
+                               :name "plant"
+                               :anchor [0.0 1.0]
+                               :position [0 cell-height]}]])]
     {:view container
      :entities {:energy (pixi/get-child-by-name container "energy")
-                :cost (pixi/get-child-by-name container "cost")}}))
+                :plant (pixi/get-child-by-name container "plant")}}))
 
 (defn make-area-view [area]
   (let [area-container (pixi/make-container)
@@ -105,7 +127,7 @@
                                      (pixi/add-child-view area-container cell)
                                      cell)) row)))
                      area))]
-    (pixi/set-position area-container 300 200)
+    (pixi/set-position area-container 150 290)
     {:view area-container
      :entities {:cells cells}}))
 
@@ -120,15 +142,15 @@
 (defn make-cow-view [cow]
   (let [container
         (scene/render
-          [:container {:position [(* cell-size (get-in cow [:position :col]))
-                                  (* cell-size (get-in cow [:position :row]))]}
+          [:container {:position [(* cell-width (get-in cow [:position :col]))
+                                  (* cell-height (get-in cow [:position :row]))]}
            [:sprite {:texture "images/awwwliens/cow.png"
-                     :anchor [0 -0.5]
-                     :name "cow"}]
+                     :name "cow"
+                     :position [0 cell-height]
+                     :anchor [0 1.0]}]
            [:text {:text (:energy cow)
-                   :anchor [0 0]
-                   :position [0 0]
-                   :style {"fill" "#d751c9" "fontSize" 20}
+                   :position [62 -36]
+                   :style {"fill" "#d751c9" "fontSize" 19}
                    :name "energy"}]
            ])]
     {:view container
@@ -151,7 +173,7 @@
   "setup the view based on the world_ atom; main-stage refers to the
   root container, where other graphical elements will be added"
   [world_ main-stage]
-  (let [background (pixi/make-sprite "images/awwwliens/background.png")
+  (let [background (pixi/make-sprite "images/awwwliens/game/background.png")
         view (make-world-view @world_)
         {:keys [area cow score]} view]
     (pixi/add-child main-stage background)

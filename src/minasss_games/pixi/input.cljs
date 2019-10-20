@@ -10,7 +10,7 @@
 
 (def event-registry_ (atom {}))
 
-(def event-mappings
+(def event-name-mapping
   {:key-up "keyup"
    :key-down "keydown"
    :key-press "keypress"})
@@ -19,14 +19,14 @@
   [event-name handler-identifier handler]
   (swap! event-registry_
     (fn [event-map]
-      (.addEventListener js/document (get event-mappings event-name) handler)
+      (.addEventListener js/document (get event-name-mapping event-name) handler)
       (assoc event-map [event-name handler-identifier] handler))))
 
 (defn remove-key-handler
   [event-name handler-identifier]
   (swap! event-registry_
     (fn [event-map]
-      (.removeEventListener js/document (get event-mappings event-name) (get event-map handler-identifier))
+      (.removeEventListener js/document (get event-name-mapping event-name) (get event-map handler-identifier))
       (dissoc event-map [event-name handler-identifier]))))
 
 (defn register-keys
