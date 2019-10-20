@@ -1,0 +1,55 @@
+{"frames": {
+
+"cow-kidnap-1.png":
+{
+	"frame": {"x":1,"y":1,"w":229,"h":142},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":229,"h":142},
+	"sourceSize": {"w":229,"h":142}
+},
+"cow-kidnap-2.png":
+{
+	"frame": {"x":1,"y":145,"w":257,"h":223},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":257,"h":223},
+	"sourceSize": {"w":257,"h":223}
+},
+"cow-kidnap-3.png":
+{
+	"frame": {"x":1,"y":404,"w":257,"h":223},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":257,"h":223},
+	"sourceSize": {"w":257,"h":223}
+},
+"cow-kidnap-4.png":
+{
+	"frame": {"x":1,"y":663,"w":67,"h":68},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":67,"h":68},
+	"sourceSize": {"w":67,"h":68}
+},
+"cow-kidnap-5.png":
+{
+	"frame": {"x":71,"y":663,"w":20,"h":21},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":20,"h":21},
+	"sourceSize": {"w":20,"h":21}
+}},
+"animations": {
+	"cow-kidnap": ["cow-kidnap-1.png","cow-kidnap-2.png","cow-kidnap-3.png","cow-kidnap-4.png","cow-kidnap-5.png"]
+},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "cow-kidnap.png",
+	"format": "RGBA8888",
+	"size": {"w":231,"h":731},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:c955dd37e770c5de706dc2d4c06fbb17:ea8b3db6072bad4899e367515b5fb9df:61f2705d78d15b2910ac1c47c107254d$"
+}
+}
