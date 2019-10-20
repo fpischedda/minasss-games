@@ -13,7 +13,7 @@
             :cleanup-scene ::menu-scene})
 
 (def resources ["images/awwwliens/menu/background.png"
-                "images/awwwliens/menu-container.png"
+                "images/awwwliens/menu/baloon.png"
                 "images/awwwliens/menu/cow-still.png"
                 "images/awwwliens/anim/cow-kidnap.json"])
 
@@ -47,7 +47,7 @@
     [:sprite {:name "menu"
               :anchor [1.0 0.0]
               :position [590 50]
-              :texture "images/awwwliens/menu-container.png"}
+              :texture "images/awwwliens/menu/baloon.png"}
      (into [] (map-indexed #(make-menu-entry %2 (= %1 selected-index)) items))]))
 
 (defn menu-changed-listener
