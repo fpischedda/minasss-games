@@ -28,9 +28,9 @@
               :name "cow-stil"}]))
 
 (def menu-items_ (atom {:selected-index 0
-                        :items [{:text "Play" :position [-100 100]}
-                                {:text "Credits" :position [-100 200]}
-                                {:text "Vote" :position [-100 300]}]}))
+                        :items [{:text "Press Enter\nTo Play" :position [-90 100]}
+                                {:text "Arrows\nWASD\nHJKL\nTo Move" :position [-90 200]}
+                                {:text "By Carmilla\nAnd Minasss" :position [-90 300]}]}))
 
 (defn make-menu-entry
   [{:keys [text position]} selected]
@@ -38,8 +38,8 @@
         [x y] position]
     [:text {:text text
             :anchor [0.5 0.5]
-            :position [(if selected (- x 30) x) y]
-            :style {"fill" color "fontSize" 30}}]))
+            :position [(if selected (- x 20) x) y]
+            :style {"fill" color "fontSize" 25}}]))
 
 (defn make-menu
   [{:keys [selected-index items]}]
