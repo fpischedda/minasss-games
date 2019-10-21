@@ -1,6 +1,12 @@
 # minasss-games
 
-FIXME: Write a one-line description of your library/project.
+Experimenting with ClojureScript and [PIXIjs](https://www.pixijs.com) and having fun.
+
+First "real" game developed with this "thing" is the [Entry](https://minasss.itch.io/awwwliens) for the [Autumn Lisp Game Jam 2019](https://itch.io/jam/autumn-lisp-game-jam-2019).
+The code for the entry can be found in [its branch](https://github.com/fpischedda/minasss-games/tree/lisp-gamejam-oct-2019).
+Graphics and game design by [Camilla Cali](https://www.instagram.com/camilla_cali/).
+Code and game design by [me](https://github.com/fpischedda/)
+
 
 ## Overview
 
@@ -30,7 +36,7 @@ To create a production build run:
     lein do clean, cljsbuild once min
 
 And open your browser in `resources/public/index.html`. You will not
-get live reloading, nor a REPL. 
+get live reloading, nor a REPL.
 
 ## License
 
