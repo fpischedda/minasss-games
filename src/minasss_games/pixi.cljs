@@ -30,10 +30,11 @@
   "Load resourse specified by `resources` array, when finished
   call loaded-fn callback"
   [resources loaded-fn]
-  (->
-    (.add Loader (clj->js resources))
-    (.on "progress" load-resources-progress-callback)
-    (.load loaded-fn)))
+  (let [to-load (filter #(nil? (aget Resources %)) resources)]
+    (->
+      (.add Loader (clj->js to-load))
+      (.on "progress" load-resources-progress-callback)
+      (.load loaded-fn))))
 
 (defn get-texture
   "Return a texture from the texture cache, by name"
@@ -42,6 +43,14 @@
     (if (nil? tex)
       (println "could not find texture " texture-name)
       (.-texture tex))))
+
+(defn get-spritesheet
+  "Return a spritesheet from the texture cache, by name"
+  [resource-name]
+  (let [res (aget Resources resource-name)]
+    (if (nil? res)
+      (println "could not find spritesheet " resource-name)
+      (.-spritesheet res))))
 
 (defn make-container
   "Create a PIXI container"
@@ -53,6 +62,11 @@
   [texture-name]
   (js/PIXI.Sprite. (get-texture texture-name)))
 
+(defn make-animated-sprite
+  "Create a animated sprite prividing a spritesheet name"
+  [spritesheet-name animation-name]
+  (js/PIXI.AnimatedSprite. (aget (.-animations (get-spritesheet spritesheet-name)) animation-name)))
+
 (defn add-child
   "Add child to provided parent container"
   [parent child]
@@ -63,6 +77,22 @@
   [parent children]
   (mapv #(add-child parent %) children)
   parent)
+
+(defn get-child-by-name
+  "return, if any, the container's child identified by name"
+  [container child-name]
+  (.getChildByName container child-name))
+
+(defn remove-container
+  "Remove a container from the scene"
+  [container]
+  (.removeChild (.-parent container) container))
+
+(defn remove-child-by-name
+  "Remove the child specified by name"
+  [parent child-name]
+  (if-let [child (get-child-by-name parent child-name)]
+    (.removeChild parent child)))
 
 (defn add-child-view
   "Add child to provided parent container
@@ -138,6 +168,30 @@
   (aset container "text" text)
   container)
 
+(defn set-alpha
+  "Set alpha of any PIXI/DisplayObject subclass"
+  [container value]
+  (aset container "alpha" value)
+  container)
+
+(defn set-animation-speed
+  "Set animation-speed of a PIXI/AnimatedSprite instance"
+  [container value]
+  (aset container "animationSpeed" value)
+  container)
+
+(defn set-visible
+  "Set visibility of any PIXI/DisplayObject subclass"
+  [container value]
+  (aset container "visible" value)
+  container)
+
+(defn set-texture
+  "Set texture of any PIXI/Sprite subclass"
+  [container texture]
+  (aset container "texture" (get-texture texture))
+  container)
+
 (defn make-ticker
   "Create a ticker registering an handler"
   [handler-fn]
@@ -172,6 +226,18 @@
   [container _attribute name]
   (set-name container name))
 
+(defmethod set-attribute :alpha
+  [container _attribute value]
+  (set-alpha container value))
+
+(defmethod set-attribute :animation-speed
+  [container _attribute value]
+  (set-animation-speed container value))
+
+(defmethod set-attribute :visible
+  [container _attribute value]
+  (set-visible container value))
+
 (defn set-attributes
   "Given a container subclass set its attributes by attributes map,
   there is no type checking so trying to set properties not available
@@ -179,8 +245,3 @@
   [container attributes]
   (mapv (fn [[attr value]] (set-attribute container attr value)) attributes)
   container)
-
-(defn get-child-by-name
-  "return, if any, the container's child identified by name"
-  [container child-name]
-  (.getChildByName container child-name))

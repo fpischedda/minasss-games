@@ -1,48 +1,20 @@
 (ns minasss-games.experiments.harvest-bot.view
   "this namespace collects all view related functions"
-  (:require [minasss-games.math :as math]
-            [minasss-games.pixi :as pixi]
+  (:require [minasss-games.pixi :as pixi]
             [minasss-games.pixi.scene :as scene]
+            [minasss-games.tween :as tween]
             [minasss-games.experiments.harvest-bot.game :as game]))
 
-(def resources ["images/background.png" "images/sprite.png" "images/tile.png"])
+(def resources ["images/background.png" "images/sprite.png" "images/tile.png" "images/gem.png"])
 
 (defonce world-view_ (atom {}))
 
-(def view-updater-functions_ (atom (list)))
+(def cell-size 128)
 
 (defn update-step
   "update view related stuff"
   [delta-time]
-  (swap! view-updater-functions_
-    (fn [functions]
-      (into () (filter (fn [f] (f delta-time)) functions)))))
-
-(defn add-view-updater-function
-  [f]
-  (swap! view-updater-functions_ conj f))
-
-(defn make-move-to
-  [container old-pos target-pos speed completed-fn]
-  (let [dir (math/direction target-pos old-pos)
-        normalized-dir (math/normalize dir)
-        calculated-pos (volatile! old-pos)
-        prev-distance (volatile! (math/length dir))]
-    (fn [delta-time]
-      (vswap! calculated-pos (fn [pos]
-                              {:x (+ (:x pos) (* delta-time speed (:x normalized-dir)))
-                               :y (+ (:y pos) (* delta-time speed (:y normalized-dir)))}))
-      (let [distance (math/length (math/direction target-pos @calculated-pos))]
-        (if (> distance @prev-distance)
-          (do
-            (pixi/set-position container (:x target-pos) (:y target-pos))
-            (when (some? completed-fn)
-              (completed-fn))
-            false)
-          (do
-            (vreset! prev-distance distance)
-            (pixi/set-position container (:x @calculated-pos) (:y @calculated-pos))
-            true))))))
+  (tween/update-tweens delta-time))
 
 (defn update-bot-energy
   "helper function that update the text representing bot energy"
@@ -55,16 +27,21 @@
         new-pos (:position new-bot)
         old-energy (:energy old-bot)
         new-energy (:energy new-bot)]
+
     ;; position changed detection, must find a better way...
-    (cond
-      (not (= old-pos new-pos))
-      (let [old-x (* 64 (:col old-pos))
-            old-y (* 64 (:row old-pos))
-            x (* 64 (:col new-pos))
-            y (* 64 (:row new-pos))]
-        (add-view-updater-function
-          (make-move-to (get-in @world-view_ [:bot :view]) {:x old-x :y old-y} {:x x :y y} 1.5 game/harvest)))
-      (not (= old-energy new-energy))
+    (when (not (= old-pos new-pos))
+      (let [old-x (* cell-size (:col old-pos))
+            old-y (* cell-size (:row old-pos))
+            x (* cell-size (:col new-pos))
+            y (* cell-size (:row new-pos))]
+        (tween/move-to {:target (get-in @world-view_ [:bot :view])
+                        :starting-position {:x old-x :y old-y}
+                        :target-position {:x x :y y}
+                        :speed 1.5
+                        :on-complete game/harvest})))
+
+    ;; eventually update bot energy text
+    (when (not (= old-energy new-energy))
       (update-bot-energy new-energy))))
 
 (defn update-score-text
@@ -83,8 +60,11 @@
 (defn update-cell
   "helper function to update a cell view"
   [cell]
-  (let [{:keys [row col energy]} cell]
-    (pixi/set-text (get-in @world-view_ [:area :entities :cells row col :entities :energy]) energy)))
+  (let [{:keys [row col energy]} cell
+        cell-view (get-in @world-view_ [:area :entities :cells row col :view])
+        energy-text (pixi/get-child-by-name cell-view "energy")]
+    (pixi/remove-child-by-name cell-view "gem")
+    (pixi/set-text energy-text energy)))
 
 (defn world-changed-listener
   "listens to changes of bot game entity, updates
@@ -104,19 +84,23 @@
 (defn make-cell
   [{:keys [row col energy cost]}]
   (let [container (scene/render
-                    [:container {:position [(* 64 col) (* 64 row)]}
+                    [:container {:position [(* cell-size col) (* cell-size row)]}
                      [:sprite {:texture "images/tile.png"
-                               :scale [2 2]}]
+                               :scale [4 4]}]
                      [:text {:text energy
-                             :position [64 0]
+                             :position [cell-size 0]
                              :anchor [1 0]
-                             :style {"fill" "#62f479" "fontSize" 16}
+                             :style {"fill" "#62f479" "fontSize" 20}
                              :name "energy"}]
                      [:text {:text cost
-                             :position [64 64]
+                             :position [cell-size cell-size]
                              :anchor [1 1]
-                             :style {"fill" "#ce4b17" "fontSize" 16}
-                             :name "cost"}]])]
+                             :style {"fill" "#ce4b17" "fontSize" 20}
+                             :name "cost"}]
+                     [:sprite {:texture "images/gem.png"
+                               :name "gem"
+                               :anchor [0.5 0.5]
+                               :position [(/ cell-size 2) (/ cell-size 2)]}]])]
     {:view container
      :entities {:energy (pixi/get-child-by-name container "energy")
                 :cost (pixi/get-child-by-name container "cost")}}))
@@ -130,7 +114,7 @@
                                      (pixi/add-child-view area-container cell)
                                      cell)) row)))
                      area))]
-    (pixi/set-position area-container 200 200)
+    (pixi/set-position area-container 300 200)
     {:view area-container
      :entities {:cells cells}}))
 
@@ -144,15 +128,15 @@
 
 (defn make-bot-view [bot]
   (let [container (scene/render
-                    [:container {:position [(* 64 (get-in bot [:position :col]))
-                                            (* 64 (get-in bot [:position :row]))]}
+                    [:container {:position [(* cell-size (get-in bot [:position :col]))
+                                            (* cell-size (get-in bot [:position :row]))]}
                      [:sprite {:texture "images/sprite.png"
-                               :scale [2 2]
+                               :scale [4 4]
                                :name "bot"}]
                      [:text {:text (:energy bot)
                              :anchor [0 0]
                              :position [0 0]
-                             :style {"fill" "#d751c9" "fontSize" 16}
+                             :style {"fill" "#d751c9" "fontSize" 20}
                              :name "energy"}]
                      ])]
     {:view container

@@ -13,11 +13,31 @@
   This namespace contains functions to provide such a declarative API"
   (:require [minasss-games.pixi :as pixi]))
 
+(defn valid-tag?
+  "Return true if the provided parameter is a valid tag"
+  [tag]
+  (or (keyword? tag)
+    (symbol? tag)
+    (string? tag)))
+
+(defn un-nest-children
+  "Try to find the innermost sequence that make sense in the context
+  of scene creation. at most two levels of nesting are supported
+  meaning that sub elements of a scene can be provided at the same level of
+  the parent container or inside another sequence type of object"
+  [children]
+  (let [first-level (first children)]
+    (cond
+      (valid-tag? first-level) children
+      (valid-tag? (first first-level)) children
+      :else (un-nest-children first-level))))
+
 (defn fix-children
   [x]
-  (if (seq? x)
-    x
-    []))
+  (cond
+    (nil? x) []
+    (or (seq? x) (vector? x)) (un-nest-children x)
+    :else x))
 
 (defn normalize
   "An element is composed by a tag, attributes and a children collection.
@@ -26,9 +46,7 @@
   - a optional collection of children's definitions
   This function ensures that an element is in the correct format"
   [[tag & content]]
-  (when-not (or (keyword? tag)
-                (symbol? tag)
-                (string? tag))
+  (when-not (valid-tag? tag)
     (throw (ex-info (str tag " is not a valid element name.") {:tag tag :content content})))
 
   (let [map-attrs (first content)]
@@ -52,6 +70,11 @@
   [tag attrs]
   (let [texture (:texture attrs)
         container (pixi/make-sprite texture)]
+    (pixi/set-attributes container attrs)))
+
+(defmethod make-element :animated-sprite
+  [tag attrs]
+  (let [container (pixi/make-animated-sprite (:spritesheet attrs) (:animation-name attrs))]
     (pixi/set-attributes container attrs)))
 
 (defmethod make-element :text
