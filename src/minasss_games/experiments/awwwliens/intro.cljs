@@ -28,11 +28,6 @@
               :position [300 200]
               :name "ufo"}]))
 
-(def menu-items_ (atom {:selected-index 0
-                        :items [{:text "Press Enter\nTo Play" :position [-90 100]}
-                                {:text "Arrows\nWASD\nHJKL\nTo Move" :position [-90 200]}
-                                {:text "By Carmilla\nAnd Minasss" :position [-90 300]}]}))
-
 (defn make-cow-still
   "Create cow still element"
   []

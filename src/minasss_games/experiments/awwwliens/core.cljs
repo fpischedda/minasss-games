@@ -103,19 +103,22 @@
     (= 3 energy) 2
     :else 1))
 
+(def cow-max-energy 10)
+
 (defn eat
-  "Calculate cow energy = cell-food - cell cost
+  "Calculate cow energy = energy + cell-food - cell cost
+  BUT not bigger than cow-max-energy
   remove plant from cell (setting energy to 0)
   increase days alive
-  eventually remove poison flag"
+  calculate poison flag"
   [world]
   (let [{:keys [row col]} (get-in world [:cow :position])
         cell (get-area-tile (:area world) row col)]
         (-> world
-          (update-in [:cow :energy] + (- (cell-food cell) (:cost cell)))
+          (update-in [:cow :energy] #(min cow-max-energy (+ % (- (cell-food cell) (:cost cell)))))
           (update-in [:days-alive] inc)
           (assoc-in [:area row col :energy] -1) ;; it will increase in the grow step anyway
-          (update-in [:area row col] dissoc :poison))))
+          (update-in [:area row col] assoc :poison (< 10 (rand-int 100))))))
 
 (defn grow
   "Update cells meaning: grow plants"
