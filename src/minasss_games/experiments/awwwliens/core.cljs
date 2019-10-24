@@ -92,16 +92,16 @@
 (defn cell-food
   "Return the amount of food that the cell can give to the cow
   there different cases:
-  - poison? then -1
   - energy 3 then 2, top of the form of the plant
   - energy = 1 or energy > 2 then 1
-  - else 0"
+  - else 0
+  if poison is true return - cell-food"
   [{:keys [energy poison]}]
-  (cond
-    poison -1
-    (>= 0 energy) 0
-    (= 3 energy) 2
-    :else 1))
+  (let [poison-multiplier (if poison -1 1)]
+    (* poison-multiplier (cond
+                           (>= 0 energy) 0
+                           (= 3 energy) 2
+                           :else 1))))
 
 (def cow-max-energy 10)
 
