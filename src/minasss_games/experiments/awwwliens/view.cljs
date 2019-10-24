@@ -80,7 +80,7 @@
         energy-text (pixi/get-child-by-name cell-view "energy")
         plant (pixi/get-child-by-name cell-view "plant")]
     (pixi/set-texture plant (get-plant-texture energy))
-    (pixi/set-text energy-text energy)))
+    (pixi/set-text energy-text (core/cell-food cell))))
 
 (defn world-changed-listener
   "listens to changes of cow game entity, updates
