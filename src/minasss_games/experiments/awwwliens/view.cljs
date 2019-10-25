@@ -100,6 +100,7 @@
         food-text (pixi/get-child-by-name cell-view "food")
         plant (pixi/get-child-by-name cell-view "plant")]
     (pixi/set-texture plant (get-plant-texture energy poison))
+    (pixi/set-visible food-text (> energy 1))
     (pixi/set-text food-text (get-food-text cell))))
 
 (defn world-changed-listener
@@ -128,6 +129,7 @@
                      [:text {:text (get-food-text cell)
                              :position [cell-width 0]
                              :anchor [1 0]
+                             :visible (> energy 1)
                              :style {"fill" "#62f479" "fontSize" 20}
                              :name "food"}]
                      [:sprite {:texture (get-plant-texture energy poison)

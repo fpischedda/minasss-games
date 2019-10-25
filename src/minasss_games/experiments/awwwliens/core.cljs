@@ -99,7 +99,7 @@
   [{:keys [energy poison]}]
   (let [poison-multiplier (if poison -1 1)]
     (* poison-multiplier (cond
-                           (>= 0 energy) 0
+                           (>= 1 energy) 0
                            (= 3 energy) 2
                            :else 1))))
 
@@ -115,7 +115,7 @@
   (let [{:keys [row col]} (get-in world [:cow :position])
         cell (get-area-tile (:area world) row col)]
         (-> world
-          (update-in [:cow :energy] #(min cow-max-energy (+ % (- (cell-food cell) (:cost cell)))))
+          (update-in [:cow :energy] #(min cow-max-energy (+ % (cell-food cell))))
           (update-in [:days-alive] inc)
           (assoc-in [:area row col :energy] -1) ;; it will increase in the grow step anyway
           (update-in [:area row col] assoc :poison (< 10 (rand-int 100))))))

@@ -182,8 +182,8 @@
 
 (defn set-visible
   "Set visibility of any PIXI/DisplayObject subclass"
-  [container value]
-  (aset container "visible" value)
+  [container visible?]
+  (aset container "visible" visible?)
   container)
 
 (defn set-texture
@@ -235,8 +235,8 @@
   (set-animation-speed container value))
 
 (defmethod set-attribute :visible
-  [container _attribute value]
-  (set-visible container value))
+  [container _attribute visible?]
+  (set-visible container visible?))
 
 (defn set-attributes
   "Given a container subclass set its attributes by attributes map,
