@@ -87,7 +87,7 @@
   - if energy > 4 it turns to compost increasing fertilizer by one and turning its energy to -1
   - if energy > 3 starts rotting meaning it counts as 1 when computing food"
   [area]
-  (into [] (map #(into [] (map update-cell %)) area)))
+  (mapv #(mapv update-cell %) area))
 
 (defn cell-food
   "Return the amount of food that the cell can give to the cow
