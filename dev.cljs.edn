@@ -1,0 +1,2 @@
+{:main minasss-games.core
+ :output-to "resources/public/js/compiled/minasss_games.js"}
