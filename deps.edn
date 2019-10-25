@@ -1,8 +1,10 @@
-{:deps {cljsjs/pixi {:mvn/version "5.1.4-0"}
-        com.bhauman/figwheel-main {:mvn/version "0.2.3"}
-        com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}}
+{:deps {cljsjs/pixi {:mvn/version "5.1.4-0"}}
 
  :paths ["src" "target" "resources"]
 
- :aliases {:dev {:main-opts ["-m" "figwheel.main" "-b" "dev" "-r"]}
-           :min   {:main-opts ["-m" "figwheel.main" "-O" "advanced" "-bo" "dev"]}}}
+ :aliases {:dev
+           {:extra-deps {com.bhauman/figwheel-main {:mvn/version "0.2.3"}
+                         com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}}
+            :main-opts ["-m" "figwheel.main" "-b" "dev" "-r"]}
+           :min
+           {:main-opts ["-m" "figwheel.main" "-O" "advanced" "-bo" "dev"]}}}
