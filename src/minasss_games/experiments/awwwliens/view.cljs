@@ -12,7 +12,12 @@
                 "images/awwwliens/plants/plant-2.png"
                 "images/awwwliens/plants/plant-3.png"
                 "images/awwwliens/plants/plant-4.png"
-                "images/awwwliens/plants/plant-5.png"])
+                "images/awwwliens/plants/plant-5.png"
+                "images/awwwliens/plants/plant-poison-1.png"
+                "images/awwwliens/plants/plant-poison-2.png"
+                "images/awwwliens/plants/plant-poison-3.png"
+                "images/awwwliens/plants/plant-poison-4.png"
+                "images/awwwliens/plants/plant-poison-5.png"])
 
 (defonce world-view_ (atom {}))
 
@@ -25,12 +30,20 @@
                      "images/awwwliens/plants/plant-4.png"
                      "images/awwwliens/plants/plant-5.png"])
 
+(def plant-poison-textures ["images/awwwliens/plants/plant-poison-1.png"
+                            "images/awwwliens/plants/plant-poison-2.png"
+                            "images/awwwliens/plants/plant-poison-3.png"
+                            "images/awwwliens/plants/plant-poison-4.png"
+                            "images/awwwliens/plants/plant-poison-5.png"])
+
 (defn get-plant-texture
   "Return the texture name base on plant energy"
-  [energy]
+  [energy poison?]
   (cond
     (<= energy 0) "images/awwwliens/plants/plant-1.png"
-    :else (nth plant-textures energy)))
+    :else (if poison?
+            (nth plant-poison-textures energy)
+            (nth plant-textures energy))))
 
 (defn update-step
   "update view related stuff"
@@ -72,15 +85,22 @@
   [score]
   (pixi/set-text (get-in @world-view_ [:score :entities :text]) (str "Days Alive " score)))
 
+(defn get-food-text
+  "return the text content for the food quantity of the cell
+  it forces the string +N for N > 0"
+  [cell]
+  (let [food (core/cell-food cell)]
+    (if (> food 0) (str "+" food) food)))
+
 (defn update-cell
   "helper function to update a cell view"
-  [cell]
-  (let [{:keys [row col energy]} cell
+  [{:keys [row col energy poison] :as cell}]
+  (let [
         cell-view (get-in @world-view_ [:area :entities :cells row col :view])
-        energy-text (pixi/get-child-by-name cell-view "energy")
+        food-text (pixi/get-child-by-name cell-view "food")
         plant (pixi/get-child-by-name cell-view "plant")]
-    (pixi/set-texture plant (get-plant-texture energy))
-    (pixi/set-text energy-text (core/cell-food cell))))
+    (pixi/set-texture plant (get-plant-texture energy poison))
+    (pixi/set-text food-text (get-food-text cell))))
 
 (defn world-changed-listener
   "listens to changes of cow game entity, updates
@@ -99,23 +119,23 @@
         (update-cell cell)))))
 
 (defn make-cell
-  [{:keys [row col energy]}]
+  [{:keys [row col energy poison] :as cell}]
   (let [container (scene/render
                     [:container {:position [(* cell-width col) (* cell-height row)]}
                      [:sprite {:texture "images/awwwliens/game/tile.png"
                                :anchor [0 1]
                                :position [0 cell-height]}]
-                     [:text {:text energy
+                     [:text {:text (get-food-text cell)
                              :position [cell-width 0]
                              :anchor [1 0]
                              :style {"fill" "#62f479" "fontSize" 20}
-                             :name "energy"}]
-                     [:sprite {:texture (get-plant-texture energy)
+                             :name "food"}]
+                     [:sprite {:texture (get-plant-texture energy poison)
                                :name "plant"
-                               :anchor [0.0 1.0]
-                               :position [0 cell-height]}]])]
+                               :anchor [0.5 1.0]
+                               :position [16 cell-height]}]])]
     {:view container
-     :entities {:energy (pixi/get-child-by-name container "energy")
+     :entities {:energy (pixi/get-child-by-name container "food")
                 :plant (pixi/get-child-by-name container "plant")}}))
 
 (defn make-area-view [area]
