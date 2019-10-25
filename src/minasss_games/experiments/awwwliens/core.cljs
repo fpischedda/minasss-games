@@ -118,7 +118,7 @@
           (update-in [:cow :energy] #(min cow-max-energy (+ % (cell-food cell))))
           (update-in [:days-alive] inc)
           (assoc-in [:area row col :energy] -1) ;; it will increase in the grow step anyway
-          (update-in [:area row col] assoc :poison (< 10 (rand-int 100))))))
+          (update-in [:area row col] assoc :poison (> 10 (rand-int 100))))))
 
 (defn grow
   "Update cells meaning: grow plants"
