@@ -238,6 +238,14 @@
   [container _attribute visible?]
   (set-visible container visible?))
 
+(defmethod set-attribute :texture
+  [container _attribute texture]
+  (set-texture container texture))
+
+(defmethod set-attribute :text
+  [container _attribute text]
+  (set-text container text))
+
 (defn set-attributes
   "Given a container subclass set its attributes by attributes map,
   there is no type checking so trying to set properties not available
