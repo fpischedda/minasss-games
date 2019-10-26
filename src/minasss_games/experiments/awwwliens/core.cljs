@@ -67,6 +67,8 @@
       (assoc-in world [:cow :position] new-pos)
       world)))
 
+(def poison-probability 0.2)
+
 (defn update-cell
   "Update cell with the following logic:
   - dec fertilizer, capping it to 0
@@ -77,8 +79,9 @@
   (let [temp-fertilizer (max 0 (dec fertilizer))
         temp-energy (+ energy (inc (min 1 temp-fertilizer))) ;; energy += if fertilizer > 0 then 2 else 1 :D
         new-energy (if (> temp-energy 4) -2 temp-energy)
-        new-fertilizer (if (> temp-energy 4) (inc temp-fertilizer) temp-fertilizer)]
-    (assoc cell :fertilizer new-fertilizer :energy new-energy)))
+        new-fertilizer (if (> temp-energy 4) (inc temp-fertilizer) temp-fertilizer)
+        poison (> (* 2 poison-probability) (rand))]
+    (assoc cell :fertilizer new-fertilizer :energy new-energy :poison poison)))
 
 (defn update-area
   "Update cells with the following logic:
@@ -113,12 +116,15 @@
   calculate poison flag"
   [world]
   (let [{:keys [row col]} (get-in world [:cow :position])
-        cell (get-area-tile (:area world) row col)]
+        cell (get-area-tile (:area world) row col)
+        food (cell-food cell)
+        hungry (if (and (= 0 food) (= 0 (get-in world [:cow :prev-food]))) -1 0)]
         (-> world
-          (update-in [:cow :energy] #(min cow-max-energy (+ % (cell-food cell))))
+          (update-in [:cow :energy] #(min cow-max-energy (+ % food hungry)))
+          (assoc-in [:cow :prev-food] food)
           (update-in [:days-alive] inc)
           (assoc-in [:area row col :energy] -1) ;; it will increase in the grow step anyway
-          (update-in [:area row col] assoc :poison (> 10 (rand-int 100))))))
+          (update-in [:area row col] assoc :poison (> poison-probability (rand))))))
 
 (defn grow
   "Update cells meaning: grow plants"
