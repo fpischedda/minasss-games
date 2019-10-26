@@ -100,8 +100,8 @@
         food-text (pixi/get-child-by-name cell-view "food")
         plant (pixi/get-child-by-name cell-view "plant")]
     (pixi/set-texture plant (get-plant-texture energy poison))
-    (pixi/set-visible food-text (> energy 1))
-    (pixi/set-text food-text (get-food-text cell))))
+    (pixi/set-attributes food-text {:visible (> energy 1)
+                                    :text (get-food-text cell)})))
 
 (defn world-changed-listener
   "listens to changes of cow game entity, updates
