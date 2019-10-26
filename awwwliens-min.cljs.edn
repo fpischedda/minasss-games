@@ -1,0 +1,3 @@
+{:main minasss-games.core
+ :optimizations :advanced
+ :output-to "resources/public/js/compiled/minasss_games.js"}
