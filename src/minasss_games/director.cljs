@@ -1,9 +1,16 @@
 (ns minasss-games.director
   "The director should help to coordinate transitions between different
   scenes, providing a way to start a new scene and clean everything
-  afterwards.")
+  afterwards."
+  (:require [minasss-games.pixi :as pixi]
+            [minasss-games.tween :as tween]))
 
 (def director_ (atom {}))
+
+(defn update-step
+  "update view related stuff"
+  [delta-time]
+  (tween/update-tweens delta-time))
 
 (defn init
   "Initialize the director which is basicly a map that holds
@@ -12,6 +19,7 @@
   - :current-scene optional, a map that contains information about current scene
     like init function, cleanup function and maybe something else in the future"
   [app]
+  (.start (pixi/make-ticker update-step))
   (reset! director_ {:app app
                      :app-stage (.-stage app)}))
 

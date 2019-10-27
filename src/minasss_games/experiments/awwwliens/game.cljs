@@ -33,12 +33,6 @@
 ;; this possible behavior
 (def main-stage (pixi/make-container))
 
-(defn ^:export game-tick
-  "Update function called in the game loop;
-  parameter delta-time refers to time passed since last update"
-  [delta-time]
-  (view/update-step delta-time))
-
 (defn handle-input
   [world_ event-type _native direction]
   (if (= :key-up event-type)
@@ -56,8 +50,7 @@
                           "ArrowLeft" :left "h" :left "a" :left
                           "ArrowRight" :right "l" :right "d" :right
                           "Escape" :exit}
-      ::game-input-handler (partial handle-input world_)))
-  (.start (pixi/make-ticker game-tick)))
+      ::game-input-handler (partial handle-input world_))))
 
 (defmethod scene-cleanup ::game-scene
   [_]

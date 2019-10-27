@@ -11,11 +11,6 @@
 
 (def cell-size 128)
 
-(defn update-step
-  "update view related stuff"
-  [delta-time]
-  (tween/update-tweens delta-time))
-
 (defn update-bot-energy
   "helper function that update the text representing bot energy"
   [energy]

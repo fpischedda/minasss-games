@@ -44,12 +44,6 @@ GUI:
 ;; this possible behavior
 (def main-stage (pixi/make-container))
 
-(defn ^:export game-tick
-  "Update function called in the game loop;
-  parameter delta-time refers to time passed since last update"
-  [delta-time]
-  (view/update-step delta-time))
-
 (defn handle-input [event-type _native direction]
   (if (= :key-up event-type)
     (game/update-world :move-bot direction)))
@@ -60,8 +54,7 @@ GUI:
                         "ArrowDown" :down "j" :down "s" :down
                         "ArrowLeft" :left "h" :left "a" :left
                         "ArrowRight" :right "l" :right "d" :right}
-    :bot-handler handle-input)
-  (.start (pixi/make-ticker game-tick)))
+    :bot-handler handle-input))
 
 (defn init [app]
   (settings/set! :scale-mode :nearest)

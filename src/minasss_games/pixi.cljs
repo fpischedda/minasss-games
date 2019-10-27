@@ -6,27 +6,27 @@
 (def Loader js/PIXI.Loader.shared)
 (def Resources js/PIXI.Loader.shared.resources)
 
-(defn update-step
-  "update view related stuff"
-  [delta-time]
-  (tween/update-tweens delta-time))
-
 (defn add-app-to-dom
   "Add the specified app to the DOM"
   [app]
   (js/document.body.appendChild (.-view app)))
+
+(defn make-ticker
+  "Create a ticker registering an handler"
+  [handler-fn]
+  (let [ticker (js/PIXI.Ticker.)]
+    (.add ticker handler-fn)
+    ticker))
 
 (defn make-app
   "Instantiate a PIXI app"
   ([options-map]
    (let [app (js/PIXI.Application. (clj->js options-map))]
      (add-app-to-dom app)
-     (.start (pixi/make-ticker update-step))
      app))
   ([width height]
    (let [app (js/PIXI.Application. #js {:width width :height height})]
      (add-app-to-dom app)
-     (.start (pixi/make-ticker update-step))
      app)))
 
 (defn ^:export load-resources-progress-callback
@@ -198,13 +198,6 @@
   [container texture]
   (aset container "texture" (get-texture texture))
   container)
-
-(defn make-ticker
-  "Create a ticker registering an handler"
-  [handler-fn]
-  (let [ticker (js/PIXI.Ticker.)]
-    (.add ticker handler-fn)
-    ticker))
 
 (defmulti set-attribute
   (fn [container attribute value] attribute))

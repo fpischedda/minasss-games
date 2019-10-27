@@ -95,11 +95,6 @@
   (if (= :key-up event-type)
     (update-menu! action)))
 
-(defn update-step
-  "update view related stuff"
-  [delta-time]
-  (tween/update-tweens delta-time))
-
 (defn setup
   "setup the view based on the menu-items_ atom; main-stage refers to the
   root container, where other graphical elements will be added"
@@ -116,7 +111,7 @@
                         "ArrowDown" ::move-down "j" ::move-down "s" ::move-down
                         "Enter" ::select "Space" ::select}
     ::menu-handler handle-input)
-  (.start (pixi/make-ticker update-step)))
+  )
 
 (defmethod scene-cleanup ::menu-scene
   [_]

@@ -45,11 +45,6 @@
             (nth plant-poison-textures energy)
             (nth plant-textures energy))))
 
-(defn update-step
-  "update view related stuff"
-  [delta-time]
-  (tween/update-tweens delta-time))
-
 (defn update-cow-energy
   "helper function that update the text representing cow energy"
   [energy]
