@@ -8,7 +8,7 @@
       (cond
         (and (=translated-key-code :up) (= event-type :key-up)) (jump))))`")
 
-(def event-registry_ (atom {}))
+(def handler-registry_ (atom {}))
 
 (def event-name-mapping
   {:key-up "keyup"
@@ -17,17 +17,18 @@
 
 (defn add-key-handler
   [event-name handler-identifier handler]
-  (swap! event-registry_
-    (fn [event-map]
+  (swap! handler-registry_
+    (fn [handler-map]
       (.addEventListener js/document (get event-name-mapping event-name) handler)
-      (assoc event-map [event-name handler-identifier] handler))))
+      (assoc handler-map [event-name handler-identifier] handler))))
 
 (defn remove-key-handler
   [event-name handler-identifier]
-  (swap! event-registry_
-    (fn [event-map]
-      (.removeEventListener js/document (get event-name-mapping event-name) (get event-map handler-identifier))
-      (dissoc event-map [event-name handler-identifier]))))
+  (swap! handler-registry_
+    (fn [handler-map]
+      (let [registry-key [event-name handler-identifier]])
+      (.removeEventListener js/document (get event-name-mapping event-name) (get handler-map registry-key)
+        (dissoc handler-map registry-key)))))
 
 (defn register-keys
   "Tries to provide a higher level abstraction for key management"
