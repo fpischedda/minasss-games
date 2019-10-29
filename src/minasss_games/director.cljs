@@ -3,7 +3,8 @@
   scenes, providing a way to start a new scene and clean everything
   afterwards."
   (:require [minasss-games.pixi :as pixi]
-            [minasss-games.tween :as tween]))
+            [minasss-games.tween :as tween]
+            [oops.core :refer [oget]]))
 
 (def director_ (atom {}))
 
@@ -21,7 +22,7 @@
   [app]
   (.start (pixi/make-ticker update-step))
   (reset! director_ {:app app
-                     :app-stage (.-stage app)}))
+                     :app-stage (oget app "stage")}))
 
 (defmulti scene-cleanup :cleanup-scene)
 

@@ -26,9 +26,9 @@
   [event-name handler-identifier]
   (swap! handler-registry_
     (fn [handler-map]
-      (let [registry-key [event-name handler-identifier]])
-      (.removeEventListener js/document (get event-name-mapping event-name) (get handler-map registry-key)
-        (dissoc handler-map registry-key)))))
+      (let [registry-key [event-name handler-identifier]]
+        (.removeEventListener js/document (get event-name-mapping event-name) (get handler-map registry-key)
+          (dissoc handler-map registry-key))))))
 
 (defn register-keys
   "Tries to provide a higher level abstraction for key management"

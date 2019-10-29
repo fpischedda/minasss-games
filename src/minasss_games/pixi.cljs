@@ -1,15 +1,16 @@
 (ns minasss-games.pixi
   "Simple wrapper around PIXI javascript library"
-  (:require [cljsjs.pixi]))
+  (:require [cljsjs.pixi]
+            [oops.core :refer [oget oset!]]))
 
 
-(def Loader js/PIXI.Loader.shared)
-(def Resources js/PIXI.Loader.shared.resources)
+(def Loader (oget js/PIXI.Loader "shared"))
+(def Resources (oget Loader "resources"))
 
 (defn add-app-to-dom
   "Add the specified app to the DOM"
   [app]
-  (js/document.body.appendChild (.-view app)))
+  (js/document.body.appendChild (oget app "view")))
 
 (defn make-ticker
   "Create a ticker registering an handler"
@@ -31,7 +32,7 @@
 
 (defn ^:export load-resources-progress-callback
   [loader resource]
-  (println "loading " (.-url resource) " , total " (.-progress loader)))
+  (println "loading " (oget resource "url") " , total " (oget loader "progress")))
 
 (defn load-resources
   "Load resourse specified by `resources` array, when finished
@@ -49,7 +50,7 @@
   (let [tex (aget Resources texture-name)]
     (if (nil? tex)
       (println "could not find texture " texture-name)
-      (.-texture tex))))
+      (oget tex "texture"))))
 
 (defn get-spritesheet
   "Return a spritesheet from the texture cache, by name"
@@ -57,7 +58,7 @@
   (let [res (aget Resources resource-name)]
     (if (nil? res)
       (println "could not find spritesheet " resource-name)
-      (.-spritesheet res))))
+      (oget res "spritesheet"))))
 
 (defn make-container
   "Create a PIXI container"
@@ -72,7 +73,7 @@
 (defn make-animated-sprite
   "Create a animated sprite prividing a spritesheet name"
   [spritesheet-name animation-name]
-  (js/PIXI.AnimatedSprite. (aget (.-animations (get-spritesheet spritesheet-name)) animation-name)))
+  (js/PIXI.AnimatedSprite. (aget (oget (get-spritesheet spritesheet-name) "animations") animation-name)))
 
 (defn add-child
   "Add child to provided parent container"
@@ -93,7 +94,7 @@
 (defn remove-container
   "Remove a container from the scene"
   [container]
-  (.removeChild (.-parent container) container))
+  (.removeChild (oget container "parent") container))
 
 (defn remove-child-by-name
   "Remove the child specified by name"
@@ -119,7 +120,7 @@
 (defn add-to-app-stage
   "Add container to application main stage"
   [app container]
-  (.addChild (.-stage app) container)
+  (.addChild (oget app "stage") container)
   container)
 
 (defn make-text-style
@@ -142,61 +143,61 @@
 (defn set-position
   "Set position of any PIXI/Container subclass"
   [container x y]
-  (.set (.-position container) x y)
+  (.set (oget container "position") x y)
   container)
 
 (defn set-anchor
   "Set anchor of any PIXI/Container subclass"
   [container x y]
-  (.set (.-anchor container) x y)
+  (.set (oget container "anchor") x y)
   container)
 
 (defn set-pivot
   "Set pivot of any PIXI/Container subclass"
   [container x y]
-  (.set (.-pivot container) x y)
+  (.set (oget container "pivot") x y)
   container)
 
 (defn set-scale
   "Set scale of any PIXI/Container subclass"
   [container x y]
-  (.set (.-scale container) x y)
+  (.set (oget container "scale") x y)
   container)
 
 (defn set-name
   "Set name of any PIXI/DisplayObject subclass"
   [container name]
-  (aset container "name" name)
+  (oset! container "name" name)
   container)
 
 (defn set-text
   "Set text content of PIXI/Text instance"
   [container text]
-  (aset container "text" text)
+  (oset! container "text" text)
   container)
 
 (defn set-alpha
   "Set alpha of any PIXI/DisplayObject subclass"
   [container value]
-  (aset container "alpha" value)
+  (oset! container "alpha" value)
   container)
 
 (defn set-animation-speed
   "Set animation-speed of a PIXI/AnimatedSprite instance"
   [container value]
-  (aset container "animationSpeed" value)
+  (oset! container "animationSpeed" value)
   container)
 
 (defn set-visible
   "Set visibility of any PIXI/DisplayObject subclass"
   [container visible?]
-  (aset container "visible" visible?)
+  (oset! container "visible" visible?)
   container)
 
 (defn set-texture
   "Set texture of any PIXI/Sprite subclass"
   [container texture]
-  (aset container "texture" (get-texture texture))
+  (oset! container "texture" (get-texture texture))
   container)
 
 (defmulti set-attribute
