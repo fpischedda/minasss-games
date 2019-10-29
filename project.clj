@@ -9,6 +9,7 @@
   :dependencies [[org.clojure/clojure "1.10.0"]
                  [org.clojure/clojurescript "1.10.520"]
                  [org.clojure/core.async  "0.4.500"]
+                 [binaryage/oops "0.7.0"]
                  [cljsjs/pixi "5.1.2-0"]]
 
   :plugins [[lein-figwheel "0.5.19"]
