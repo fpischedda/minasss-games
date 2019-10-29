@@ -24,9 +24,9 @@
   []
   (scene/render
     [:animated-sprite {:spritesheet "images/awwwliens/anim/ufo.json"
-              :animation-speed 0.01
-              :position [300 200]
-              :name "ufo"}]))
+                       :animation-speed 0.01
+                       :position [300 200]
+                       :name "ufo"}]))
 
 (defn make-cow-still
   "Create cow still element"
