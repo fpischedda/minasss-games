@@ -1,7 +1,7 @@
 (ns minasss-games.pixi
   "Simple wrapper around PIXI javascript library"
   (:require [cljsjs.pixi]
-            [com.goog :as g]))
+            [goog.object :as g]))
 
 
 (def Loader js/PIXI.Loader.shared)
