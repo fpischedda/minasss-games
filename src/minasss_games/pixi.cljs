@@ -1,6 +1,7 @@
 (ns minasss-games.pixi
   "Simple wrapper around PIXI javascript library"
-  (:require [cljsjs.pixi]))
+  (:require [cljsjs.pixi]
+            [com.goog :as g]))
 
 
 (def Loader js/PIXI.Loader.shared)
@@ -166,37 +167,37 @@
 (defn set-name
   "Set name of any PIXI/DisplayObject subclass"
   [container name]
-  (aset container "name" name)
+  (g/set container "name" name)
   container)
 
 (defn set-text
   "Set text content of PIXI/Text instance"
   [container text]
-  (aset container "text" text)
+  (g/set container "text" text)
   container)
 
 (defn set-alpha
   "Set alpha of any PIXI/DisplayObject subclass"
   [container value]
-  (aset container "alpha" value)
+  (g/set container "alpha" value)
   container)
 
 (defn set-animation-speed
   "Set animation-speed of a PIXI/AnimatedSprite instance"
   [container value]
-  (aset container "animationSpeed" value)
+  (g/set container "animationSpeed" value)
   container)
 
 (defn set-visible
   "Set visibility of any PIXI/DisplayObject subclass"
   [container visible?]
-  (aset container "visible" visible?)
+  (g/set container "visible" visible?)
   container)
 
 (defn set-texture
   "Set texture of any PIXI/Sprite subclass"
   [container texture]
-  (aset container "texture" (get-texture texture))
+  (g/set container "texture" (get-texture texture))
   container)
 
 (defmulti set-attribute
