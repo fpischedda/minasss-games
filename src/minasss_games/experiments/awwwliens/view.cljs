@@ -66,7 +66,7 @@
         (tween/move-to {:target (get-in @world-view_ [:cow :view])
                         :starting-position {:x old-x :y old-y}
                         :target-position {:x x :y y}
-                        :speed 1.5
+                        :speed 3
                         :on-complete (fn [] (swap! world_ #(-> % core/eat core/grow)))})))
 
     ;; eventually update cow energy text

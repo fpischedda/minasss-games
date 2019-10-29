@@ -1,7 +1,7 @@
 (ns minasss-games.pixi
   "Simple wrapper around PIXI javascript library"
   (:require [cljsjs.pixi]
-            [oops.core :refer [oget oset!]]))
+            [oops.core :refer [oget oget+ oset!]]))
 
 
 (def Loader (oget js/PIXI.Loader "shared"))
@@ -73,7 +73,7 @@
 (defn make-animated-sprite
   "Create a animated sprite prividing a spritesheet name"
   [spritesheet-name animation-name]
-  (js/PIXI.AnimatedSprite. (aget (oget (get-spritesheet spritesheet-name) "animations") animation-name)))
+  (js/PIXI.AnimatedSprite. (oget+ (oget (get-spritesheet spritesheet-name) "animations") animation-name)))
 
 (defn add-child
   "Add child to provided parent container"

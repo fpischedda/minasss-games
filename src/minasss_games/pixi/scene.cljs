@@ -75,7 +75,8 @@
 
 (defmethod make-element :animated-sprite
   [tag attrs]
-  (let [container (pixi/make-animated-sprite (:spritesheet attrs) (:animation-name attrs))]
+  (let [container (pixi/make-animated-sprite (:spritesheet attrs) (:animation-name attrs))
+        cleaned-attrs (dissoc attrs :spritesheet :animation-name)]
     (pixi/set-attributes container attrs)))
 
 (defmethod make-element :text

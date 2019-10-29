@@ -24,6 +24,7 @@
   []
   (scene/render
     [:animated-sprite {:spritesheet "images/awwwliens/anim/ufo.json"
+                       :animation-name "ufo"
                        :animation-speed 0.01
                        :position [300 200]
                        :name "ufo"}]))
@@ -102,6 +103,7 @@
   (let [background (pixi/make-sprite "images/awwwliens/menu/background.png")]
     (pixi/add-child main-stage background)
     (pixi/add-child main-stage (make-cow-still))
+    (pixi/add-child main-stage (make-animated-ufo))
     (pixi/add-child main-stage (make-menu @menu-items_))
     (add-watch menu-items_ :menu-changed-watch menu-changed-listener)))
 
