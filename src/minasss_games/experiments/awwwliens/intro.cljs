@@ -22,12 +22,14 @@
 (defn make-animated-ufo
   "Create animated ufo element"
   []
-  (scene/render
-    [:animated-sprite {:spritesheet "images/awwwliens/anim/ufo.json"
-                       :animation-name "ufo"
-                       :animation-speed 0.01
-                       :position [300 200]
-                       :name "ufo"}]))
+  (let [ufo (scene/render
+          [:animated-sprite {:spritesheet "images/awwwliens/anim/ufo.json"
+                             :animation-name "ufo"
+                             :animation-speed 0.05
+                             :position [200 200]
+                             :name "ufo"}])]
+    (.play ufo)
+    ufo))
 
 (defn make-cow-still
   "Create cow still element"
@@ -105,7 +107,7 @@
     (pixi/add-child main-stage (make-cow-still))
     (pixi/add-child main-stage (make-animated-ufo))
     (pixi/add-child main-stage (make-menu @menu-items_))
-    (add-watch menu-items_ :menu-changed-watch menu-changed-listener)))
+    (add-watch menu-items_ ::menu-changed-watch menu-changed-listener)))
 
 (defn ^:export loaded-callback []
   (setup main-stage)
@@ -118,6 +120,7 @@
 (defmethod scene-cleanup ::menu-scene
   [_]
   (input/unregister-key-handler ::menu-handler)
+  (remove-watch menu-items_ ::menu-changed-watch)
   (pixi/remove-container main-stage))
 
 
