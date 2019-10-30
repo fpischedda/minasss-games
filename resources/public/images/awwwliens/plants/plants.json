@@ -1,0 +1,96 @@
+{"frames": {
+
+"plant-1.png":
+{
+	"frame": {"x":21,"y":81,"w":6,"h":6},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":6,"h":6},
+	"sourceSize": {"w":6,"h":6}
+},
+"plant-2.png":
+{
+	"frame": {"x":21,"y":53,"w":6,"h":12},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":6,"h":12},
+	"sourceSize": {"w":6,"h":12}
+},
+"plant-3.png":
+{
+	"frame": {"x":21,"y":1,"w":6,"h":24},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":6,"h":24},
+	"sourceSize": {"w":6,"h":24}
+},
+"plant-4.png":
+{
+	"frame": {"x":1,"y":1,"w":18,"h":36},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":18,"h":36},
+	"sourceSize": {"w":18,"h":36}
+},
+"plant-5.png":
+{
+	"frame": {"x":1,"y":39,"w":18,"h":36},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":18,"h":36},
+	"sourceSize": {"w":18,"h":36}
+},
+"plant-poison-1.png":
+{
+	"frame": {"x":21,"y":89,"w":6,"h":6},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":6,"h":6},
+	"sourceSize": {"w":6,"h":6}
+},
+"plant-poison-2.png":
+{
+	"frame": {"x":21,"y":67,"w":6,"h":12},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":6,"h":12},
+	"sourceSize": {"w":6,"h":12}
+},
+"plant-poison-3.png":
+{
+	"frame": {"x":21,"y":27,"w":6,"h":24},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":6,"h":24},
+	"sourceSize": {"w":6,"h":24}
+},
+"plant-poison-4.png":
+{
+	"frame": {"x":1,"y":77,"w":18,"h":36},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":18,"h":36},
+	"sourceSize": {"w":18,"h":36}
+},
+"plant-poison-5.png":
+{
+	"frame": {"x":1,"y":115,"w":18,"h":36},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":18,"h":36},
+	"sourceSize": {"w":18,"h":36}
+}},
+"animations": {
+	"plant": ["plant-1.png","plant-2.png","plant-3.png","plant-4.png","plant-5.png"],
+	"plant-poison": ["plant-poison-1.png","plant-poison-2.png","plant-poison-3.png","plant-poison-4.png","plant-poison-5.png"]
+},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "plants.png",
+	"format": "RGBA8888",
+	"size": {"w":28,"h":152},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:167ffc10bc29ccef23b6507fa07d4a5c:204661d603291abe3ebea00b5f140fea:1289142517ebf077ccf29c1aafcf4ff4$"
+}
+}
