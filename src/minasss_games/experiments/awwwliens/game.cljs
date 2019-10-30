@@ -27,6 +27,8 @@
 (def scene {:init-scene ::game-scene
             :cleanup-scene ::game-scene})
 
+(def world_ (atom nil))
+
 ;; main-stage is still in this namespace because in the future
 ;; the "game" may receive the main stage where to attach its own
 ;; graphical elements; moving it to the view namespace might mask
@@ -34,26 +36,64 @@
 (def main-stage (pixi/make-container))
 
 (defn handle-input
-  [world_ event-type _native direction]
+  [event-type _native direction]
   (if (= :key-up event-type)
     (condp = direction
       :exit (director/start-scene minasss-games.experiments.awwwliens.intro/scene)
       (swap! world_ core/move-cow direction))
     ))
 
+(defn handle-cow-changed
+  [world_ old-cow new-cow]
+  (let [old-pos (:position old-cow)
+        new-pos (:position new-cow)
+        old-energy (:energy old-cow)
+        new-energy (:energy new-cow)]
+
+    ;; position changed detection, must find a better way...
+    (when (not (= old-pos new-pos))
+      (view/move-cow old-pos new-pos (fn [] (swap! world_ #(-> % core/eat core/grow)))))
+
+    ;; eventually update cow energy text
+    ;; if energy <= 0 then it is game over
+    (when (not (= old-energy new-energy))
+      (if (>= 0 new-energy)
+        (director/start-scene minasss-games.experiments.awwwliens.intro/scene)
+        (view/update-cow-energy new-energy)))))
+
+(defn world-changed-listener
+  "listens to changes of cow game entity, updates
+  graphical object accordingly"
+  [_key world_ old-state new-state]
+  (let [old-cow (:cow old-state)
+        new-cow (:cow new-state)]
+    ;; the score is the amount of days the cow has been alive
+    (view/update-score-text (:days-alive new-state))
+
+    (when (not (= old-cow new-cow))
+      (handle-cow-changed world_ old-cow new-cow))
+
+    (doseq [rows (:area new-state)
+            cell rows]
+      (view/update-cell cell))))
+
 (defn ^:export loaded-callback []
-  (let [world_ (atom (core/make-world {:width 3 :height 3
-                                       :cow-row 0 :cow-col 0 :cow-energy 2}))]
-    (view/setup world_ main-stage)
+  (let [world (core/make-world {:width 3 :height 3
+                                :cow-row 0 :cow-col 0 :cow-energy 2})]
+    (view/setup world main-stage)
     (input/register-keys {"ArrowUp" :up "k" :up "w" :up
                           "ArrowDown" :down "j" :down "s" :down
                           "ArrowLeft" :left "h" :left "a" :left
                           "ArrowRight" :right "l" :right "d" :right
                           "Escape" :exit}
-      ::game-input-handler (partial handle-input world_))))
+      ::game-input-handler handle-input)
+    (reset! world_ world)
+    (add-watch world_ ::world-changed-watch world-changed-listener)))
 
 (defmethod scene-cleanup ::game-scene
   [_]
+  (remove-watch world_ ::world-changed-watch)
+  (reset! world_ nil)
   (input/unregister-key-handler ::game-input-handler)
   (pixi/remove-container main-stage))
 

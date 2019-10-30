@@ -8,40 +8,31 @@
 (def resources ["images/awwwliens/game/background.png"
                 "images/awwwliens/cow.png"
                 "images/awwwliens/game/tile.png"
-                "images/awwwliens/plants/plant-1.png"
-                "images/awwwliens/plants/plant-2.png"
-                "images/awwwliens/plants/plant-3.png"
-                "images/awwwliens/plants/plant-4.png"
-                "images/awwwliens/plants/plant-5.png"
-                "images/awwwliens/plants/plant-poison-1.png"
-                "images/awwwliens/plants/plant-poison-2.png"
-                "images/awwwliens/plants/plant-poison-3.png"
-                "images/awwwliens/plants/plant-poison-4.png"
-                "images/awwwliens/plants/plant-poison-5.png"])
+                "images/awwwliens/plants/plants.json"])
 
 (defonce world-view_ (atom {}))
 
 (def cell-height 32)
 (def cell-width 128)
 
-(def plant-textures ["images/awwwliens/plants/plant-1.png"
-                     "images/awwwliens/plants/plant-2.png"
-                     "images/awwwliens/plants/plant-3.png"
-                     "images/awwwliens/plants/plant-4.png"
-                     "images/awwwliens/plants/plant-5.png"])
+(def plant-textures ["plant-1.png"
+                     "plant-2.png"
+                     "plant-3.png"
+                     "plant-4.png"
+                     "plant-5.png"])
 
-(def plant-poison-textures ["images/awwwliens/plants/plant-poison-1.png"
-                            "images/awwwliens/plants/plant-poison-2.png"
-                            "images/awwwliens/plants/plant-poison-3.png"
-                            "images/awwwliens/plants/plant-poison-4.png"
-                            "images/awwwliens/plants/plant-poison-5.png"])
+(def plant-poison-textures ["plant-poison-1.png"
+                            "plant-poison-2.png"
+                            "plant-poison-3.png"
+                            "plant-poison-4.png"
+                            "plant-poison-5.png"])
 
-(defn get-plant-texture
+(defn get-plant-texture-name
   "Return the texture name base on plant energy"
   [energy poison?]
-  (cond
-    (<= energy 0) "images/awwwliens/plants/plant-1.png"
-    :else (if poison?
+  (if (<= energy 0)
+    "plant-1.png"
+    (if poison?
             (nth plant-poison-textures energy)
             (nth plant-textures energy))))
 
@@ -50,30 +41,18 @@
   [energy]
   (pixi/set-text (get-in @world-view_ [:cow :entities :text]) energy))
 
-(defn handle-cow-changed
-  [world_ old-cow new-cow]
-  (let [old-pos (:position old-cow)
-        new-pos (:position new-cow)
-        old-energy (:energy old-cow)
-        new-energy (:energy new-cow)]
+(defn to-world-position
+  [{:keys [col row]}]
+  {:x (* cell-width col)
+   :y (* cell-height row)})
 
-    ;; position changed detection, must find a better way...
-    (when (not (= old-pos new-pos))
-      (let [old-x (* cell-width (:col old-pos))
-            old-y (* cell-height (:row old-pos))
-            x (* cell-width (:col new-pos))
-            y (* cell-height (:row new-pos))]
-        (tween/move-to {:target (get-in @world-view_ [:cow :view])
-                        :starting-position {:x old-x :y old-y}
-                        :target-position {:x x :y y}
-                        :speed 3
-                        :on-complete (fn [] (swap! world_ #(-> % core/eat core/grow)))})))
-
-    ;; eventually update cow energy text
-    (when (not (= old-energy new-energy))
-      (if (>= 0 new-energy)
-        (director/start-scene minasss-games.experiments.awwwliens.intro/scene)
-        (update-cow-energy new-energy)))))
+(defn move-cow
+  [from-pos to-pos on-complete-fn]
+  (tween/move-to {:target (get-in @world-view_ [:cow :view])
+                  :starting-position (to-world-position from-pos)
+                  :target-position (to-world-position to-pos)
+                  :speed 3
+                  :on-complete on-complete-fn}))
 
 (defn update-score-text
   "helper function to update score text"
@@ -90,29 +69,15 @@
 (defn update-cell
   "helper function to update a cell view"
   [{:keys [row col energy poison] :as cell}]
-  (let [
-        cell-view (get-in @world-view_ [:area :entities :cells row col :view])
+  (let [cell-view (get-in @world-view_ [:area :entities :cells row col :view])
         food-text (pixi/get-child-by-name cell-view "food")
-        plant (pixi/get-child-by-name cell-view "plant")]
-    (pixi/set-texture plant (get-plant-texture energy poison))
+        plant (pixi/get-child-by-name cell-view "plant")
+        plant-texture (pixi/get-spritesheet-texture
+                        "images/awwwliens/plants/plants.json"
+                        (get-plant-texture-name energy poison))]
+    (pixi/set-texture plant plant-texture)
     (pixi/set-attributes food-text {:visible (> energy 1)
                                     :text (get-food-text cell)})))
-
-(defn world-changed-listener
-  "listens to changes of cow game entity, updates
-  graphical object accordingly"
-  [_key world_ old-state new-state]
-  (let [old-cow (:cow old-state)
-        new-cow (:cow new-state)]
-    ;; the score is the amount of days the cow has been alive
-    (update-score-text (:days-alive new-state))
-
-    (when (not (= old-cow new-cow))
-      (handle-cow-changed world_ old-cow new-cow))
-
-    (doseq [rows (:area new-state)]
-      (doseq [cell rows]
-        (update-cell cell)))))
 
 (defn make-cell
   [{:keys [row col energy poison] :as cell}]
@@ -127,7 +92,8 @@
                              :visible (> energy 1)
                              :style {"fill" "#62f479" "fontSize" 20}
                              :name "food"}]
-                     [:sprite {:texture (get-plant-texture energy poison)
+                     [:sprite {:texture {:spritesheet "images/awwwliens/plants/plants.json"
+                                         :texture (get-plant-texture-name energy poison)}
                                :name "plant"
                                :anchor [0.5 1.0]
                                :position [16 cell-height]}]])]
@@ -187,14 +153,13 @@
    :area (make-area-view (:area world))})
 
 (defn setup
-  "setup the view based on the world_ atom; main-stage refers to the
+  "setup the view based on the provided world; main-stage refers to the
   root container, where other graphical elements will be added"
-  [world_ main-stage]
+  [world main-stage]
   (let [background (pixi/make-sprite "images/awwwliens/game/background.png")
-        view (make-world-view @world_)
+        view (make-world-view world)
         {:keys [area cow score]} view]
     (pixi/add-child main-stage background)
     (pixi/add-child-view (:view area) cow)
     (pixi/add-children-view main-stage [area score])
-    (reset! world-view_ view)
-    (add-watch world_ ::world-changed-watch world-changed-listener)))
+    (reset! world-view_ view)))

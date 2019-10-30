@@ -69,7 +69,9 @@
 (defmethod make-element :sprite
   [tag attrs]
   (let [texture (:texture attrs)
-        container (pixi/make-sprite texture)
+        container (if (map? texture)
+                    (pixi/make-sprite-from-spritesheet (:spritesheet texture) (:texture texture))
+                    (pixi/make-sprite texture))
         cleaned-attrs (dissoc attrs :texture)]
     (pixi/set-attributes container cleaned-attrs)))
 
@@ -77,7 +79,7 @@
   [tag attrs]
   (let [container (pixi/make-animated-sprite (:spritesheet attrs) (:animation-name attrs))
         cleaned-attrs (dissoc attrs :spritesheet :animation-name)]
-    (pixi/set-attributes container attrs)))
+    (pixi/set-attributes container cleaned-attrs)))
 
 (defmethod make-element :text
   [tag attrs]

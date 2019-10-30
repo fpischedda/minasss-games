@@ -36,7 +36,8 @@
 
 (defn load-resources
   "Load resourse specified by `resources` array, when finished
-  call loaded-fn callback"
+  call loaded-fn callback
+  do not load resources already in the Resource pool"
   [resources loaded-fn]
   (let [to-load (filter #(nil? (aget Resources %)) resources)]
     (->
@@ -45,7 +46,7 @@
       (.load loaded-fn))))
 
 (defn get-texture
-  "Return a texture from the texture cache, by name"
+  "Return a texture from the texture cache, looking up by name"
   [texture-name]
   (let [tex (aget Resources texture-name)]
     (if (nil? tex)
@@ -60,6 +61,12 @@
       (println "could not find spritesheet " resource-name)
       (oget res "spritesheet"))))
 
+(defn get-spritesheet-texture
+  "Return a texture from a spritesheet
+  spritesheet and texture are specified by name"
+  [resource-name texture-name]
+  (aget (oget+ (get-spritesheet resource-name) "textures") texture-name))
+
 (defn make-container
   "Create a PIXI container"
   []
@@ -69,6 +76,11 @@
   "Create a sprite prividing a texture name"
   [texture-name]
   (js/PIXI.Sprite. (get-texture texture-name)))
+
+(defn make-sprite-from-spritesheet
+  "Create a sprite prividing a spritesheet name and texture name"
+  [spritesheet-name texture-name]
+  (js/PIXI.Sprite. (get-spritesheet-texture spritesheet-name texture-name)))
 
 (defn make-animated-sprite
   "Create a animated sprite prividing a spritesheet name"
@@ -197,7 +209,7 @@
 (defn set-texture
   "Set texture of any PIXI/Sprite subclass"
   [container texture]
-  (oset! container "texture" (get-texture texture))
+  (oset! container "texture" (if (string? texture) (get-texture texture) texture))
   container)
 
 (defmulti set-attribute
