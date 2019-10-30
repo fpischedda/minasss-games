@@ -79,7 +79,7 @@
   [tag attrs]
   (let [container (pixi/make-animated-sprite (:spritesheet attrs) (:animation-name attrs))
         cleaned-attrs (dissoc attrs :spritesheet :animation-name)]
-    (pixi/set-attributes container attrs)))
+    (pixi/set-attributes container cleaned-attrs)))
 
 (defmethod make-element :text
   [tag attrs]
