@@ -95,7 +95,7 @@
 (defn add-children
   "Add children to provided parent container"
   [parent children]
-  (mapv #(add-child parent %) children)
+  (dorun (map #(add-child parent %) children))
   parent)
 
 (defn get-child-by-name
@@ -126,7 +126,7 @@
 (defn add-children-view
   "Add children `view` to provided parent container"
   [parent children]
-  (mapv #(add-child-view parent %) children)
+  (dorun (map #(add-child-view parent %) children))
   parent)
 
 (defn add-to-app-stage
@@ -264,5 +264,5 @@
   there is no type checking so trying to set properties not available
   to some classes may or may not break everything"
   [container attributes]
-  (mapv (fn [[attr value]] (set-attribute container attr value)) attributes)
+  (dorun (map (fn [[attr value]] (set-attribute container attr value)) attributes))
   container)
