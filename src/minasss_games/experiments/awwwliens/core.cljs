@@ -67,7 +67,7 @@
       (assoc-in world [:cow :position] new-pos)
       world)))
 
-(def poison-probability 0.2)
+(def poison-probability 0.4)
 
 (defn update-cell
   "Update cell with the following logic:
@@ -75,12 +75,13 @@
   - increase energy by 1 if no fertilizer is present, by 2 if it is
   - if energy > 4 it turns to compost increasing fertilizer by one and turning its energy to -2
   - if energy > 3 starts rotting meaning it counts as 1 when computing food"
-  [{:keys [energy fertilizer] :as cell}]
+  [{:keys [energy fertilizer poison] :as cell}]
   (let [temp-fertilizer (max 0 (dec fertilizer))
         temp-energy (+ energy (inc (min 1 temp-fertilizer))) ;; energy += if fertilizer > 0 then 2 else 1 :D
-        new-energy (if (> temp-energy 4) -2 temp-energy)
-        new-fertilizer (if (> temp-energy 4) (inc temp-fertilizer) temp-fertilizer)
-        poison (> (* 2 poison-probability) (rand))]
+        plant-died (> temp-energy 4)
+        new-energy (if plant-died -2 temp-energy)
+        new-fertilizer (if plant-died (inc temp-fertilizer) temp-fertilizer)
+        poison (if plant-died (> (* 2 poison-probability) (rand)) poison)]
     (assoc cell :fertilizer new-fertilizer :energy new-energy :poison poison)))
 
 (defn update-area
