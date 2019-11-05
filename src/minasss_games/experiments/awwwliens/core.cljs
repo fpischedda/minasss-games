@@ -81,7 +81,9 @@
         plant-died (> temp-energy 4)
         new-energy (if plant-died -2 temp-energy)
         new-fertilizer (if plant-died (inc temp-fertilizer) temp-fertilizer)
-        poison (if plant-died (> (* 2 poison-probability) (rand)) poison)]
+        ;; if a plant is dying it became poisonous and will sprout
+        ;; again as poisonous
+        poison (if (> temp-energy 3) true poison)]
     (assoc cell :fertilizer new-fertilizer :energy new-energy :poison poison)))
 
 (defn update-area
