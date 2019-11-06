@@ -20,7 +20,7 @@
       (->> tweens
         (map #(updater % delta-time))
         (filter some?)
-        (into ())))))
+        doall))))
 
 (defmethod updater ::move-to
   [tween delta-time]
