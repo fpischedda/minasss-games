@@ -1,5 +1,5 @@
-(ns minasss-games.plot
-  "Here is a way to define complex plots like the one described below
+(ns minasss-games.screenplay
+  "Here is a way to define complex screenplays like the one described below
   ```
   [[:fade-in :time 1000 :actor :scene]
   [:after :time 500
@@ -10,7 +10,7 @@
       :then [:show :target :menu]
     ]]]]
   ```
-  To make it possible to use different backends the plot should work
+  To make it possible to use different backends the screenplay should work
   independently of the pixi code (i.e. updating containers, sprite etc),
   instead it should provide a callback mechanism with at least three events:
   - start: subscribers will receive the initial context (whatever it means)
@@ -74,23 +74,49 @@
         ;; return the current state of the action for the next iteration
         (update-in action [:params] assoc :position new-position :prev-distance distance)))))
 
-(defn move
-  []
-  )
+(defmethod updater ::after
+  [action delta-time]
+  (let [time (get-in action [params time])
+        new-time (- time delta-time)
+        listener-payload {:old-state {:time time}
+                          :state {:time new-time}}]
+    (if (>= 0 new-time)
+      (do
+        (listener ::finish (:action action) listener-payload)
+        (when-let [next-action (:then action)]
+          (next-action)))
+      (do
+        (listener ::step (:action action) listener-payload)
+        ;; return the current state of the action for the next iteration
+        (update-in action [:params] assoc :time new-time)))))
 
-(defmulti make-action (fn [action _dispatcher _options]) action)
+(defmulti make-action (fn [[action &_options] _dispatcher]) action)
+
+;; after action just waits until the specified amount of time passes
+;; and eventually continue with the actions specified in the :then
+;; option
+(defmethod make-action ::after
+  [[action &options] listener]
+  (let [{:keys [actor time then]} (apply hash-map options)]
+    (listener ::start action {:actor actor
+                              :state {:time time}})
+    (register-action
+      {:action action
+       :listener listener
+       :then (when-some then (partial start-screenplay then listener))
+       :params {:time time}})))
 
 (defmethod make-action ::move
-  [_action listener options]
+  [[action &options] listener]
   (let [{:keys [actor from to speed]} (apply hash-map options) ;; options are provided as a vector but it is pratical to access them as a map
         dir (math/direction to from)
         normalized-dir (math/normalize dir)
         prev-distance (math/length dir)
-        then (when-let options)]
+        :then (when-some then (partial start-screenplay then listener))]
     (listener ::start action {:actor actor
                               :state {:position from}})
     (register-action
-      {:action ::move
+      {:action action
        :listener listener
        :params {:actor actor
                 :position from
@@ -99,8 +125,11 @@
                 :prev-distance prev-distance
                 :speed speed}})))
 
-(defn make-plot
-  "A plot is a tree like structure defined as a vector;
+(defn start-screenplay
+  "A screenplay is a tree like structure defined as a vector;
   first item represent the action; the rest of the vector represents
   options specified as pairs like :time 500, :actor :bob and so on"
-  [plot-spec listener])
+  [screenplay listener]
+  (if (vector? (first screeplay))
+    (dorun (map #(make-action % listener) screenplay))
+    (make-action screeplay listener)))
