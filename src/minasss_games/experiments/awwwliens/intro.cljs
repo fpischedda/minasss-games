@@ -20,24 +20,24 @@
 
 (def main-stage (pixi/make-container))
 
-(def intro-plot [[:screenplay/move
-                  :actor :cow
-                  :from [0 0] :to [100 100] :speed 30
-                  :then [:screenplay/after
-                         :time 500
-                         :then [:screenplay/move
-                         :actor :ufo
-                         :from [0 0] :to [100 100] :speed 50]]]])
+(def intro-screenplay [[screenplay/action-move
+                        :actor :cow
+                        :from [0 400] :to [248 400] :speed 60
+                        :then [screenplay/action-after
+                               :time 500
+                               :then [screenplay/action-move
+                                      :actor :ufo
+                                      :from [0 0] :to [200 200] :speed 80]]]])
 
 (defn make-animated-ufo
   "Create animated ufo element"
   []
   (let [ufo (scene/render
-          [:animated-sprite {:spritesheet "images/awwwliens/anim/ufo.json"
-                             :animation-name "ufo"
-                             :animation-speed 0.05
-                             :position [200 200]
-                             :name "ufo"}])]
+              [:animated-sprite {:spritesheet "images/awwwliens/anim/ufo.json"
+                                 :animation-name "ufo"
+                                 :animation-speed 0.05
+                                 :position [200 200]
+                                 :name "ufo"}])]
     (.play ufo)
     ufo))
 
@@ -47,7 +47,7 @@
   (scene/render
     [:sprite {:texture "images/awwwliens/menu/cow-still.png"
               :position [248 400]
-              :name "cow-stil"}]))
+              :name "cow"}]))
 
 (def menu-items_ (atom {:selected-index 0
                         :items [{:text "Press Enter\nTo Play" :position [-90 100]}
@@ -108,6 +108,12 @@
   (if (= :key-up event-type)
     (update-menu! action)))
 
+(defn screenplay-listener
+  [_event-type action payload]
+  (when (not (= action :screenplay/after))
+    (let [container (pixi/get-child-by-name main-stage (name (:actor payload)))]
+      (pixi/set-attributes container (:state payload)))))
+
 (defn setup
   "setup the view based on the menu-items_ atom; main-stage refers to the
   root container, where other graphical elements will be added"
@@ -117,6 +123,8 @@
     (pixi/add-child main-stage (make-cow-still))
     (pixi/add-child main-stage (make-animated-ufo))
     (pixi/add-child main-stage (make-menu @menu-items_))
+
+    (screenplay/start intro-screenplay screenplay-listener)
     (add-watch menu-items_ ::menu-changed-watch menu-changed-listener)))
 
 (defn ^:export loaded-callback []

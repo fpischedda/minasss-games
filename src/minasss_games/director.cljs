@@ -3,6 +3,7 @@
   scenes, providing a way to start a new scene and clean everything
   afterwards."
   (:require [minasss-games.pixi :as pixi]
+            [minasss-games.screenplay :as screenplay]
             [minasss-games.tween :as tween]
             [oops.core :refer [oget]]))
 
@@ -11,6 +12,7 @@
 (defn update-step
   "update view related stuff"
   [delta-time]
+  (screenplay/update-actions delta-time)
   (tween/update-tweens delta-time))
 
 (defn init

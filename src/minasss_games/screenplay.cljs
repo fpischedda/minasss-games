@@ -50,8 +50,9 @@
 (defmethod updater ::move
   [action delta-time]
   (let [{:keys [actor position target-position direction prev-distance speed]} (:params action)
-        new-position {:x (+ (:x position) (* delta-time speed (:x direction)))
-                      :y (+ (:y position) (* delta-time speed (:y direction)))}
+        new-position (->> (* delta-time speed)
+                       (math/scale direction )
+                       (math/translate position ))
         distance (math/length (math/direction target-position new-position))
         listener (:listener action)
         listener-payload {:actor actor
@@ -76,8 +77,9 @@
 
 (defmethod updater ::after
   [action delta-time]
-  (let [time (get-in action [params time])
+  (let [time (get-in action [:params :time])
         new-time (- time delta-time)
+        listener (:listener action)
         listener-payload {:old-state {:time time}
                           :state {:time new-time}}]
     (if (>= 0 new-time)
@@ -90,29 +92,40 @@
         ;; return the current state of the action for the next iteration
         (update-in action [:params] assoc :time new-time)))))
 
-(defmulti make-action (fn [[action &_options] _dispatcher]) action)
+(defmulti make-action (fn [[action &_options] lisetner] action))
+
+(defn start
+  "A screenplay is a tree like structure defined as a vector;
+  first item represent the action; the rest of the vector represents
+  options specified as pairs like :time 500, :actor :bob and so on"
+  [screenplay listener]
+  (if (vector? (first screenplay))
+    (dorun (map #(make-action % listener) screenplay))
+    (make-action screenplay listener)))
 
 ;; after action just waits until the specified amount of time passes
 ;; and eventually continue with the actions specified in the :then
 ;; option
+(def action-after ::after)
+
 (defmethod make-action ::after
-  [[action &options] listener]
+  [[action & options] listener]
   (let [{:keys [actor time then]} (apply hash-map options)]
     (listener ::start action {:actor actor
                               :state {:time time}})
     (register-action
       {:action action
        :listener listener
-       :then (when-some then (partial start-screenplay then listener))
+       :then (when (some? then) (partial start then listener))
        :params {:time time}})))
 
+(def action-move ::move)
 (defmethod make-action ::move
-  [[action &options] listener]
-  (let [{:keys [actor from to speed]} (apply hash-map options) ;; options are provided as a vector but it is pratical to access them as a map
+  [[action & options] listener]
+  (let [{:keys [actor from to speed then]} (apply hash-map options) ;; options are provided as a vector but it is pratical to access them as a map
         dir (math/direction to from)
         normalized-dir (math/normalize dir)
-        prev-distance (math/length dir)
-        :then (when-some then (partial start-screenplay then listener))]
+        prev-distance (math/length dir)]
     (listener ::start action {:actor actor
                               :state {:position from}})
     (register-action
@@ -124,12 +137,3 @@
                 :direction normalized-dir
                 :prev-distance prev-distance
                 :speed speed}})))
-
-(defn start-screenplay
-  "A screenplay is a tree like structure defined as a vector;
-  first item represent the action; the rest of the vector represents
-  options specified as pairs like :time 500, :actor :bob and so on"
-  [screenplay listener]
-  (if (vector? (first screeplay))
-    (dorun (map #(make-action % listener) screenplay))
-    (make-action screeplay listener)))

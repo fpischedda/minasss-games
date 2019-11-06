@@ -4,7 +4,7 @@
 (defn direction
   "Given two vectors a and b, return a new vector that points from a to b"
   [[ax ay] [bx by]]
-  [(- ax ba) (- ay by)])
+  [(- ax bx) (- ay by)])
 
 (defn length
   "Given the vector v return its length"
