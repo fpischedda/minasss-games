@@ -6,6 +6,7 @@
             [minasss-games.pixi :as pixi]
             [minasss-games.pixi.input :as input]
             [minasss-games.pixi.scene :as scene]
+            [minasss-games.screenplay :as screenplay]
             [minasss-games.tween :as tween]
             [minasss-games.experiments.awwwliens.game :as game]))
 
@@ -18,6 +19,15 @@
                 "images/awwwliens/anim/ufo.json"])
 
 (def main-stage (pixi/make-container))
+
+(def intro-plot [[:screenplay/move
+                  :actor :cow
+                  :from [0 0] :to [100 100] :speed 30
+                  :then [:screenplay/after
+                         :time 500
+                         :then [:screenplay/move
+                         :actor :ufo
+                         :from [0 0] :to [100 100] :speed 50]]]])
 
 (defn make-animated-ufo
   "Create animated ufo element"
