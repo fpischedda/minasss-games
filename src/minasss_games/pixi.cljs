@@ -154,9 +154,11 @@
 
 (defn set-position
   "Set position of any PIXI/Container subclass"
-  [container x y]
-  (.set (oget container "position") x y)
-  container)
+  ([container [x y]]
+   (set-position x y))
+  ([container x y]
+   (.set (oget container "position") x y)
+   container))
 
 (defn set-anchor
   "Set anchor of any PIXI/Container subclass"

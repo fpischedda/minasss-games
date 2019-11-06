@@ -43,8 +43,7 @@
 
 (defn to-world-position
   [{:keys [col row]}]
-  {:x (* cell-width col)
-   :y (* cell-height row)})
+  [(* cell-width col) (* cell-height row)])
 
 (defn move-cow
   [from-pos to-pos on-complete-fn]
