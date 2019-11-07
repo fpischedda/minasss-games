@@ -26,26 +26,61 @@
   future."
   (:require [minasss-games.math :as math]))
 
+(def clog js/console.log)
+
 ;; Replicating the action namespace for now, to not break existing
-;; existing functionality
+;; functionality
+
+(defmulti make-action (fn [[action &_options] _listener] action))
+
+(defn start
+  "A screenplay is a tree like structure defined as a vector;
+  first item represent the action; the rest of the vector represents
+  options specified as pairs like :time 500, :actor :bob and so on"
+  [screenplay listener]
+  (clog "STARTING SCREENPLAY")
+  (clog (clj->js screenplay))
+  (if (keyword? (first screenplay))
+    (make-action screenplay listener)
+    (dorun (map #(make-action % listener) screenplay))))
 
 (def actions-registry_ (atom (list)))
+(def active-actions-registry_ (atom (list)))
+
+(defn clean-actions
+  "remove all actions from the registry"
+  []
+  (reset! active-actions-registry_ (list))
+  (reset! actions-registry_ (list)))
 
 (defn register-action
-  [action]
-  (swap! actions-registry_ conj action))
+  ([action-name listener then params]
+   (clog "REGISTERING ACTION action then params")
+   (clog (clj->js action-name))
+   (clog (clj->js then))
+   (clog (clj->js params))
+   (register-action
+     {:action action-name
+      :listener listener
+      :then (when (some? then) (partial start then listener))
+      :params params}))
+
+  ([action]
+   (swap! actions-registry_ conj action)))
 
 (defmulti updater
   (fn [action _delta-time] (:action action)))
 
 (defn update-actions
   [delta-time]
-  (swap! actions-registry_
+  (swap! active-actions-registry_
     (fn [action]
       (->> action
         (map #(updater % delta-time))
         (filter some?)
-        doall))))
+        doall)))
+  (swap! active-actions-registry_ concat @actions-registry_)
+  (reset! actions-registry_ (list)))
 
 (defmethod updater ::move
   [action delta-time]
@@ -67,7 +102,8 @@
         ;; return the next action if any
         ;; :then should be associated to a function that returns a new action
         (when-let [next-action (:then action)]
-          (next-action)))
+          (next-action)
+          nil))
       ;; this action has not finished yet, in updates the target and
       ;; prepares the state for next iteration
       (do
@@ -86,22 +122,12 @@
       (do
         (listener ::finish (:action action) listener-payload)
         (when-let [next-action (:then action)]
-          (next-action)))
+          (next-action)
+          nil))
       (do
         (listener ::step (:action action) listener-payload)
         ;; return the current state of the action for the next iteration
         (update-in action [:params] assoc :time new-time)))))
-
-(defmulti make-action (fn [[action &_options] lisetner] action))
-
-(defn start
-  "A screenplay is a tree like structure defined as a vector;
-  first item represent the action; the rest of the vector represents
-  options specified as pairs like :time 500, :actor :bob and so on"
-  [screenplay listener]
-  (if (vector? (first screenplay))
-    (dorun (map #(make-action % listener) screenplay))
-    (make-action screenplay listener)))
 
 ;; after action just waits until the specified amount of time passes
 ;; and eventually continue with the actions specified in the :then
@@ -110,14 +136,10 @@
 
 (defmethod make-action ::after
   [[action & options] listener]
-  (let [{:keys [actor time then]} (apply hash-map options)]
-    (listener ::start action {:actor actor
-                              :state {:time time}})
-    (register-action
-      {:action action
-       :listener listener
-       :then (when (some? then) (partial start then listener))
-       :params {:time time}})))
+  (let [{:keys [time then]} (apply hash-map options)
+        initial-state {:time time}]
+    (listener ::start action {:state initial-state})
+    (register-action action listener then initial-state)))
 
 (def action-move ::move)
 (defmethod make-action ::move
@@ -128,12 +150,9 @@
         prev-distance (math/length dir)]
     (listener ::start action {:actor actor
                               :state {:position from}})
-    (register-action
-      {:action action
-       :listener listener
-       :params {:actor actor
-                :position from
-                :target-position to
-                :direction normalized-dir
-                :prev-distance prev-distance
-                :speed speed}})))
+    (register-action action listener then {:actor actor
+                                           :position from
+                                           :target-position to
+                                           :direction normalized-dir
+                                           :prev-distance prev-distance
+                                           :speed speed})))

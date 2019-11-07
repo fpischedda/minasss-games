@@ -10,6 +10,8 @@
             [minasss-games.tween :as tween]
             [minasss-games.experiments.awwwliens.game :as game]))
 
+(def clog js/console.log)
+
 (def scene {:init-scene ::menu-scene
             :cleanup-scene ::menu-scene})
 
@@ -20,14 +22,26 @@
 
 (def main-stage (pixi/make-container))
 
-(def intro-screenplay [[screenplay/action-move
-                        :actor :cow
-                        :from [0 400] :to [248 400] :speed 60
-                        :then [screenplay/action-after
-                               :time 500
-                               :then [screenplay/action-move
-                                      :actor :ufo
-                                      :from [0 0] :to [200 200] :speed 80]]]])
+(def intro-screenplay
+  [screenplay/action-after :time 50
+   :then [screenplay/action-move
+          :actor :cow
+          :from [0 400] :to [248 400] :speed 10
+          :then [screenplay/action-after
+                 :time 5.0
+                 :then [screenplay/action-move
+                        :actor :ufo
+                        :from [0 0] :to [200 200] :speed 10]]]])
+
+(defn screenplay-listener
+  [_event-type action payload]
+  (clog "screenplay lisetner event action payload")
+  (clog _event-type)
+  (clog (clj->js action))
+  (clog (clj->js payload))
+  (when-let [actor (:actor action)]
+    (let [container (pixi/get-child-by-name main-stage (name actor))]
+      (pixi/set-attributes container (:state payload)))))
 
 (defn make-animated-ufo
   "Create animated ufo element"
@@ -46,7 +60,7 @@
   []
   (scene/render
     [:sprite {:texture "images/awwwliens/menu/cow-still.png"
-              :position [248 400]
+              :position [0 400]
               :name "cow"}]))
 
 (def menu-items_ (atom {:selected-index 0
@@ -108,12 +122,6 @@
   (if (= :key-up event-type)
     (update-menu! action)))
 
-(defn screenplay-listener
-  [_event-type action payload]
-  (when (not (= action :screenplay/after))
-    (let [container (pixi/get-child-by-name main-stage (name (:actor payload)))]
-      (pixi/set-attributes container (:state payload)))))
-
 (defn setup
   "setup the view based on the menu-items_ atom; main-stage refers to the
   root container, where other graphical elements will be added"
@@ -137,6 +145,7 @@
 
 (defmethod scene-cleanup ::menu-scene
   [_]
+  (screenplay/clean-actions)
   (input/unregister-key-handler ::menu-handler)
   (remove-watch menu-items_ ::menu-changed-watch)
   (pixi/remove-container main-stage))
