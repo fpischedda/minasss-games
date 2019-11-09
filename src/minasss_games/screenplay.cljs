@@ -38,8 +38,6 @@
   first item represent the action; the rest of the vector represents
   options specified as pairs like :time 500, :actor :bob and so on"
   [screenplay listener]
-  (clog "STARTING SCREENPLAY")
-  (clog (clj->js screenplay))
   (if (keyword? (first screenplay))
     (make-action screenplay listener)
     (dorun (map #(make-action % listener) screenplay))))
@@ -55,10 +53,6 @@
 
 (defn register-action
   ([action-name listener then params]
-   (clog "REGISTERING ACTION action then params")
-   (clog (clj->js action-name))
-   (clog (clj->js then))
-   (clog (clj->js params))
    (register-action
      {:action action-name
       :listener listener
@@ -129,6 +123,25 @@
         ;; return the current state of the action for the next iteration
         (update-in action [:params] assoc :time new-time)))))
 
+(defmethod updater ::scale
+  [{:keys [action-name params listener] :as action} delta-time]
+  (let [{:keys [from to scale diff elapsed time]} params
+        new-elapsed (+ elapsed delta-time)]
+    (if (>= new-elapsed time)
+      (do
+        (listener ::finish action-name {:old-state {:scale scale}
+                                        :state {:scale to}})
+        (when-let [next-action (:then action)]
+          (next-action)
+          nil))
+      (do
+        (let [new-scale (+ from (* diff (/ new-elapsed time)))]
+          (listener ::step action-name {:old-state {:scale scale}
+                                        :state {:scale new-scale}})
+          ;; return the current state of the action for the next iteration
+          (update-in action [:params] assoc
+            :elapsed new-elapsed :scale new-scale))))))
+
 ;; after action just waits until the specified amount of time passes
 ;; and eventually continue with the actions specified in the :then
 ;; option
@@ -156,3 +169,15 @@
                                            :direction normalized-dir
                                            :prev-distance prev-distance
                                            :speed speed})))
+
+(def action-scale ::scale)
+(defmethod make-action ::scale
+  [[action & options] listener]
+  (let [{:keys [from to time then]} (apply hash-map options)]
+    (listener ::start action {:state {:scale from}})
+    (register-action action listener then {:from from
+                                           :to to
+                                           :diff (- to from)
+                                           :scale from
+                                           :elapsed 0.0
+                                           :time time})))
