@@ -20,7 +20,7 @@
   Event listeners will receive event-type, action and a payload which may be
   different for each kind of actions, as a convention the ::start payload
   will contain the initial state and the actor (if it makes sense), ::step and
-  ::finish will contain the actor, old-state and state.
+  ::finish will contain the actor, old-state and (current) state.
 
   This protocol is not well defined yet and will probably change in the
   future."

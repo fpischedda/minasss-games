@@ -35,7 +35,7 @@
 
 (defn screenplay-listener
   [_event-type action payload]
-  (clog "screenplay lisetner event action payload")
+  (clog "screenplay listener event action payload")
   (clog _event-type)
   (clog (clj->js action))
   (clog (clj->js payload))
