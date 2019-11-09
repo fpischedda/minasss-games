@@ -9,7 +9,7 @@
 
 (def director_ (atom {}))
 
-(defn update-step
+(defn ^:export update-step
   "update view related stuff"
   [delta-time]
   (screenplay/update-actions delta-time)
@@ -22,7 +22,7 @@
   - :current-scene optional, a map that contains information about current scene
     like init function, cleanup function and maybe something else in the future"
   [app]
-  (.start (pixi/make-ticker update-step))
+  (pixi/add-to-shared-ticker update-step)
   (reset! director_ {:app app
                      :app-stage (oget app "stage")}))
 
