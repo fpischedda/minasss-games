@@ -25,21 +25,20 @@
 (def intro-screenplay
   [screenplay/action-after :time 50
    :then [screenplay/action-move
-          :actor :cow
-          :from [0 400] :to [248 400] :speed 10
+          :actor :ufo
+          :from [0 0] :to [248 200] :speed 10
           :then [screenplay/action-after
                  :time 5.0
-                 :then [screenplay/action-move
-                        :actor :ufo
-                        :from [0 0] :to [200 200] :speed 10]]]])
+                 :then [[screenplay/action-scale
+                         :actor :cow
+                         :from 0.1 :to 1.0 :time 0.5]
+                        [screenplay/action-move
+                         :actor :cow
+                         :from [248 200] :to [248 400] :speed 5]]]]])
 
 (defn screenplay-listener
   [_event-type action payload]
-  (clog "screenplay listener event action payload")
-  (clog _event-type)
-  (clog (clj->js action))
-  (clog (clj->js payload))
-  (when-let [actor (:actor action)]
+  (when-let [actor (:actor payload)]
     (let [container (pixi/get-child-by-name main-stage (name actor))]
       (pixi/set-attributes container (:state payload)))))
 
@@ -50,7 +49,7 @@
               [:animated-sprite {:spritesheet "images/awwwliens/anim/ufo.json"
                                  :animation-name "ufo"
                                  :animation-speed 0.05
-                                 :position [200 200]
+                                 :position [-200 -200]
                                  :name "ufo"}])]
     (.play ufo)
     ufo))
@@ -60,7 +59,7 @@
   []
   (scene/render
     [:sprite {:texture "images/awwwliens/menu/cow-still.png"
-              :position [0 400]
+              :position [-200 -400]
               :name "cow"}]))
 
 (def menu-items_ (atom {:selected-index 0
@@ -120,7 +119,9 @@
 (defn handle-input
   [event-type _native action]
   (if (= :key-up event-type)
-    (update-menu! action)))
+    (if (= ::restart-screenplay action)
+      (screenplay/start intro-screenplay screenplay-listener)
+      (update-menu! action))))
 
 (defn setup
   "setup the view based on the menu-items_ atom; main-stage refers to the
@@ -139,7 +140,8 @@
   (setup main-stage)
   (input/register-keys {"ArrowUp" ::move-up "k" ::move-up "w" ::move-up
                         "ArrowDown" ::move-down "j" ::move-down "s" ::move-down
-                        "Enter" ::select "Space" ::select}
+                        "Enter" ::select "Space" ::select
+                        "r" ::restart-screenplay}
     ::menu-handler handle-input)
   )
 
