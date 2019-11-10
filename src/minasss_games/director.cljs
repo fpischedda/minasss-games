@@ -3,17 +3,30 @@
   scenes, providing a way to start a new scene and clean everything
   afterwards."
   (:require [minasss-games.pixi :as pixi]
+            [minasss-games.pixi.settings :as settings]
             [minasss-games.screenplay :as screenplay]
             [minasss-games.tween :as tween]
             [oops.core :refer [oget]]))
 
 (def director_ (atom {}))
 
+(def TargetFPMS (settings/get-by-name "TARGET_FPMS"))
+
 (defn ^:export update-step
-  "update view related stuff"
-  [delta-time]
-  (screenplay/update-actions delta-time)
-  (tween/update-tweens delta-time))
+  "update view related stuff
+  ticker callback will receive a parameter which is referred as
+  delta time by PIXI documentation; but this name is missleading because
+  instead of time since last update it refers to `frame time` since last frame
+  this means that if we target 60 FPS and we effectively have 60 FPS,
+  delta-time will have the value 1, if we have 30 FPS delta-time will have
+  the value 2; to make things more clear PIXI delta time will be called
+  `delta-frame`.
+  If we are interested in `real` delta-time we can scale delta-frame with
+  TargetFPMS: target frames per millisecond"
+  [delta-frame]
+  (let [dt-ms (* delta-frame TargetFPMS)]
+    (screenplay/update-actions dt-ms)
+    (tween/update-tweens dt-ms)))
 
 (defn init
   "Initialize the director which is basicly a map that holds
