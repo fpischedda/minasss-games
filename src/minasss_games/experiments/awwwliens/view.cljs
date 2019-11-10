@@ -50,7 +50,7 @@
   (tween/move-to {:target (get-in @world-view_ [:cow :view])
                   :starting-position (to-world-position from-pos)
                   :target-position (to-world-position to-pos)
-                  :speed 3
+                  :speed 100
                   :on-complete on-complete-fn}))
 
 (defn update-score-text
