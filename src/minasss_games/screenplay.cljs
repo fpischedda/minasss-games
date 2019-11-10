@@ -124,29 +124,30 @@
         (update-in action [:params] assoc :time new-time)))))
 
 (defmethod updater ::scale
-  [{:keys [action-name params listener] :as action} delta-time]
-  (let [{:keys [from to scale diff elapsed time]} params
+  [{:keys [action params then listener] :as action-state} delta-time]
+  (let [{:keys [actor from to scale diff elapsed time]} params
         new-elapsed (+ elapsed delta-time)]
     (if (>= new-elapsed time)
       (do
-        (listener ::finish action-name {:old-state {:scale scale}
-                                        :state {:scale to}})
-        (when-let [next-action (:then action)]
-          (next-action)
+        (listener ::finish action {:actor actor
+                                   :old-state {:scale scale}
+                                   :state {:scale to}})
+        (when (some? then)
+          (then)
           nil))
       (do
         (let [new-scale (+ from (* diff (/ new-elapsed time)))]
-          (listener ::step action-name {:old-state {:scale scale}
-                                        :state {:scale new-scale}})
+          (listener ::step action {:actor actor
+                                   :old-state {:scale scale}
+                                   :state {:scale new-scale}})
           ;; return the current state of the action for the next iteration
-          (update-in action [:params] assoc
+          (update-in action-state [:params] assoc
             :elapsed new-elapsed :scale new-scale))))))
 
 ;; after action just waits until the specified amount of time passes
 ;; and eventually continue with the actions specified in the :then
 ;; option
 (def action-after ::after)
-
 (defmethod make-action ::after
   [[action & options] listener]
   (let [{:keys [time then]} (apply hash-map options)
@@ -173,9 +174,10 @@
 (def action-scale ::scale)
 (defmethod make-action ::scale
   [[action & options] listener]
-  (let [{:keys [from to time then]} (apply hash-map options)]
-    (listener ::start action {:state {:scale from}})
-    (register-action action listener then {:from from
+  (let [{:keys [actor from to time then]} (apply hash-map options)]
+    (listener ::start action {:actor actor :state {:scale from}})
+    (register-action action listener then {:actor actor
+                                           :from from
                                            :to to
                                            :diff (- to from)
                                            :scale from
