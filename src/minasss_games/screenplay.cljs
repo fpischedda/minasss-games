@@ -78,32 +78,33 @@
 
 (defmethod updater ::move
   [action delta-time]
-  (let [{:keys [actor position target-position direction prev-distance speed]} (:params action)
-        new-position (->> (* delta-time speed)
-                       (math/scale direction )
-                       (math/translate position ))
-        distance (math/length (math/direction target-position new-position))
-        listener (:listener action)
-        listener-payload {:actor actor
-                          :old-state {:position position}
-                          :state {:position new-position}}]
-    (if (> distance prev-distance)
+  (let [{:keys [actor from to position direction elapsed time]} (:params action)
+        new-elapsed (+ elapsed delta-time)
+        listener (:listener action)]
+    (if (>= new-elapsed time)
       ;; lifecycle of this action finishes here;
-      ;; if :dispatcher is set call dispatch function with the latest state
-      ;; of the action
+      ;; if :listener is set, call it with the latest state and ::finish
+      ;; event type
       (do
-        (listener ::finish (:action action) listener-payload)
+        (listener ::finish (:action action) {:actor actor
+                                             :old-state {:position position}
+                                             :state {:position to}})
         ;; return the next action if any
-        ;; :then should be associated to a function that returns a new action
+        ;; :then should be associated to a function that registers a new action
         (when-let [next-action (:then action)]
           (next-action)
           nil))
       ;; this action has not finished yet, in updates the target and
       ;; prepares the state for next iteration
       (do
-        (listener ::step (:action action) listener-payload)
-        ;; return the current state of the action for the next iteration
-        (update-in action [:params] assoc :position new-position :prev-distance distance)))))
+        (let [new-position (->> (/ new-elapsed time)
+                             (math/scale direction )
+                             (math/translate from ))]
+          (listener ::step (:action action) {:actor actor
+                                             :old-state {:position position}
+                                             :state {:position new-position}})
+          ;; return the current state of the action for the next iteration
+          (update-in action [:params] assoc :position new-position :elapsed new-elapsed))))))
 
 (defmethod updater ::after
   [action delta-time]
@@ -158,18 +159,17 @@
 (def action-move ::move)
 (defmethod make-action ::move
   [[action & options] listener]
-  (let [{:keys [actor from to speed then]} (apply hash-map options) ;; options are provided as a vector but it is pratical to access them as a map
-        dir (math/direction to from)
-        normalized-dir (math/normalize dir)
-        prev-distance (math/length dir)]
+  (let [{:keys [actor from to time then]} (apply hash-map options) ;; options are provided as a vector but it is pratical to access them as a map
+        dir (math/direction to from)]
     (listener ::start action {:actor actor
                               :state {:position from}})
     (register-action action listener then {:actor actor
+                                           :from from
+                                           :to to
                                            :position from
-                                           :target-position to
-                                           :direction normalized-dir
-                                           :prev-distance prev-distance
-                                           :speed speed})))
+                                           :direction dir
+                                           :elapsed 0.0
+                                           :time time})))
 
 (def action-scale ::scale)
 (defmethod make-action ::scale
