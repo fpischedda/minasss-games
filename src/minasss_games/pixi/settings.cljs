@@ -3,15 +3,18 @@
   (compared to using js directly)
 
   PIXI.settings is an associative array so it is possible to access and set its
-  properties using aget/aset")
+  properties using aget/aset"
+  (:require [oops.core :refer [oget oget+ oset!+]]))
 
-(defn get-by-name!
-  [name value]
-  (aget js/PIXI.settings name))
+(def Settings (oget js/PIXI "settings"))
+
+(defn get-by-name
+  [name]
+  (oget+ Settings name))
 
 (defn set-by-name!
   [name value]
-  (aset js/PIXI.settings name value))
+  (oset!+ Settings name value))
 
 (defmulti set!
   (fn [setting _param] setting))
