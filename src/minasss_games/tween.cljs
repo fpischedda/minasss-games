@@ -26,14 +26,15 @@
   [tween delta-time]
   (let [{:keys [target position target-position direction prev-distance speed]} (:params tween)
         on-complete (:on-complete tween)
-        new-position {:x (+ (:x position) (* delta-time speed (:x direction)))
-                      :y (+ (:y position) (* delta-time speed (:y direction)))}
+        new-position (->> (* delta-time speed)
+                       (math/scale direction )
+                       (math/translate position ))
         distance (math/length (math/direction target-position new-position))]
     (if (> distance prev-distance)
       ;; lifecycle of this tween finishes here; if on-complete returns
       ;; something that seems a tween return it so it can be registered
       (do
-        (pixi/set-position target (:x target-position) (:y target-position))
+        (pixi/set-position target target-position)
         (when (some? on-complete)
           (let [next-tween (on-complete)]
             (when (and (map? next-tween) (some? (:tween next-tween)))
@@ -41,7 +42,7 @@
       ;; this tween has not finished yet, in updates the target and
       ;; prepares the state for next iteration
       (do
-        (pixi/set-position target (:x new-position) (:y new-position))
+        (pixi/set-position target new-position)
         (update-in tween [:params] assoc :position new-position :prev-distance distance)))))
 
 (defn move-to

@@ -43,15 +43,14 @@
 
 (defn to-world-position
   [{:keys [col row]}]
-  {:x (* cell-width col)
-   :y (* cell-height row)})
+  [(* cell-width col) (* cell-height row)])
 
 (defn move-cow
   [from-pos to-pos on-complete-fn]
   (tween/move-to {:target (get-in @world-view_ [:cow :view])
                   :starting-position (to-world-position from-pos)
                   :target-position (to-world-position to-pos)
-                  :speed 3
+                  :speed 100
                   :on-complete on-complete-fn}))
 
 (defn update-score-text

@@ -6,6 +6,7 @@
 
 (def Loader (oget js/PIXI.Loader "shared"))
 (def Resources (oget Loader "resources"))
+(def Ticker (oget js/PIXI.Ticker "shared"))
 
 (defn add-app-to-dom
   "Add the specified app to the DOM"
@@ -18,6 +19,11 @@
   (let [ticker (js/PIXI.Ticker.)]
     (.add ticker handler-fn)
     ticker))
+
+(defn add-to-shared-ticker
+  "Add a listerner to the shared ticker"
+  [handler-fn]
+  (.add Ticker handler-fn))
 
 (defn make-app
   "Instantiate a PIXI app"
@@ -154,9 +160,11 @@
 
 (defn set-position
   "Set position of any PIXI/Container subclass"
-  [container x y]
-  (.set (oget container "position") x y)
-  container)
+  ([container [x y]]
+   (set-position container x y))
+  ([container x y]
+   (.set (oget container "position") x y)
+   container))
 
 (defn set-anchor
   "Set anchor of any PIXI/Container subclass"
@@ -172,9 +180,12 @@
 
 (defn set-scale
   "Set scale of any PIXI/Container subclass"
-  [container x y]
-  (.set (oget container "scale") x y)
-  container)
+  ([container scale]
+   (.set (oget container "scale") scale scale)
+   container)
+  ([container x y]
+   (.set (oget container "scale") x y)
+   container))
 
 (defn set-name
   "Set name of any PIXI/DisplayObject subclass"
@@ -234,6 +245,12 @@
 (defmethod set-attribute :pivot
   [container _attribute [x y]]
   (set-pivot container x y))
+
+(defmethod set-attribute :scale
+  ([container _attribute scale]
+   (set-scale container scale scale))
+  ([container _attribute x y]
+   (set-scale container x y)))
 
 (defmethod set-attribute :name
   [container _attribute name]
