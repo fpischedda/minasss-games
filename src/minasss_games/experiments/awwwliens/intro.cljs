@@ -26,15 +26,15 @@
   [screenplay/action-after :time 1.5
    :then [screenplay/action-move
           :actor :ufo
-          :from [0 0] :to [248 200] :speed 10
+          :from [0 0] :to [248 200] :time 5.0
           :then [screenplay/action-after
                  :time 3.0
                  :then [[screenplay/action-scale
                          :actor :cow
-                         :from 0.1 :to 1.0 :time 5.0]
+                         :from 0.1 :to 1.0 :time 4.0]
                         [screenplay/action-move
                          :actor :cow
-                         :from [248 200] :to [248 400] :speed 40]]]]])
+                         :from [248 200] :to [248 400] :time 4.0]]]]])
 
 (comment
   (let [container (pixi/get-child-by-name main-stage "cow")]
@@ -65,6 +65,7 @@
   (scene/render
     [:sprite {:texture "images/awwwliens/menu/cow-still.png"
               :position [-200 -400]
+              :pivot [0.5 0.5]
               :name "cow"}]))
 
 (def menu-items_ (atom {:selected-index 0
