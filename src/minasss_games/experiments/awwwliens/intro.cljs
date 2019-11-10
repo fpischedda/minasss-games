@@ -28,13 +28,18 @@
           :actor :ufo
           :from [0 0] :to [248 200] :speed 10
           :then [screenplay/action-after
-                 :time 5.0
+                 :time 10.0
                  :then [[screenplay/action-scale
                          :actor :cow
-                         :from 0.1 :to 1.0 :time 0.5]
+                         :from 0.1 :to 1.0 :time 25.0]
                         [screenplay/action-move
                          :actor :cow
                          :from [248 200] :to [248 400] :speed 5]]]]])
+
+(comment
+  (let [container (pixi/get-child-by-name main-stage "cow")]
+    (pixi/set-attributes container {:scale 0.5}))
+  )
 
 (defn screenplay-listener
   [_event-type action payload]
