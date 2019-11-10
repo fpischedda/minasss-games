@@ -181,7 +181,8 @@
 (defn set-scale
   "Set scale of any PIXI/Container subclass"
   ([container scale]
-   (set-scale scale scale))
+   (.set (oget container "scale") scale scale)
+   container)
   ([container x y]
    (.set (oget container "scale") x y)
    container))
