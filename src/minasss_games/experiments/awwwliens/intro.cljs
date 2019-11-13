@@ -7,7 +7,6 @@
             [minasss-games.pixi.input :as input]
             [minasss-games.pixi.scene :as scene]
             [minasss-games.screenplay :as screenplay]
-            [minasss-games.tween :as tween]
             [minasss-games.experiments.awwwliens.game :as game]))
 
 (def clog js/console.log)
@@ -157,7 +156,6 @@
   (input/unregister-key-handler ::menu-handler)
   (remove-watch menu-items_ ::menu-changed-watch)
   (pixi/remove-container main-stage))
-
 
 (defmethod scene-init ::menu-scene
   [_scene parent-stage]
