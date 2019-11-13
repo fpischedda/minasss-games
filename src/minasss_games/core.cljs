@@ -1,5 +1,5 @@
 (ns minasss-games.core
-  "A small experimetn with PIXI javascript library"
+  "A small experiment with PIXI javascript library"
   (:require [minasss-games.director :as director]
             [minasss-games.pixi :as pixi]
             [minasss-games.experiments.awwwliens.intro :as awwwliens]))
