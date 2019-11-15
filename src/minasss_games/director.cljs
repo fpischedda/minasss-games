@@ -15,6 +15,7 @@
   and used as the `resources` parameter to call `pixi/load-resources` with
   `(scene-ready :scene-id app-stage)` as the `loaded` callback"
   (:require [minasss-games.pixi :as pixi]
+            [minasss-games.pixi.input :as input]
             [minasss-games.pixi.settings :as settings]
             [minasss-games.screenplay :as screenplay]
             [minasss-games.tween :as tween]
@@ -69,11 +70,53 @@
   [scene]
   (println "no scene-cleanup defined for this scene:" scene))
 
+(defmulti scene-key-up
+  (fn [scene _event-type _native _translated] (:id scene)))
+
+(defmethod scene-key-up :default
+  [_scene _event-type _native _translated])
+
+(defmulti scene-key-down
+  (fn [scene _event-type _native _translated] (:id scene)))
+
+(defmethod scene-key-down :default
+  [_scene _event-type _native _translated])
+
+(defmulti scene-key-pressed
+  (fn [scene _event-type _native _translated] (:id scene)))
+
+(defmethod scene-key-pressed :default
+  [_scene _event-type _native _translated])
+
 (defn load-scene-resources
   "Load scene defined resources and setup a callback to call
-  to scene-ready <:scene-id>"
+  scene-ready <:scene-id> parent-stage"
   [resources scene parent-stage]
   (pixi/load-resources resources (partial scene-ready scene parent-stage)))
+
+(defn make-key-handler
+  [scene handler key-mapping]
+  (fn [event]
+    (let [native (.-key event)
+          translated (get key-mapping native)]
+      (when (some? translated)
+        (handler scene native translated)))))
+
+(defn register-keys
+  [scene key-mapping]
+  (let [key-up-fn (make-key-handler scene scene-key-up key-mapping)
+        key-down-fn (make-key-handler scene scene-key-down key-mapping)
+        key-pressed-fn (make-key-handler scene scene-key-pressed key-mapping)
+        handler-id (:id scene)]
+    (input/add-key-handler :key-up handler-id key-up-fn)
+    (input/add-key-handler :key-down handler-id key-down-fn)
+    (input/add-key-handler :key-press handler-id key-pressed-fn)))
+
+(defn unregister-keys
+  [{:keys [id]}]
+  (input/remove-key-handler :key-up id)
+  (input/remove-key-handler :key-down id)
+  (input/remove-key-handler :key-press id))
 
 (defn start-scene
   "Provided scene is set as the current one, if an old scene is running,
@@ -81,7 +124,8 @@
   [scene]
   (swap! director_ (fn [{:keys [current-scene app-stage] :as director}]
                      (when current-scene
-                       (scene-cleanup current-scene))
+                       (scene-cleanup current-scene)
+                       (unregister-keys scene))
                      (scene-init scene app-stage)
                      ;; eventually load resources defined in the scene.
                      ;; after loading, scene-ready :scene-id will be called.
@@ -90,4 +134,6 @@
                      (if-let [resources (:resources scene)]
                        (load-scene-resources resources scene app-stage)
                        (scene-ready scene app-stage))
+                     (when-let [key-mapping (:key-mapping scene)]
+                       (register-keys scene key-mapping))
                      (assoc director :current-scene scene))))

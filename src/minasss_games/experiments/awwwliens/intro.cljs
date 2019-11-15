@@ -4,6 +4,7 @@
   Maybe the intro could go together with the main menu"
   (:require [minasss-games.director :as director :refer [scene-init
                                                          scene-ready
+                                                         scene-key-up
                                                          scene-cleanup]]
             [minasss-games.pixi :as pixi]
             [minasss-games.pixi.input :as input]
@@ -17,7 +18,11 @@
             :resources ["images/awwwliens/menu/background.png"
                         "images/awwwliens/menu/baloon.png"
                         "images/awwwliens/menu/cow-still.png"
-                        "images/awwwliens/anim/ufo.json"]})
+                        "images/awwwliens/anim/ufo.json"]
+            :key-mapping {"ArrowUp" ::move-up "k" ::move-up "w" ::move-up
+                          "ArrowDown" ::move-down "j" ::move-down "s" ::move-down
+                          "Enter" ::select "Space" ::select
+                          "r" ::restart-screenplay}})
 
 (def main-stage (pixi/make-container))
 
@@ -121,12 +126,11 @@
   (let [app-stage (.-parent main-stage)]
     (director/start-scene game/scene)))
 
-(defn handle-input
-  [event-type _native action]
-  (if (= :key-up event-type)
-    (if (= ::restart-screenplay action)
-      (screenplay/start intro-screenplay screenplay-listener)
-      (update-menu! action))))
+(defmethod scene-key-up ::menu
+  [scene _native action]
+  (if (= ::restart-screenplay action)
+    (screenplay/start intro-screenplay screenplay-listener)
+    (update-menu! action)))
 
 ;; setup the view based on the menu-items_ atom; main-stage refers to the
 ;; root container, where other graphical elements will be added
@@ -141,17 +145,10 @@
     (pixi/add-child app-stage main-stage)
 
     (screenplay/start intro-screenplay screenplay-listener)
-    (add-watch menu-items_ ::menu-changed-watch menu-changed-listener)
-
-    (input/register-keys {"ArrowUp" ::move-up "k" ::move-up "w" ::move-up
-                        "ArrowDown" ::move-down "j" ::move-down "s" ::move-down
-                        "Enter" ::select "Space" ::select
-                        "r" ::restart-screenplay}
-    ::menu-handler handle-input)))
+    (add-watch menu-items_ ::menu-changed-watch menu-changed-listener)))
 
 (defmethod scene-cleanup ::menu
   [_]
   (screenplay/clean-actions)
-  (input/unregister-key-handler ::menu-handler)
   (remove-watch menu-items_ ::menu-changed-watch)
   (pixi/remove-container main-stage))

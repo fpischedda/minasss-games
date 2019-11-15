@@ -1,7 +1,6 @@
 (ns minasss-games.experiments.gameoff-2019.menu
   (:require [minasss-games.director :as director :refer [scene-ready scene-cleanup]]
             [minasss-games.pixi :as pixi]
-            [minasss-games.pixi.input :as input]
             [minasss-games.pixi.scene :as scene]
             [minasss-games.screenplay :as screenplay]
             [minasss-games.experiments.awwwliens.game :as game]))
@@ -71,7 +70,7 @@
   (let [app-stage (.-parent main-stage)]
     (director/start-scene game/scene)))
 
-(defn scene-key-up ::menu-scene
+#_(defn scene-key-up ::menu-scene
   [_native action]
   (update-menu! action))
 
@@ -89,16 +88,12 @@
   [_scene app-stage]
   (let [background (pixi/make-sprite "images/awwwliens/menu/background.png")]
     (pixi/add-child main-stage background)
-    (pixi/add-child main-stage (make-cow-still))
-    (pixi/add-child main-stage (make-animated-ufo))
     (pixi/add-child main-stage (make-menu @menu-items_))
 
-    (screenplay/start intro-screenplay screenplay-listener)
     (add-watch menu-items_ ::menu-changed-watch menu-changed-listener))
   (pixi/add-child app-stage main-stage))
 
 (defmethod scene-cleanup ::menu-scene
   [_]
-  (input/unregister-key-handler ::menu-handler)
   (remove-watch menu-items_ ::menu-changed-watch)
   (pixi/remove-container main-stage))
