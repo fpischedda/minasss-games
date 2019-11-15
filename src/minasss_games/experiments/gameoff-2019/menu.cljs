@@ -1,5 +1,5 @@
 (ns minasss-games.experiments.gameoff-2019.menu
-  (:require [minasss-games.director :as director :refer [scene-init scene-cleanup]]
+  (:require [minasss-games.director :as director :refer [scene-ready scene-cleanup]]
             [minasss-games.pixi :as pixi]
             [minasss-games.pixi.input :as input]
             [minasss-games.pixi.scene :as scene]
@@ -71,11 +71,9 @@
   (let [app-stage (.-parent main-stage)]
     (director/start-scene game/scene)))
 
-(defmethod scene-cleanup ::menu-scene
-  [_]
-  (input/unregister-key-handler ::menu-handler)
-  (remove-watch menu-items_ ::menu-changed-watch)
-  (pixi/remove-container main-stage))
+(defn scene-key-up ::menu-scene
+  [_native action]
+  (update-menu! action))
 
 ;; NOTE: init should be used to initialize scene context
 ;; after init the director will load resources, if specified,
@@ -83,12 +81,12 @@
 ;; init could also start a "Loading" animation or this may be provided
 ;; by the director directly
 ;; for now this function is defined only to show the new protocol/contract
-(defmethod scene-init ::menu-scene
-  [_scene parent-stage]
-  nil)
+;; (defmethod scene-init ::menu-scene
+;;   [_scene app-stage]
+;;   nil)
 
 (defmethod scene-ready ::menu-scene
-  [_scene parent-stage]
+  [_scene app-stage]
   (let [background (pixi/make-sprite "images/awwwliens/menu/background.png")]
     (pixi/add-child main-stage background)
     (pixi/add-child main-stage (make-cow-still))
@@ -97,8 +95,10 @@
 
     (screenplay/start intro-screenplay screenplay-listener)
     (add-watch menu-items_ ::menu-changed-watch menu-changed-listener))
-  (pixi/add-child parent-stage main-stage))
+  (pixi/add-child app-stage main-stage))
 
-(defn scene-key-up ::menu-scene
-  [_native action]
-  (update-menu! action))
+(defmethod scene-cleanup ::menu-scene
+  [_]
+  (input/unregister-key-handler ::menu-handler)
+  (remove-watch menu-items_ ::menu-changed-watch)
+  (pixi/remove-container main-stage))

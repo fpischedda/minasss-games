@@ -2,7 +2,9 @@
   "Here I am trying to animate the intro where the alien kidnap the cow
   It should be super fun!
   Maybe the intro could go together with the main menu"
-  (:require [minasss-games.director :as director :refer [scene-init scene-cleanup]]
+  (:require [minasss-games.director :as director :refer [scene-init
+                                                         scene-ready
+                                                         scene-cleanup]]
             [minasss-games.pixi :as pixi]
             [minasss-games.pixi.input :as input]
             [minasss-games.pixi.scene :as scene]
@@ -11,13 +13,11 @@
 
 (def clog js/console.log)
 
-(def scene {:init-scene ::menu-scene
-            :cleanup-scene ::menu-scene})
-
-(def resources ["images/awwwliens/menu/background.png"
-                "images/awwwliens/menu/baloon.png"
-                "images/awwwliens/menu/cow-still.png"
-                "images/awwwliens/anim/ufo.json"])
+(def scene {:id ::menu
+            :resources ["images/awwwliens/menu/background.png"
+                        "images/awwwliens/menu/baloon.png"
+                        "images/awwwliens/menu/cow-still.png"
+                        "images/awwwliens/anim/ufo.json"]})
 
 (def main-stage (pixi/make-container))
 
@@ -128,36 +128,30 @@
       (screenplay/start intro-screenplay screenplay-listener)
       (update-menu! action))))
 
-(defn setup
-  "setup the view based on the menu-items_ atom; main-stage refers to the
-  root container, where other graphical elements will be added"
-  [main-stage]
+;; setup the view based on the menu-items_ atom; main-stage refers to the
+;; root container, where other graphical elements will be added
+(defmethod scene-ready ::menu
+  [_scene app-stage]
   (let [background (pixi/make-sprite "images/awwwliens/menu/background.png")]
     (pixi/add-child main-stage background)
     (pixi/add-child main-stage (make-cow-still))
     (pixi/add-child main-stage (make-animated-ufo))
     (pixi/add-child main-stage (make-menu @menu-items_))
 
-    (screenplay/start intro-screenplay screenplay-listener)
-    (add-watch menu-items_ ::menu-changed-watch menu-changed-listener)))
+    (pixi/add-child app-stage main-stage)
 
-(defn ^:export loaded-callback []
-  (setup main-stage)
-  (input/register-keys {"ArrowUp" ::move-up "k" ::move-up "w" ::move-up
+    (screenplay/start intro-screenplay screenplay-listener)
+    (add-watch menu-items_ ::menu-changed-watch menu-changed-listener)
+
+    (input/register-keys {"ArrowUp" ::move-up "k" ::move-up "w" ::move-up
                         "ArrowDown" ::move-down "j" ::move-down "s" ::move-down
                         "Enter" ::select "Space" ::select
                         "r" ::restart-screenplay}
-    ::menu-handler handle-input)
-  )
+    ::menu-handler handle-input)))
 
-(defmethod scene-cleanup ::menu-scene
+(defmethod scene-cleanup ::menu
   [_]
   (screenplay/clean-actions)
   (input/unregister-key-handler ::menu-handler)
   (remove-watch menu-items_ ::menu-changed-watch)
   (pixi/remove-container main-stage))
-
-(defmethod scene-init ::menu-scene
-  [_scene parent-stage]
-  (pixi/load-resources resources loaded-callback)
-  (pixi/add-child parent-stage main-stage))
