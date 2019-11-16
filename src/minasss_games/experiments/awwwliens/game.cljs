@@ -18,14 +18,21 @@
   the universe if you love cows as much this race does; cow manures will help
   to grow cow food!
   How long will you be able to keep the cow alive?"
-  (:require [minasss-games.director :as director :refer [scene-init scene-cleanup]]
+  (:require [minasss-games.director :as director :refer [scene-ready
+                                                         scene-key-up
+                                                         scene-cleanup]]
             [minasss-games.pixi :as pixi]
             [minasss-games.pixi.input :as input]
             [minasss-games.experiments.awwwliens.core :as core]
             [minasss-games.experiments.awwwliens.view :as view]))
 
-(def scene {:init-scene ::game-scene
-            :cleanup-scene ::game-scene})
+(def scene {:id ::game
+            :resources view/resources
+            :key-mapping {"ArrowUp" :up "k" :up "w" :up
+                          "ArrowDown" :down "j" :down "s" :down
+                          "ArrowLeft" :left "h" :left "a" :left
+                          "ArrowRight" :right "l" :right "d" :right
+                          "Escape" :exit}})
 
 (def world_ (atom nil))
 
@@ -34,14 +41,6 @@
 ;; graphical elements; moving it to the view namespace might mask
 ;; this possible behavior
 (def main-stage (pixi/make-container))
-
-(defn handle-input
-  [event-type _native direction]
-  (if (= :key-up event-type)
-    (condp = direction
-      :exit (director/start-scene minasss-games.experiments.awwwliens.intro/scene)
-      (swap! world_ core/move-cow direction))
-    ))
 
 (defn handle-cow-changed
   [world_ old-cow new-cow]
@@ -77,27 +76,25 @@
             cell rows]
       (view/update-cell cell))))
 
-(defn ^:export loaded-callback []
+(defmethod scene-ready ::game
+  [_scene parent-stage]
   (let [world (core/make-world {:width 3 :height 3
                                 :cow-row 0 :cow-col 0 :cow-energy 2})]
     (view/setup world main-stage)
-    (input/register-keys {"ArrowUp" :up "k" :up "w" :up
-                          "ArrowDown" :down "j" :down "s" :down
-                          "ArrowLeft" :left "h" :left "a" :left
-                          "ArrowRight" :right "l" :right "d" :right
-                          "Escape" :exit}
-      ::game-input-handler handle-input)
+
     (reset! world_ world)
-    (add-watch world_ ::world-changed-watch world-changed-listener)))
+    (add-watch world_ ::world-changed-watch world-changed-listener)
+    (pixi/add-child parent-stage main-stage)))
+
+(defmethod scene-key-up ::game
+  [_scene _native direction]
+  (condp = direction
+    :exit (director/start-scene minasss-games.experiments.awwwliens.intro/scene)
+    (swap! world_ core/move-cow direction))
+    )
 
 (defmethod scene-cleanup ::game-scene
   [_]
   (remove-watch world_ ::world-changed-watch)
   (reset! world_ nil)
-  (input/unregister-key-handler ::game-input-handler)
   (pixi/remove-container main-stage))
-
-(defmethod scene-init ::game-scene
-  [_scene parent-stage]
-  (pixi/load-resources view/resources loaded-callback)
-  (pixi/add-child parent-stage main-stage))
