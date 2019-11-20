@@ -38,7 +38,11 @@
                          :from 0.1 :to 1.0 :time 4.0]
                         [screenplay/action-move
                          :actor :cow
-                         :from [248 200] :to [248 400] :time 4.0]]]]])
+                         :from [248 200] :to [248 400] :time 4.0]
+                        [screenplay/action-after :time 4.0
+                         :then [screenplay/action-scale
+                                :actor :menu
+                                :from 0 :to 1.0 :time 0.7]]]]]])
 
 (comment
   (let [container (pixi/get-child-by-name main-stage "cow")]
@@ -92,6 +96,7 @@
     [:sprite {:name "menu"
               :anchor [1.0 0.0]
               :position [590 50]
+              :scale 0
               :texture "images/awwwliens/menu/baloon.png"}
      (into [] (map-indexed #(make-menu-entry %2 (= %1 selected-index)) items))]))
 
