@@ -1,16 +1,18 @@
 (ns minasss-games.experiments.awwwliens.intro
-  "Here I am trying to animate the intro where the alien kidnap the cow
-  It should be super fun!
+  "Here I am trying to animate the intro where the alien drops the cow in its
+  new environment.
+  It should be super fun! But it is not :)
   Maybe the intro could go together with the main menu"
-  (:require [minasss-games.director :as director :refer [scene-init
-                                                         scene-ready
-                                                         scene-key-up
-                                                         scene-cleanup]]
+  (:require [minasss-games.director
+             :as
+             director
+             :refer
+             [scene-cleanup scene-init scene-key-up scene-ready]]
+            [minasss-games.element :as element]
+            [minasss-games.experiments.awwwliens.game :as game]
             [minasss-games.pixi :as pixi]
             [minasss-games.pixi.input :as input]
-            [minasss-games.pixi.scene :as scene]
-            [minasss-games.screenplay :as screenplay]
-            [minasss-games.experiments.awwwliens.game :as game]))
+            [minasss-games.screenplay :as screenplay]))
 
 (def clog js/console.log)
 
@@ -58,7 +60,7 @@
 (defn make-animated-ufo
   "Create animated ufo element"
   []
-  (let [ufo (scene/render
+  (let [ufo (element/render
               [:animated-sprite {:spritesheet "images/awwwliens/anim/ufo.json"
                                  :animation-name "ufo"
                                  :animation-speed 0.05
@@ -70,7 +72,7 @@
 (defn make-cow-still
   "Create cow still element"
   []
-  (scene/render
+  (element/render
     [:sprite {:texture "images/awwwliens/menu/cow-still.png"
               :position [-200 -400]
               :pivot [0.5 0.5]
@@ -92,7 +94,7 @@
 
 (defn make-menu
   [{:keys [selected-index items]}]
-  (scene/render
+  (element/render
     [:sprite {:name "menu"
               :anchor [1.0 0.0]
               :position [590 50]

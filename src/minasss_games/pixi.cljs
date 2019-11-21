@@ -3,7 +3,6 @@
   (:require [cljsjs.pixi]
             [oops.core :refer [oget oget+ oset!]]))
 
-
 (def Loader (oget js/PIXI.Loader "shared"))
 (def Resources (oget Loader "resources"))
 (def Ticker (oget js/PIXI.Ticker "shared"))
