@@ -7,7 +7,7 @@
   :min-lein-version "2.9.1"
 
   :dependencies [[org.clojure/clojure "1.10.0"]
-                 [org.clojure/clojurescript "1.10.520"]
+                 [org.clojure/clojurescript "1.10.597"]
                  [org.clojure/core.async  "0.4.500"]
                  [binaryage/oops "0.7.0"]
                  [cljsjs/pixi "5.1.2-0"]]

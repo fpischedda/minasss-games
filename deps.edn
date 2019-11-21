@@ -1,4 +1,4 @@
-{:deps {org.clojure/clojurescript {:mvn/version "1.10.520"}
+{:deps {org.clojure/clojurescript {:mvn/version "1.10.597"}
         com.bhauman/figwheel-main {:mvn/version "0.2.3"}
         binaryage/oops {:mvn/version "0.7.0"}
         cljsjs/pixi {:mvn/version "5.1.4-0"}}
