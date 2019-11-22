@@ -23,9 +23,7 @@
 
 (def director_ (atom {}))
 
-(def TargetFPMS (settings/get-by-name "TARGET_FPMS"))
-
-(defn ^:export update-step
+(defn update-step
   "update view related stuff
   ticker callback will receive a parameter which is referred as
   delta time by PIXI documentation; but this name is missleading because
@@ -37,7 +35,8 @@
   If we are interested in `real` delta-time we can scale delta-frame with
   TargetFPMS: target frames per millisecond"
   [delta-frame]
-  (let [dt-ms (* delta-frame TargetFPMS)]
+  (let [target-fpms (settings/get-by-name "TARGET_FPMS")
+        dt-ms (* delta-frame target-fpms)]
     (screenplay/update-actions dt-ms)
     (tween/update-tweens dt-ms)))
 

@@ -1,9 +1,9 @@
 (ns minasss-games.experiments.awwwliens.view
   (:require [minasss-games.director :as director]
+            [minasss-games.element :as element]
+            [minasss-games.experiments.awwwliens.core :as core]
             [minasss-games.pixi :as pixi]
-            [minasss-games.pixi.scene :as scene]
-            [minasss-games.tween :as tween]
-            [minasss-games.experiments.awwwliens.core :as core]))
+            [minasss-games.tween :as tween]))
 
 (def resources ["images/awwwliens/game/background.png"
                 "images/awwwliens/cow.png"
@@ -80,7 +80,7 @@
 
 (defn make-cell
   [{:keys [row col energy poison] :as cell}]
-  (let [container (scene/render
+  (let [container (element/render
                     [:container {:position [(* cell-width col) (* cell-height row)]}
                      [:sprite {:texture "images/awwwliens/game/tile.png"
                                :anchor [0 1]
@@ -123,7 +123,7 @@
 
 (defn make-cow-view [cow]
   (let [container
-        (scene/render
+        (element/render
           [:container {:position [(* cell-width (get-in cow [:position :col]))
                                   (* cell-height (get-in cow [:position :row]))]}
            [:sprite {:texture "images/awwwliens/cow.png"

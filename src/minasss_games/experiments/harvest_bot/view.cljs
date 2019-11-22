@@ -1,9 +1,9 @@
 (ns minasss-games.experiments.harvest-bot.view
   "this namespace collects all view related functions"
-  (:require [minasss-games.pixi :as pixi]
-            [minasss-games.pixi.scene :as scene]
-            [minasss-games.tween :as tween]
-            [minasss-games.experiments.harvest-bot.game :as game]))
+  (:require [minasss-games.element :as element]
+            [minasss-games.experiments.harvest-bot.game :as game]
+            [minasss-games.pixi :as pixi]
+            [minasss-games.tween :as tween]))
 
 (def resources ["images/background.png" "images/sprite.png" "images/tile.png" "images/gem.png"])
 
@@ -78,7 +78,7 @@
 
 (defn make-cell
   [{:keys [row col energy cost]}]
-  (let [container (scene/render
+  (let [container (element/render
                     [:container {:position [(* cell-size col) (* cell-size row)]}
                      [:sprite {:texture "images/tile.png"
                                :scale [4 4]}]
@@ -122,7 +122,7 @@
      :entities {:text text}}))
 
 (defn make-bot-view [bot]
-  (let [container (scene/render
+  (let [container (element/render
                     [:container {:position [(* cell-size (get-in bot [:position :col]))
                                             (* cell-size (get-in bot [:position :row]))]}
                      [:sprite {:texture "images/sprite.png"

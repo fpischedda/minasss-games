@@ -6,15 +6,15 @@
   properties using aget/aset"
   (:require [oops.core :refer [oget oget+ oset!+]]))
 
-(def Settings (oget js/PIXI "settings"))
-
 (defn get-by-name
   [name]
-  (oget+ Settings name))
+  (let [settings (oget js/PIXI "settings")]
+    (oget+ settings name)))
 
 (defn set-by-name!
   [name value]
-  (oset!+ Settings name value))
+  (let [settings (oget js/PIXI "settings")]
+    (oset!+ settings name value)))
 
 (defmulti set!
   (fn [setting _param] setting))

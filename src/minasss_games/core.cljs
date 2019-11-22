@@ -1,7 +1,7 @@
 (ns minasss-games.core
   "A small experiment with PIXI javascript library"
-  (:require [minasss-games.director :as director]
-            [minasss-games.pixi :as pixi]
+  (:require [minasss-games.pixi :as pixi]
+            [minasss-games.director :as director]
             [minasss-games.experiments.awwwliens.intro :as awwwliens]))
             ;; [minasss-games.experiments.harvest-bot :as harvest-bot]))
 
