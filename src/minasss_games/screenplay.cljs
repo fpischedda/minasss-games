@@ -148,7 +148,6 @@
 ;; after action just waits until the specified amount of time passes
 ;; and eventually continue with the actions specified in the :then
 ;; option
-(def action-after ::after)
 (defmethod make-action ::after
   [[action & options] listener]
   (let [{:keys [time then]} (apply hash-map options)
@@ -156,7 +155,6 @@
     (listener ::start action {:state initial-state})
     (register-action action listener then initial-state)))
 
-(def action-move ::move)
 (defmethod make-action ::move
   [[action & options] listener]
   (let [{:keys [actor from to time then]} (apply hash-map options) ;; options are provided as a vector but it is pratical to access them as a map
@@ -171,7 +169,6 @@
                                            :elapsed 0.0
                                            :time time})))
 
-(def action-scale ::scale)
 (defmethod make-action ::scale
   [[action & options] listener]
   (let [{:keys [actor from to time then]} (apply hash-map options)]
@@ -183,3 +180,13 @@
                                            :scale from
                                            :elapsed 0.0
                                            :time time})))
+
+;; this action is a bit particular, it is meant to be used to set
+;; actor properties once so the only event triggered by this
+;; action is ::start, so there is also no need to register itself
+(defmethod make-action ::set-attributes
+  [[action & options] listener]
+  (let [options-map (apply hash-map options)
+        actor (:actor options-map)
+        attributes (dissoc options-map :actor)]
+    (listener ::start action {:actor actor :state attributes})))

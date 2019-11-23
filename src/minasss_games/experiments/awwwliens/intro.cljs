@@ -29,22 +29,23 @@
 (def main-stage (pixi/make-container))
 
 (def intro-screenplay
-  [screenplay/action-after :time 1.5
-   :then [screenplay/action-move
-          :actor :ufo
-          :from [0 0] :to [248 200] :time 5.0
-          :then [screenplay/action-after
-                 :time 3.0
-                 :then [[screenplay/action-scale
-                         :actor :cow
-                         :from 0.1 :to 1.0 :time 4.0]
-                        [screenplay/action-move
-                         :actor :cow
-                         :from [248 200] :to [248 400] :time 4.0]
-                        [screenplay/action-after :time 4.0
-                         :then [screenplay/action-scale
-                                :actor :menu
-                                :from 0 :to 1.0 :time 0.7]]]]]])
+  [[::screenplay/set-attributes :actor :menu :scale 0.0]
+   [::screenplay/after :time 1.5
+    :then [::screenplay/move
+           :actor :ufo
+           :from [0 0] :to [260 200] :time 5.0
+           :then [::screenplay/after
+                  :time 3.0
+                  :then [[::screenplay/scale
+                          :actor :cow
+                          :from 0.1 :to 1.0 :time 4.0]
+                         [::screenplay/move
+                          :actor :cow
+                          :from [350 200] :to [350 430] :time 4.0]
+                         [::screenplay/after :time 4.0
+                          :then [::screenplay/scale
+                                 :actor :menu
+                                 :from 0 :to 1.0 :time 0.7]]]]]]])
 
 (comment
   (let [container (pixi/get-child-by-name main-stage "cow")]
@@ -75,20 +76,21 @@
   (element/render
     [:sprite {:texture "images/awwwliens/menu/cow-still.png"
               :position [-200 -400]
-              :pivot [0.5 0.5]
+              :anchor [0.5 0.0]
               :name "cow"}]))
 
-(def menu-items_ (atom {:selected-index 0
-                        :items [{:text "Press Enter\nTo Play" :position [-90 100]}
-                                {:text "Arrows\nWASD\nHJKL\nTo Move" :position [-90 200]}
-                                {:text "By Carmilla\nAnd Minasss" :position [-90 300]}]}))
+(def menu-items_
+  (atom {:selected-index 0
+         :items [{:text "Press Enter\nTo Play" :position [100 -350]}
+                 {:text "Arrows\nWASD\nHJKL\nTo Move" :position [100 -280]}
+                 {:text "By Carmilla\nAnd Minasss" :position [100 -150]}]}))
 
 (defn make-menu-entry
   [{:keys [text position]} selected]
   (let [color (if selected "#19d708" "#808284")
         [x y] position]
     [:text {:text text
-            :anchor [0.5 0.5]
+            :anchor [0.5 0.0]
             :position [(if selected (- x 20) x) y]
             :style {"fill" color "fontSize" 25}}]))
 
@@ -96,9 +98,8 @@
   [{:keys [selected-index items]}]
   (element/render
     [:sprite {:name "menu"
-              :anchor [1.0 0.0]
-              :position [590 50]
-              :scale 0
+              :anchor [0.0 1.0]
+              :position [392 480]
               :texture "images/awwwliens/menu/baloon.png"}
      (into [] (map-indexed #(make-menu-entry %2 (= %1 selected-index)) items))]))
 
@@ -149,9 +150,9 @@
     (pixi/add-child main-stage (make-animated-ufo))
     (pixi/add-child main-stage (make-menu @menu-items_))
 
-    (pixi/add-child app-stage main-stage)
-
     (screenplay/start intro-screenplay screenplay-listener)
+
+    (pixi/add-child app-stage main-stage)
     (add-watch menu-items_ ::menu-changed-watch menu-changed-listener)))
 
 (defmethod scene-cleanup ::menu
