@@ -14,43 +14,15 @@
   If the scene defines a :resources key its value it is expected to be a vector
   and used as the `resources` parameter to call `pixi/load-resources` with
   `(scene-ready :scene-id app-stage)` as the `loaded` callback"
-  (:require [minasss-games.pixi :as pixi]
+  (:require [minasss-games.gamepad :as gamepad]
+            [minasss-games.pixi :as pixi]
             [minasss-games.pixi.input :as input]
             [minasss-games.pixi.settings :as settings]
             [minasss-games.screenplay :as screenplay]
             [minasss-games.tween :as tween]
             [oops.core :refer [oget]]))
 
-(def director_ (atom {}))
-
-(defn update-step
-  "update view related stuff
-  ticker callback will receive a parameter which is referred as
-  delta time by PIXI documentation; but this name is missleading because
-  instead of time since last update it refers to `frame time` since last frame
-  this means that if we target 60 FPS and we effectively have 60 FPS,
-  delta-time will have the value 1, if we have 30 FPS delta-time will have
-  the value 2; to make things more clear PIXI delta time will be called
-  `delta-frame`.
-  If we are interested in `real` delta-time we can scale delta-frame with
-  TargetFPMS: target frames per millisecond"
-  [delta-frame]
-  (let [target-fpms (settings/get-by-name "TARGET_FPMS")
-        dt-ms (* delta-frame target-fpms)]
-    (screenplay/update-actions dt-ms)
-    (tween/update-tweens dt-ms)))
-
-(defn init
-  "Initialize the director which is basicly a map that holds
-  - :app the main app object
-  - :app-stage the main stage where to attach scenes
-  - :current-scene optional, a map that contains information about current scene
-    like init function, cleanup function and maybe something else in the future"
-  [app]
-  (pixi/add-to-shared-ticker update-step)
-  (reset! director_ {:app app
-                     :app-stage (oget app "stage")}))
-
+;; Here it start with the director "protocol(ish)" stuff
 (defmulti scene-init (fn [scene _stage] (:id scene)))
 
 (defmethod scene-init :default
@@ -86,6 +58,50 @@
 
 (defmethod scene-key-pressed :default
   [_scene _event-type _native _translated])
+
+;; a scene can handle an update event which is a way to update the scene
+;; every frame; it will receive the current scene and the delta-time
+(defmulti scene-update
+  (fn [scene _delta-time] (:id scene)))
+
+(defmethod scene-update :default
+  [_scene _delta-time])
+
+;; protocol stuff finish here
+
+
+(def director_ (atom {}))
+
+(defn update-step
+  "Handle the currenct game loop step
+  Any ticker callback will receive a parameter which is referred as
+  delta time by PIXI documentation; but this name is missleading because
+  instead of time since last update it refers to `frame time` since last frame
+  this means that if we target 60 FPS and we effectively have 60 FPS,
+  delta-time will have the value 1, if we have 30 FPS delta-time will have
+  the value 2; to make things more clear PIXI delta time will be called
+  `delta-frame`.
+  If we are interested in `real` delta-time we can scale delta-frame with
+  TargetFPMS: target frames per millisecond"
+  [delta-frame]
+  (let [target-fpms (settings/get-by-name "TARGET_FPMS")
+        dt-ms (* delta-frame target-fpms)]
+    (screenplay/update-actions dt-ms)
+    (tween/update-tweens dt-ms)
+    (gamepad/update-gamepads)
+    (scene-update (:current-scene @director_) dt-ms)))
+
+(defn init
+  "Initialize the director which is basicly a map that holds
+  - :app the main app object
+  - :app-stage the main stage where to attach scenes
+  - :current-scene optional, a map that contains information about current scene
+    like init function, cleanup function and maybe something else in the future"
+  [app]
+  (gamepad/init)
+  (pixi/add-to-shared-ticker update-step)
+  (reset! director_ {:app app
+                     :app-stage (oget app "stage")}))
 
 (defn load-scene-resources
   "Load scene defined resources and setup a callback to call
