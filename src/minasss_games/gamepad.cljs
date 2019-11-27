@@ -22,14 +22,16 @@
   only buttons are supported and returned in the :buttons key"
   [gamepad]
   (let [buttons (oget gamepad "buttons")]
-    {:buttons (mapv #(oget % "pressed") buttons)}))
+    {:buttons (mapv #(oget % "pressed") buttons)
+     :axes (oget gamepad "axes")}))
 
 (defn gamepad-connected
   "Register new connected gamepad in the gamepads_ registry"
   [event]
   (let [gamepad (oget event "gamepad")
         status (gamepad-status gamepad)]
-    (swap! gamepads_ dissoc (gamepad-id gamepad) {:gamepad gamepad
+    (swap! gamepads_ assoc (gamepad-id gamepad) {:gamepad gamepad
+                                                  :old-status status
                                                   :status status})))
 
 (defn gamepad-disconnected
@@ -50,13 +52,34 @@
                                                            :old-status old-status
                                                            :status status}))) {} %)))
 
+(defn button-status
+  [gamepad-index button-index which-status]
+  (if-let [gamepad (get @gamepads_ gamepad-index)]
+    (-> gamepad
+      which-status
+      :buttons
+      (nth button-index))
+    false))
+
+(defn button-down
+  [gamepad-index button-index]
+  (button-status gamepad-index button-index :status))
+
+(defn button-up
+  [gamepad-index button-index]
+  (not (button-status gamepad-index button-index :status)))
+
 (defn button-pressed
   [gamepad-index button-index]
-  (-> @gamepads_
-    gamepad-index
-    :status
-    :buttons
-    (nth button-index)))
+  (let [state (button-status gamepad-index button-index :status)
+        old-state (button-status gamepad-index button-index :old-status)]
+    (and (not old-state) state)))
+
+(defn button-released
+  [gamepad-index button-index]
+  (let [state (button-status gamepad-index button-index :status)
+        old-state (button-status gamepad-index button-index :old-status)]
+    (and old-state (not state))))
 
 (defn init
   "Initialize gamepad system, register connected and disconnected event handlers"
