@@ -59,8 +59,9 @@
     (nth button-index)))
 
 (defn init
-  "Initialize game system, register connected and disconnected event handlers"
+  "Initialize gamepad system, register connected and disconnected event handlers"
   []
+  (reset! gamepads_ {})
   (.addEventListener js/window "gamepadconnected" gamepad-connected)
   (.addEventListener js/window "gamepaddisconnected" gamepad-disconnected))
 
