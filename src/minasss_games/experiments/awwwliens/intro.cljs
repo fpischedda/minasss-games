@@ -7,8 +7,9 @@
              :as
              director
              :refer
-             [scene-cleanup scene-init scene-key-up scene-ready]]
+             [scene-cleanup scene-init scene-key-up scene-update scene-ready]]
             [minasss-games.element :as element]
+            [minasss-games.gamepad :as gamepad]
             [minasss-games.experiments.awwwliens.game :as game]
             [minasss-games.pixi :as pixi]
             [minasss-games.pixi.input :as input]
@@ -139,6 +140,17 @@
   (if (= ::restart-screenplay action)
     (screenplay/start intro-screenplay screenplay-listener)
     (update-menu! action)))
+
+(def DPAD-UP 0)
+(def DPAD-DOWN 1)
+(def BUTTON-A 4)
+
+(defmethod scene-update ::menu
+  [scene delta-time]
+  (cond
+    (gamepad/button-pressed 0 BUTTON-A) (update-menu! ::select)
+    (gamepad/button-pressed 0 DPAD-UP) (update-menu! ::move-up)
+    (gamepad/button-pressed 0 DPAD-DOWN) (update-menu! ::move-down)))
 
 ;; setup the view based on the menu-items_ atom; main-stage refers to the
 ;; root container, where other graphical elements will be added
