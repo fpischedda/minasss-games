@@ -141,9 +141,9 @@
     (screenplay/start intro-screenplay screenplay-listener)
     (update-menu! action)))
 
-(def DPAD-UP 8)
-(def DPAD-DOWN 9)
-(def BUTTON-A 0)
+(def DPAD-UP 0)
+(def DPAD-DOWN 1)
+(def BUTTON-A 4)
 
 (defmethod scene-update ::menu
   [scene delta-time]
