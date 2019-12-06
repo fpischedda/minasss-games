@@ -15,7 +15,9 @@
   "Given the vector v return its normalized version"
   [[x y]]
   (let [len (Math/sqrt (+ (* x x) (* y y)))]
-    [(/ x len) (/ y len)]))
+    (if (= 0 len)
+      [0 0]
+      [(/ x len) (/ y len)])))
 
 (defn scale
   "Given the vector v return its scaled version"
