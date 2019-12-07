@@ -22,6 +22,8 @@
                           "z" ::fire "m" ::fire}
             :state (atom nil)})
 
+(def main-stage (pixi/make-container))
+
 (defn make-animated-ufo
   "Create animated ufo element"
   [ufo]
@@ -50,7 +52,15 @@
     [:sprite {:texture "images/shmup/game/bullet.png"
               :position position}]))
 
-(def main-stage (pixi/make-container))
+(defn spawn-bullet
+  [player]
+  (let [position (:position player)
+        view (make-bullet position)]
+    (pixi/add-child main-stage view)
+    {:position position
+     :speed 100
+     :direction [0 -1]
+     :view view}))
 
 (def actions_ (atom {}))
 
@@ -88,8 +98,12 @@
         dir-y (cond
                 (::move-up actions) -1
                 (::move-down actions) 1
-                :else 0)]
-    (assoc-in state [:player :direction] (math/normalize [dir-x dir-y]))))
+                :else 0)
+        bullets (:bullets state)
+        new-bullets (if (::fire actions) (conj bullets (spawn-bullet (:player state))) bullets)]
+    (-> state
+      (assoc-in [:player :direction] (math/normalize [dir-x dir-y]))
+      (assoc :bullets new-bullets))))
 
 (defn update-bullets!
   [state delta-time]
@@ -97,8 +111,8 @@
     (fn [bullets]
       (mapv
         (fn [{:keys [position direction speed] :as bullet}]
-          (assoc bullet :position (math/translate position (math/scale direction (* speed delta-time)))))
-         bullets))))
+          (let [new-pos (math/translate position (math/scale direction (* speed delta-time)))]
+            (assoc bullet :position new-pos))) bullets))))
 
 (defn move-player!
   [state delta-time]
@@ -114,7 +128,7 @@
 (defn update-view!
   [state]
   (pixi/set-position (get-in state [:view :player]) (get-in state [:player :position]))
-  state)
+  (mapv (fn [bullet] (pixi/set-position (:view bullet) (:position bullet))) (:bullets state)))
 
 (defmethod scene-update ::game
   [scene delta-time]
