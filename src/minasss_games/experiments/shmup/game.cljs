@@ -12,7 +12,8 @@
 
 (def scene {:id ::game
             :resources ["images/shmup/game/background.png"
-                        "images/shmup/game/player.png"
+                        "images/shmup/game/player.json"
+                        "images/shmup/game/bullet.png"
                         "images/shmup/game/ufo.json"]
             :key-mapping {"ArrowUp" ::move-up "k" ::move-up "w" ::move-up
                           "ArrowDown" ::move-down "j" ::move-down "s" ::move-down
@@ -27,7 +28,7 @@
   (element/render
     [:animated-sprite {:spritesheet "images/shmup/game/ufo.json"
                        :animation-name "ufo"
-                       :animation-speed 0.05
+                       :animation-speed 0.1
                        :autostart true
                        :position (:position ufo)
                        :name "ufo"}]))
@@ -36,9 +37,18 @@
   "Create player element"
   [player]
   (element/render
-    [:sprite {:texture "images/shmup/game/player.png"
-              :position (:position player)
-              :name "player"}]))
+    [:animated-sprite {:spritesheet "images/shmup/game/player.json"
+                       :animation-name "player"
+                       :animation-speed 0.1
+                       :autostart true
+                       :position (:position player)
+                       :name "player"}]))
+
+(defn make-bullet
+  [position]
+  (element/render
+    [:sprite {:texture "images/shmup/game/bullet.png"
+              :position position}]))
 
 (def main-stage (pixi/make-container))
 
@@ -58,46 +68,66 @@
 (def DPAD-RIGHT 3)
 (def BUTTON-A 4)
 
-(defn handle-input!
-  [scene]
-  (swap! (:state scene)
-    (fn [state]
-      (let [actions @actions_
-            dir-x (cond
-                    (::move-left actions) -1
-                    (::move-right actions) 1
-                    :else 0)
-            dir-y (cond
-                    (::move-up actions) -1
-                    (::move-down actions) 1
-                    :else 0)
-            direction (math/normalize [dir-x dir-y])]
-        (assoc-in state [:player :direction] direction))))
-  )
+(defn handle-gamepad!
+  []
+  (swap! actions_
+    (fn [actions]
+      (assoc actions
+        ::move-left (gamepad/button-down 0 DPAD-LEFT)
+        ::move-right (gamepad/button-down 0 DPAD-RIGHT)
+        ::move-up (gamepad/button-down 0 DPAD-UP)
+        ::move-down (gamepad/button-down 0 DPAD-DOWN)))))
+
+(defn handle-actions!
+  [state]
+  (let [actions @actions_
+        dir-x (cond
+                (::move-left actions) -1
+                (::move-right actions) 1
+                :else 0)
+        dir-y (cond
+                (::move-up actions) -1
+                (::move-down actions) 1
+                :else 0)]
+    (assoc-in state [:player :direction] (math/normalize [dir-x dir-y]))))
+
+(defn update-bullets!
+  [state delta-time]
+  (update state :bullets
+    (fn [bullets]
+      (mapv
+        (fn [{:keys [position direction speed] :as bullet}]
+          (assoc bullet :position (math/translate position (math/scale direction (* speed delta-time)))))
+         bullets))))
 
 (defn move-player!
-  [scene delta-time]
-  (swap! (:state scene)
-    (fn [state]
-      (let [{:keys [position direction speed]} (:player state)
-            new-pos (math/translate position (math/scale direction (* speed delta-time)))]
-        (assoc-in state [:player :position] new-pos)))))
+  [state delta-time]
+  (let [{:keys [position direction speed]} (:player state)
+        new-pos (math/translate position (math/scale direction (* speed delta-time)))]
+    (assoc-in state [:player :position] new-pos)))
 
 (comment
   (js/console.log (clj->js (:player @(:state scene))))
   (math/normalize [1 1])
   (math/translate [200 200] (math/scale [1 0] 0.5)))
 
-(defn update-view! [scene]
-  (let [state @(:state scene)]
-    (pixi/set-position (get-in state [:view :player]) (get-in state [:player :position]))))
+(defn update-view!
+  [state]
+  (pixi/set-position (get-in state [:view :player]) (get-in state [:player :position]))
+  state)
 
 (defmethod scene-update ::game
   [scene delta-time]
   (when (:view @(:state scene))
-    (handle-input! scene)
-    (move-player! scene delta-time)
-    (update-view! scene)))
+    ;; (handle-gamepad!)
+    (swap! (:state scene)
+      (fn [state]
+        (-> state
+          handle-actions!
+          (move-player! delta-time)
+          (update-bullets! delta-time)
+          )))
+    (update-view! @(:state scene))))
 
 ;; put scene to initial state
 (defmethod scene-init ::game
@@ -106,6 +136,7 @@
                                    :energy 100
                                    :speed 100
                                    :direction [0 0]}
+                          :bullets []
                           :ufo {:position [200 200]
                                 :energy 100}}))
 
