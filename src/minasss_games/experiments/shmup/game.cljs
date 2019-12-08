@@ -72,21 +72,34 @@
   [scene _native action]
   (swap! actions_ dissoc action))
 
-(def DPAD-UP 0)
-(def DPAD-DOWN 1)
-(def DPAD-LEFT 2)
-(def DPAD-RIGHT 3)
-(def BUTTON-A 4)
+(def LAXE-UP 0)
+(def LAXE-DOWN 1)
+(def LAXE-LEFT 2)
+(def LAXE-RIGHT 3)
+(def DPAD-UP 12)
+(def DPAD-DOWN 13)
+(def DPAD-LEFT 14)
+(def DPAD-RIGHT 15)
+(def BUTTON-A 0)
 
 (defn handle-gamepad!
   []
   (swap! actions_
     (fn [actions]
       (assoc actions
-        ::move-left (gamepad/button-down 0 DPAD-LEFT)
-        ::move-right (gamepad/button-down 0 DPAD-RIGHT)
-        ::move-up (gamepad/button-down 0 DPAD-UP)
-        ::move-down (gamepad/button-down 0 DPAD-DOWN)))))
+        ::fire (or (::fire actions) (gamepad/button-down 0 BUTTON-A))
+        ::move-left (or (::move-left actions)
+                      (> 0 (gamepad/axis-status 0 DPAD-LEFT))
+                      (> 0 (gamepad/axis-status 0 LAXE-LEFT)))
+        ::move-right (or (::move-right actions)
+                       (> 0 (gamepad/axis-status 0 DPAD-RIGHT))
+                       (> 0 (gamepad/axis-status 0 LAXE-RIGHT)))
+        ::move-up (or (::move-up actions)
+                    (> 0 (gamepad/axis-status 0 DPAD-UP))
+                    (> 0 (gamepad/axis-status 0 LAXE-UP)))
+        ::move-down (or (::move-down actions)
+                      (> 0 (gamepad/axis-status 0 DPAD-DOWN))
+                      (> 0 (gamepad/axis-status 0 LAXE-DOWN)))))))
 
 (defn handle-actions!
   [state]
@@ -148,7 +161,7 @@
 (defmethod scene-update ::game
   [scene delta-time]
   (when (:view @(:state scene))
-    ;; (handle-gamepad!)
+    (handle-gamepad!)
     (swap! (:state scene)
       (fn [state]
         (-> state
