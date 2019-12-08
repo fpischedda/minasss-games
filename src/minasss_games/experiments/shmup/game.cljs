@@ -105,14 +105,28 @@
       (assoc-in [:player :direction] (math/normalize [dir-x dir-y]))
       (assoc :bullets new-bullets))))
 
+(defn update-bullet
+  "Update bullet position, if the bullet goes outside of the screen
+  its sprite will be released and the bullet marked as deleted so it
+  can be removed later"
+  [{:keys [position direction speed view] :as bullet} delta-time]
+  (let [new-pos (math/translate position (math/scale direction (* speed delta-time)))
+        delete (> 0 (nth new-pos 1))]
+    (when delete
+      (pixi/remove-container view))
+    (assoc bullet
+      :position new-pos
+      :deleted delete)))
+
 (defn update-bullets!
+  "Update bullets removing the ones that are not visibile anymore"
   [state delta-time]
   (update state :bullets
     (fn [bullets]
-      (mapv
-        (fn [{:keys [position direction speed] :as bullet}]
-          (let [new-pos (math/translate position (math/scale direction (* speed delta-time)))]
-            (assoc bullet :position new-pos))) bullets))))
+      (->> bullets
+        (map #(update-bullet % delta-time))
+        (remove :deleted)
+        (into [])))))
 
 (defn move-player!
   [state delta-time]
@@ -128,7 +142,8 @@
 (defn update-view!
   [state]
   (pixi/set-position (get-in state [:view :player]) (get-in state [:player :position]))
-  (mapv (fn [bullet] (pixi/set-position (:view bullet) (:position bullet))) (:bullets state)))
+  (doseq [{:keys [view position]} (:bullets state)]
+    (pixi/set-position view position)))
 
 (defmethod scene-update ::game
   [scene delta-time]
@@ -170,4 +185,5 @@
 
 (defmethod scene-cleanup ::game
   [_]
+  (reset! (:state scene) nil)
   (pixi/remove-container main-stage))
