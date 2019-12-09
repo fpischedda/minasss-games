@@ -10,4 +10,4 @@
             :extra-deps {com.bhauman/figwheel-main {:mvn/version "0.2.3"}
                          com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}}}
            :min
-           {:main-opts ["-m" "figwheel.main" "-bo" "awwwliens-min"]}}}
+           {:main-opts ["-m" "figwheel.main" "-bo" "min" "-O" "advanced"]}}}
