@@ -58,7 +58,7 @@
         view (make-bullet position)]
     (pixi/add-child main-stage view)
     {:position position
-     :speed 100
+     :speed 130
      :direction [0 -1]
      :view view}))
 
