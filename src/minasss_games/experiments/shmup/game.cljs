@@ -101,7 +101,7 @@
                       (> 0 (gamepad/axis-status 0 DPAD-DOWN))
                       (> 0 (gamepad/axis-status 0 LAXE-DOWN)))))))
 
-(defn handle-actions!
+(defn handle-actions
   [state]
   (let [actions @actions_
         dir-x (cond
@@ -131,7 +131,7 @@
       :position new-pos
       :deleted delete)))
 
-(defn update-bullets!
+(defn update-bullets
   "Update bullets removing the ones that are not visibile anymore"
   [state delta-time]
   (update state :bullets
@@ -141,7 +141,7 @@
         (remove :deleted)
         (into [])))))
 
-(defn move-player!
+(defn move-player
   [state delta-time]
   (let [{:keys [position direction speed]} (:player state)
         new-pos (math/translate position (math/scale direction (* speed delta-time)))]
@@ -153,6 +153,7 @@
   (math/translate [200 200] (math/scale [1 0] 0.5)))
 
 (defn update-view!
+  "Side effecty function that sync sprites accordingly with scene state"
   [state]
   (pixi/set-position (get-in state [:view :player]) (get-in state [:player :position]))
   (doseq [{:keys [view position]} (:bullets state)]
@@ -165,9 +166,9 @@
     (swap! (:state scene)
       (fn [state]
         (-> state
-          handle-actions!
-          (move-player! delta-time)
-          (update-bullets! delta-time)
+          handle-actions
+          (move-player delta-time)
+          (update-bullets delta-time)
           )))
     (update-view! @(:state scene))))
 
