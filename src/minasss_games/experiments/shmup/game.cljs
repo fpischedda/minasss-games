@@ -3,7 +3,7 @@
              :as
              director
              :refer
-             [scene-cleanup scene-init scene-key-down scene-key-up scene-update scene-ready]]
+             [scene-cleanup scene-key-down scene-key-up scene-update scene-ready]]
             [minasss-games.element :as element]
             [minasss-games.gamepad :as gamepad]
             [minasss-games.math :as math]
@@ -48,28 +48,48 @@
   )
 
 (defn make-animated-ufo
-  "Create animated ufo element"
-  [ufo]
+  "Create animated ufo element at position"
+  [position]
   (element/render
     [:animated-sprite {:spritesheet "images/shmup/game/ufo.json"
                        :animation-name "ufo"
                        :animation-speed 0.1
                        :autostart true
-                       :position (:position ufo)
+                       :position position
                        :anchor [0.5 0.5]
                        :name "ufo"}]))
 
+(defn spawn-enemy
+  [position]
+  (let [view (make-animated-ufo position)]
+    (pixi/add-child main-stage view)
+    {:position position
+     :collision-rect [32 32]
+     :energy 100
+     :view view}))
+
 (defn make-player
   "Create player element"
-  [player]
+  [position]
   (element/render
     [:animated-sprite {:spritesheet "images/shmup/game/player.json"
                        :animation-name "player"
                        :animation-speed 0.1
                        :autostart true
-                       :position (:position player)
+                       :position position
                        :anchor [0.5 0.5]
                        :name "player"}]))
+
+(defn spawn-player
+  [position]
+  (let [view (make-player position)]
+    (pixi/add-child main-stage view)
+    {:position position
+     :energy 100
+     :speed 100
+     :collision-rect [8 8]
+     :direction [0 0]
+     :view view}))
 
 (defn make-bullet
   [position]
@@ -149,11 +169,9 @@
   "Update bullet position, if the bullet goes outside of the screen
   its sprite will be released and the bullet marked as deleted so it
   can be removed later"
-  [{:keys [position direction speed collision-rect view] :as bullet} enemy delta-time]
+  [{:keys [position direction speed collision-rect view] :as bullet} delta-time]
   (let [new-pos (math/translate position (math/scale direction (* speed delta-time)))
-        enemy-rect (make-rect-bounds (:position enemy) (:collision-rect enemy))
-        bullet-rect (make-rect-bounds position collision-rect)
-        delete (or (rects-overlap enemy-rect bullet-rect) (> 0 (nth new-pos 1)))]
+        delete (> 0 (nth new-pos 1))]
     (when delete
       (pixi/remove-container view))
     (assoc bullet
@@ -166,7 +184,7 @@
   (update state :bullets
     (fn [bullets]
       (->> bullets
-        (map #(update-bullet % (:ufo state) delta-time))
+        (map #(update-bullet % delta-time))
         (remove :deleted)
         (into [])))))
 
@@ -182,37 +200,43 @@
   (math/translate [200 200] (math/scale [1 0] 0.5)))
 
 (defn update-view!
-  "Side effecty function that sync sprites accordingly with scene state"
+  "Side effecty function that sync sprites accordingly with scene state.
+  Now this function returns the state even if it is not supposed to change
+  because this way it is easier to put this function in the
+  `state management pipeline` and maybe in the future it can take care of
+  adding or removing view elements."
   [state]
-  (pixi/set-position (get-in state [:view :player]) (get-in state [:player :position]))
+  (let [{:keys [position view]} (:player state)]
+       (pixi/set-position view position))
+  ;; enemies do nothing at this time but lets prepare for the future
+  (doseq [{:keys [view position]} (:enemies state)]
+    (pixi/set-position view position))
+  ;; update active bullets
   (doseq [{:keys [view position]} (:bullets state)]
-    (pixi/set-position view position)))
+    (pixi/set-position view position))
+  state)
+
+(defn update-game-state
+  "This function updates a bounch of things:
+  - player
+  - bullets
+  - enemies
+  - view state of everything
+  and returns the next state of the world"
+  [state delta-time]
+  (handle-gamepad!)
+  (-> state
+    handle-actions
+    (move-player delta-time)
+    (update-bullets delta-time)
+    update-view!))
 
 (defmethod scene-update ::game
   [scene delta-time]
-  (when (:view @(:state scene))
-    (handle-gamepad!)
-    (swap! (:state scene)
-      (fn [state]
-        (-> state
-          handle-actions
-          (move-player delta-time)
-          (update-bullets delta-time)
-          )))
-    (update-view! @(:state scene))))
-
-;; put scene to initial state
-(defmethod scene-init ::game
-  [scene]
-  (reset! (:state scene) {:player {:position [200 400]
-                                   :energy 100
-                                   :speed 100
-                                   :collision-rect [8 8]
-                                   :direction [0 0]}
-                          :bullets []
-                          :ufo {:position [200 200]
-                                :collision-rect [32 32]
-                                :energy 100}}))
+  (swap! (:state scene)
+    (fn [state]
+      (when (some? state)
+        (update-game-state state delta-time)))))
 
 ;; setup the view adding the ufo and the player
 (defmethod scene-ready ::game
@@ -221,11 +245,10 @@
     (pixi/add-child main-stage background)
     (swap! (:state scene)
       (fn [state]
-        (let [ufo (make-animated-ufo (:ufo state))
-              player (make-player (:player state))]
-          (pixi/add-child main-stage ufo)
-          (pixi/add-child main-stage player)
-          (assoc state :view {:ufo ufo :player player}))))
+        (assoc state
+          :player (spawn-player [200 400])
+          :bullets []
+          :enemies [(spawn-enemy [200 200]) (spawn-enemy [260 200])])))
     (pixi/add-child app-stage main-stage)))
 
 (defmethod scene-cleanup ::game
