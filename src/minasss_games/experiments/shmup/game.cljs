@@ -24,6 +24,29 @@
 
 (def main-stage (pixi/make-container))
 
+(defn make-rect-bounds
+  "Make a bounding rect based on provided position and rect size; rect is
+  centered around position"
+  [[x y] [width height]]
+  (let [hw (/ width 2)
+        hh (/ height 2)]
+    [(- x hw) (- y hh) (+ x hw) (+ y hh)]))
+
+(defn rects-overlap
+  "Returns true if the provided rects overlaps"
+  [[ax-top ay-top ax-bottom ay-bottom] [bx-top by-top bx-bottom by-bottom]]
+  (and (< ax-top bx-bottom) (< ay-top by-bottom) (> ax-bottom bx-top) (> ay-bottom by-top)))
+
+(comment
+  (make-rect-bounds [100 100] [10 10])
+  (make-rect-bounds [105 105] [10 10])
+
+  (rects-overlap
+    (make-rect-bounds [100 100] [10 10])
+    (make-rect-bounds [125 125] [10 10])
+    )
+  )
+
 (defn make-animated-ufo
   "Create animated ufo element"
   [ufo]
@@ -33,6 +56,7 @@
                        :animation-speed 0.1
                        :autostart true
                        :position (:position ufo)
+                       :anchor [0.5 0.5]
                        :name "ufo"}]))
 
 (defn make-player
@@ -44,6 +68,7 @@
                        :animation-speed 0.1
                        :autostart true
                        :position (:position player)
+                       :anchor [0.5 0.5]
                        :name "player"}]))
 
 (defn make-bullet
@@ -58,8 +83,10 @@
         view (make-bullet position)]
     (pixi/add-child main-stage view)
     {:position position
+     :anchor [0.5 0.5]
      :speed 130
      :direction [0 -1]
+     :collision-rect [8 8]
      :view view}))
 
 (def actions_ (atom {}))
@@ -122,9 +149,11 @@
   "Update bullet position, if the bullet goes outside of the screen
   its sprite will be released and the bullet marked as deleted so it
   can be removed later"
-  [{:keys [position direction speed view] :as bullet} delta-time]
+  [{:keys [position direction speed collision-rect view] :as bullet} enemy delta-time]
   (let [new-pos (math/translate position (math/scale direction (* speed delta-time)))
-        delete (> 0 (nth new-pos 1))]
+        enemy-rect (make-rect-bounds (:position enemy) (:collision-rect enemy))
+        bullet-rect (make-rect-bounds position collision-rect)
+        delete (or (rects-overlap enemy-rect bullet-rect) (> 0 (nth new-pos 1)))]
     (when delete
       (pixi/remove-container view))
     (assoc bullet
@@ -137,7 +166,7 @@
   (update state :bullets
     (fn [bullets]
       (->> bullets
-        (map #(update-bullet % delta-time))
+        (map #(update-bullet % (:ufo state) delta-time))
         (remove :deleted)
         (into [])))))
 
@@ -178,9 +207,11 @@
   (reset! (:state scene) {:player {:position [200 400]
                                    :energy 100
                                    :speed 100
+                                   :collision-rect [8 8]
                                    :direction [0 0]}
                           :bullets []
                           :ufo {:position [200 200]
+                                :collision-rect [32 32]
                                 :energy 100}}))
 
 ;; setup the view adding the ufo and the player
