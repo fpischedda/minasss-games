@@ -65,6 +65,8 @@
     (pixi/add-child main-stage view)
     {:position position
      :collision-rect [32 32]
+     :direction [0 0]
+     :speed 0
      :energy 100
      :view view}))
 
@@ -188,6 +190,21 @@
         (remove :deleted)
         (into [])))))
 
+(defn update-enemy
+  [{:keys [position direction speed]} delta-time]
+  (let [new-pos (math/translate position (math/scale direction (* speed delta-time)))]
+    (assoc enemy :position new-pos)))
+
+(defn update-enemies
+  "Update enemies, don't do a lot at this point"
+  [state delta-time]
+  (update state :enemies
+    (fn [enemies]
+      (->> enemies
+        (map #(update-enemy % delta-time))
+        (remove :deleted)
+        (into [])))))
+
 (defn move-player
   [state delta-time]
   (let [{:keys [position direction speed]} (:player state)
@@ -229,6 +246,7 @@
     handle-actions
     (move-player delta-time)
     (update-bullets delta-time)
+    (update-enemies delta-time)
     update-view!))
 
 (defmethod scene-update ::game
@@ -238,7 +256,7 @@
       (when (some? state)
         (update-game-state state delta-time)))))
 
-;; setup the view adding the ufo and the player
+;; setup the view adding the enemies and the player
 (defmethod scene-ready ::game
   [scene app-stage]
   (let [background (pixi/make-sprite "images/shmup/game/background.png")]
