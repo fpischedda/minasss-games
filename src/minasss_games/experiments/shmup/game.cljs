@@ -167,13 +167,19 @@
       (assoc-in [:player :direction] (math/normalize [dir-x dir-y]))
       (assoc :bullets new-bullets))))
 
+(def LIMIT-TOP 0)
+(def LIMIT-BOTTOM 1200)
+(def LIMIT-LEFT 0)
+(def LIMIT-RIGHT 640)
+
 (defn update-bullet
   "Update bullet position, if the bullet goes outside of the screen
   its sprite will be released and the bullet marked as deleted so it
   can be removed later"
   [{:keys [position direction speed collision-rect view] :as bullet} delta-time]
   (let [new-pos (math/translate position (math/scale direction (* speed delta-time)))
-        delete (> 0 (nth new-pos 1))]
+        [x y] new-pos
+        delete (or (> LIMIT-TOP y) (< LIMIT-BOTTOM y) (> LIMIT-LEFT x) (< LIMIT-RIGHT x))]
     (when delete
       (pixi/remove-container view))
     (assoc bullet
@@ -191,7 +197,7 @@
         (into [])))))
 
 (defn update-enemy
-  [{:keys [position direction speed]} delta-time]
+  [{:keys [position direction speed] :as enemy} delta-time]
   (let [new-pos (math/translate position (math/scale direction (* speed delta-time)))]
     (assoc enemy :position new-pos)))
 
@@ -207,14 +213,41 @@
 
 (defn move-player
   [state delta-time]
-  (let [{:keys [position direction speed]} (:player state)
-        new-pos (math/translate position (math/scale direction (* speed delta-time)))]
-    (assoc-in state [:player :position] new-pos)))
+  (update state :player
+    (fn [{:keys [position direction speed] :as player}]
+      (assoc player :position
+        (math/translate position (math/scale direction (* speed delta-time)))))))
 
 (comment
   (js/console.log (clj->js (:player @(:state scene))))
   (math/normalize [1 1])
   (math/translate [200 200] (math/scale [1 0] 0.5)))
+
+(defn handle-collisions
+  "Detect bullets colliding with enemies and remove both from the state
+  and scene graph"
+  [{:keys [bullets enemies] :as state}]
+  (let [collisions
+        (for [{:keys [position collision-rect] :as bullet} bullets
+              :let [bullet-rect (make-rect-bounds position collision-rect)]
+              {:keys [position collision-rect] :as enemy} enemies
+              :let [enemy-rect (make-rect-bounds position collision-rect)]
+              :when (rects-overlap bullet-rect enemy-rect)]
+          [bullet enemy])]
+
+    (if (empty? collisions)
+      state
+      (do
+        (let [bullets-to-remove (set (map first collisions))
+              enemies-to-remove (set (map second collisions))]
+          (doseq [bullet bullets-to-remove]
+            (pixi/remove-container (:view bullet)))
+          (doseq [enemy enemies-to-remove]
+            (pixi/remove-container (:view enemy)))
+          (assoc state
+            :bullets (remove bullets-to-remove (:bullets state))
+            :enemies (remove enemies-to-remove (:enemies state))))))))
+
 
 (defn update-view!
   "Side effecty function that sync sprites accordingly with scene state.
@@ -246,6 +279,7 @@
     handle-actions
     (move-player delta-time)
     (update-bullets delta-time)
+    handle-collisions
     (update-enemies delta-time)
     update-view!))
 
