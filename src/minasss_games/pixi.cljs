@@ -111,12 +111,13 @@
 (defn remove-container
   "Remove a container from the scene"
   [container]
-  (.removeChild (oget container "parent") container))
+  (when-let [parent (oget container "parent")]
+    (.removeChild parent container)))
 
 (defn remove-child-by-name
   "Remove the child specified by name"
   [parent child-name]
-  (if-let [child (get-child-by-name parent child-name)]
+  (when-let [child (get-child-by-name parent child-name)]
     (.removeChild parent child)))
 
 (defn add-child-view
