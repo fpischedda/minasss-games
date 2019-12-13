@@ -97,17 +97,17 @@
   [position]
   (element/render
     [:sprite {:texture "images/shmup/game/bullet.png"
+              :anchor [0.5 0.5]
               :position position}]))
 
 (defn spawn-bullet
-  [player]
+  [player direction]
   (let [position (:position player)
         view (make-bullet position)]
     (pixi/add-child main-stage view)
     {:position position
-     :anchor [0.5 0.5]
      :speed 130
-     :direction [0 -1]
+     :direction direction
      :collision-rect [8 8]
      :view view}))
 
@@ -161,8 +161,14 @@
                 (::move-up actions) -1
                 (::move-down actions) 1
                 :else 0)
-        bullets (:bullets state)
-        new-bullets (if (::fire actions) (conj bullets (spawn-bullet (:player state))) bullets)]
+        new-bullets (if (::fire actions)
+                      (let [player (:player state)]
+                        (-> (:bullets state)
+                          (conj (spawn-bullet player [0 -1]))
+                          (conj (spawn-bullet player (math/normalize [0.3 -1])))
+                          (conj (spawn-bullet player (math/normalize [-0.3 -1])))))
+                      (:bullets state))]
+    (js/console.log (clj->js new-bullets))
     (-> state
       (assoc-in [:player :direction] (math/normalize [dir-x dir-y]))
       (assoc :bullets new-bullets))))
@@ -234,7 +240,6 @@
               :let [enemy-rect (make-rect-bounds position collision-rect)]
               :when (rects-overlap bullet-rect enemy-rect)]
           [bullet enemy])]
-
     (if (empty? collisions)
       state
       (do
@@ -247,7 +252,6 @@
           (assoc state
             :bullets (remove bullets-to-remove (:bullets state))
             :enemies (remove enemies-to-remove (:enemies state))))))))
-
 
 (defn update-view!
   "Side effecty function that sync sprites accordingly with scene state.
@@ -271,6 +275,7 @@
   - player
   - bullets
   - enemies
+  - collisions
   - view state of everything
   and returns the next state of the world"
   [state delta-time]
