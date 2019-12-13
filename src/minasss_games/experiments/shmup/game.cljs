@@ -111,7 +111,8 @@
      :collision-rect [8 8]
      :view view}))
 
-(def actions_ (atom {}))
+(def FIRE-TIMEOUT-MS 0.3)
+(def actions_ (atom {::fire-timeout FIRE-TIMEOUT-MS}))
 
 (defmethod scene-key-down ::game
   [scene _native action]
@@ -151,8 +152,8 @@
                       (> 0 (gamepad/axis-status 0 LAXE-DOWN)))))))
 
 (defn handle-actions
-  [state]
-  (let [actions @actions_
+  [state delta-time]
+  (let [actions (swap! actions_ update ::fire-timeout - delta-time)
         dir-x (cond
                 (::move-left actions) -1
                 (::move-right actions) 1
@@ -161,14 +162,15 @@
                 (::move-up actions) -1
                 (::move-down actions) 1
                 :else 0)
-        new-bullets (if (::fire actions)
+        ;; spawn new bullets if fire is pressed (one shot every 0.3 seconds)
+        new-bullets (if (and (::fire actions) (>= 0 (::fire-timeout actions)))
                       (let [player (:player state)]
+                        (swap! actions_ assoc ::fire-timeout FIRE-TIMEOUT-MS)
                         (-> (:bullets state)
                           (conj (spawn-bullet player [0 -1]))
                           (conj (spawn-bullet player (math/normalize [0.3 -1])))
                           (conj (spawn-bullet player (math/normalize [-0.3 -1])))))
                       (:bullets state))]
-    (js/console.log (clj->js new-bullets))
     (-> state
       (assoc-in [:player :direction] (math/normalize [dir-x dir-y]))
       (assoc :bullets new-bullets))))
@@ -281,7 +283,7 @@
   [state delta-time]
   (handle-gamepad!)
   (-> state
-    handle-actions
+    (handle-actions delta-time)
     (move-player delta-time)
     (update-bullets delta-time)
     handle-collisions
