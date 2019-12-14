@@ -72,14 +72,6 @@
   [resource-name texture-name]
   (aget (oget+ (get-spritesheet resource-name) "textures") texture-name))
 
-(defn get-sound
-  "Return a sound from the resource cache, looking up by name"
-  [sound-name]
-  (let [res (aget Resources sound-name)]
-    (if (nil? res)
-      (println "could not find sound " sound-name)
-      (oget res "sound"))))
-
 (defn make-container
   "Create a PIXI container"
   []

@@ -14,7 +14,8 @@
             :resources ["images/shmup/game/background.png"
                         "images/shmup/game/player.json"
                         "images/shmup/game/bullet.png"
-                        "images/shmup/game/ufo.json"]
+                        "images/shmup/game/ufo.json"
+                        "sfx/shmup/game/shot.ogg"]
             :key-mapping {"ArrowUp" ::move-up "k" ::move-up "w" ::move-up
                           "ArrowDown" ::move-down "j" ::move-down "s" ::move-down
                           "ArrowLeft" ::move-left "h" ::move-left "a" ::move-left
@@ -23,6 +24,8 @@
             :state (atom nil)})
 
 (def main-stage (pixi/make-container))
+
+(def sounds_ (volatile! nil))
 
 (defn make-rect-bounds
   "Make a bounding rect based on provided position and rect size; rect is
@@ -105,6 +108,7 @@
   (let [position (:position player)
         view (make-bullet position)]
     (pixi/add-child main-stage view)
+    (.play (:shot @sounds_))
     {:position position
      :speed 130
      :direction direction
@@ -301,6 +305,7 @@
 (defmethod scene-ready ::game
   [scene app-stage]
   (let [background (pixi/make-sprite "images/shmup/game/background.png")]
+    #_(vreset! sounds_ {:shot (pixi/get-sound "sfx/shmup/game/shot.ogg")})
     (pixi/add-child main-stage background)
     (swap! (:state scene)
       (fn [state]
