@@ -15,6 +15,7 @@
                         "images/shmup/game/player.json"
                         "images/shmup/game/bullet.png"
                         "images/shmup/game/ufo.json"
+                        "sfx/shmup/game/explosion.mp3"
                         "sfx/shmup/game/shot.ogg"]
             :key-mapping {"ArrowUp" ::move-up "k" ::move-up "w" ::move-up
                           "ArrowDown" ::move-down "j" ::move-down "s" ::move-down
