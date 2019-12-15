@@ -16,8 +16,7 @@
                         "images/shmup/game/player.json"
                         "images/shmup/game/bullet.png"
                         "images/shmup/game/ufo.json"
-                        "sfx/shmup/game/explosion.mp3"
-                        "sfx/shmup/game/shot.ogg"]
+                        "images/shmup/game/boss.png"]
             :key-mapping {"ArrowUp" ::move-up "k" ::move-up "w" ::move-up
                           "ArrowDown" ::move-down "j" ::move-down "s" ::move-down
                           "ArrowLeft" ::move-left "h" ::move-left "a" ::move-left
@@ -28,7 +27,8 @@
 (def main-stage (pixi/make-container))
 
 (def sounds_ {:shot (sound/load "sfx/shmup/game/shot.ogg")
-              :explosion (sound/load "sfx/shmup/game/explosion.ogg")})
+              :explosion (sound/load "sfx/shmup/game/explosion.ogg")
+              :impact-metal (sound/load "sfx/shmup/game/impact_metal.ogg")})
 
 (defn make-rect-bounds
   "Make a bounding rect based on provided position and rect size; rect is
@@ -75,6 +75,21 @@
      :speed 0
      :energy 100
      :view view}))
+
+(defn make-boss-entity
+  [position]
+  [:sprite {:texture "images/shmup/game/boss.png"
+              :anchor [0.5 0.5]
+              :position position}])
+
+(defn spawn-boss
+  [position]
+  {:position position
+     :collision-rect [32 32]
+     :direction [0 0]
+     :speed 0
+     :energy 100
+     :view view})
 
 (defn make-player
   "Create player element"
