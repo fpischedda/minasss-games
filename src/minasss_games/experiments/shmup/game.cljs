@@ -27,8 +27,8 @@
 
 (def main-stage (pixi/make-container))
 
-(def sounds_ {:shot sound/load  "sfx/shmup/game/shot.ogg"
-              :explosion sound/load  "sfx/shmup/game/explosion.ogg"})
+(def sounds_ {:shot (sound/load "sfx/shmup/game/shot.ogg")
+              :explosion (sound/load "sfx/shmup/game/explosion.ogg")})
 
 (defn make-rect-bounds
   "Make a bounding rect based on provided position and rect size; rect is
