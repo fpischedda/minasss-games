@@ -8,7 +8,8 @@
             [minasss-games.gamepad :as gamepad]
             [minasss-games.math :as math]
             [minasss-games.pixi :as pixi]
-            [minasss-games.pixi.input :as input]))
+            [minasss-games.pixi.input :as input]
+            [minasss-games.sound :as sound]))
 
 (def scene {:id ::game
             :resources ["images/shmup/game/background.png"
@@ -26,7 +27,8 @@
 
 (def main-stage (pixi/make-container))
 
-(def sounds_ (volatile! nil))
+(def sounds_ {:shot sound/load  "sfx/shmup/game/shot.ogg"
+              :explosion sound/load  "sfx/shmup/game/explosion.ogg"})
 
 (defn make-rect-bounds
   "Make a bounding rect based on provided position and rect size; rect is
@@ -109,7 +111,7 @@
   (let [position (:position player)
         view (make-bullet position)]
     (pixi/add-child main-stage view)
-    (.play (:shot @sounds_))
+    (.play (:shot sounds_))
     {:position position
      :speed 130
      :direction direction
@@ -255,6 +257,7 @@
           (doseq [bullet bullets-to-remove]
             (pixi/remove-container (:view bullet)))
           (doseq [enemy enemies-to-remove]
+            (.play (:explosion sounds_))
             (pixi/remove-container (:view enemy)))
           (assoc state
             :bullets (remove bullets-to-remove (:bullets state))
