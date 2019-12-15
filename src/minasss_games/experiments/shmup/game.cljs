@@ -73,23 +73,26 @@
      :collision-rect [32 32]
      :direction [0 0]
      :speed 0
-     :energy 100
+     :energy 10
      :view view}))
 
-(defn make-boss-entity
+(defn make-boss-element
   [position]
-  [:sprite {:texture "images/shmup/game/boss.png"
+  (element/render
+    [:sprite {:texture "images/shmup/game/boss.png"
               :anchor [0.5 0.5]
-              :position position}])
+              :position position}]))
 
-(defn spawn-boss
+(defn spawn-boss-enemy
   [position]
-  {:position position
+  (let [view (make-boss-element position)]
+    (pixi/add-child main-stage view)
+    {:position position
      :collision-rect [32 32]
      :direction [0 0]
      :speed 0
      :energy 100
-     :view view})
+     :view view}))
 
 (defn make-player
   "Create player element"
@@ -119,6 +122,7 @@
   (element/render
     [:sprite {:texture "images/shmup/game/bullet.png"
               :anchor [0.5 0.5]
+              :damage 1
               :position position}]))
 
 (defn spawn-bullet
@@ -331,7 +335,9 @@
         (assoc state
           :player (spawn-player [200 400])
           :bullets []
-          :enemies [(spawn-enemy [200 200]) (spawn-enemy [260 200])])))
+          :enemies [(spawn-enemy [200 200])
+                    (spawn-enemy [260 200])
+                    (spawn-boss-enemy [220 120])])))
     (pixi/add-child app-stage main-stage)))
 
 (defmethod scene-cleanup ::game
