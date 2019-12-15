@@ -2,14 +2,14 @@
   "Small wrapper around a JS sound library (Howl in this case)"
  (:require [cljsjs.howler]))
 
-(defn make-sound
+(defn load
   "Return a sound from the resource cache, looking up by name"
   [resource-name]
   (js/Howl. (clj->js {:src [resource-name]
                       :preload true})))
 
 (comment
-  (def shot (make-sound "sfx/shmup/game/shot.ogg"))
+  (def shot (load "sfx/shmup/game/shot.ogg"))
   (.play shot)
   )
 
