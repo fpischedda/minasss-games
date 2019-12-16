@@ -10,7 +10,7 @@
             [minasss-games.pixi :as pixi]
             [minasss-games.pixi.input :as input]
             [minasss-games.sound :as sound]
-            [minasss-games.experiments.shmup.enemy-ai :as enemy-ai]))
+            [minasss-games.experiments.shmup.enemy-behaviour :as enemy-behaviour]))
 
 (def scene {:id ::game
             :resources ["images/shmup/game/background.png"
@@ -88,7 +88,7 @@
   [position]
   (let [view (make-boss-element position)]
     (pixi/add-child main-stage view)
-    (enemy-ai/init-state ::enemy-ai/horizontal-ping-pong
+    (enemy-behaviour/init-state ::enemy-behaviour/horizontal-ping-pong
       {:position position
        :collision-rect [32 32]
        :direction [0 0]
@@ -234,7 +234,7 @@
 
 (defn update-enemy
   [enemy delta-time]
-  (let [new-enemy (enemy-ai/update-ai enemy)
+  (let [new-enemy (enemy-behaviour/update-state enemy)
         {:keys [direction speed position]} new-enemy
         new-pos (math/translate position (math/scale direction (* speed delta-time)))]
     (assoc new-enemy :position new-pos)))

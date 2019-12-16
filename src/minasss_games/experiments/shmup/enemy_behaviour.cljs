@@ -1,22 +1,20 @@
-(ns minasss-games.experiments.shmup.enemy-ai
+(ns minasss-games.experiments.shmup.enemy-behaviour
   "This namespace collects all enemy ai related functions and
   state management. Still not sure how this is going to be
   implemented, I expect it to be higlhy experimental and prone
   to changes in structure and functionality.")
 
-(defmulti update-ai
+(defmulti update-state
   (fn [entity] (get-in entity [::ai ::behaviour-type])))
 
-(defmethod update-ai :default
+(defmethod update-state :default
   [entity]
   entity)
 
-(defmethod update-ai ::horizontal-ping-pong
+(defmethod update-state ::horizontal-ping-pong
   [{:keys [position direction] :as entity}]
   (let [dir-x (first direction)
         pos-x (first position)]
-    (js/console.log dir-x)
-    (js/console.log pos-x)
     (cond
       (> dir-x 0) (if (< 350 pos-x)
                     (assoc entity :direction [-1 0])
