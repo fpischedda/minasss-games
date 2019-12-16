@@ -9,7 +9,8 @@
             [minasss-games.math :as math]
             [minasss-games.pixi :as pixi]
             [minasss-games.pixi.input :as input]
-            [minasss-games.sound :as sound]))
+            [minasss-games.sound :as sound]
+            [minasss-games.experiments.shmup.enemy-ai :as enemy-ai]))
 
 (def scene {:id ::game
             :resources ["images/shmup/game/background.png"
@@ -87,12 +88,13 @@
   [position]
   (let [view (make-boss-element position)]
     (pixi/add-child main-stage view)
-    {:position position
-     :collision-rect [32 32]
-     :direction [0 0]
-     :speed 0
-     :energy 100
-     :view view}))
+    (enemy-ai/init-state ::enemy-ai/horizontal-ping-pong
+      {:position position
+       :collision-rect [32 32]
+       :direction [0 0]
+       :speed 0
+       :energy 100
+       :view view})))
 
 (defn make-player
   "Create player element"
@@ -231,9 +233,11 @@
         (into [])))))
 
 (defn update-enemy
-  [{:keys [position direction speed] :as enemy} delta-time]
-  (let [new-pos (math/translate position (math/scale direction (* speed delta-time)))]
-    (assoc enemy :position new-pos)))
+  [enemy delta-time]
+  (let [new-enemy (enemy-ai/update-ai enemy)
+        {:keys [direction speed position]} new-enemy
+        new-pos (math/translate position (math/scale direction (* speed delta-time)))]
+    (assoc new-enemy :position new-pos)))
 
 (defn update-enemies
   "Update enemies, don't do a lot at this point"
@@ -328,7 +332,6 @@
 (defmethod scene-ready ::game
   [scene app-stage]
   (let [background (pixi/make-sprite "images/shmup/game/background.png")]
-    #_(vreset! sounds_ {:shot (pixi/get-sound "sfx/shmup/game/shot.ogg")})
     (pixi/add-child main-stage background)
     (swap! (:state scene)
       (fn [state]
