@@ -181,6 +181,11 @@
       (assoc-in [:player :direction] (math/normalize [dir-x dir-y]))
       (assoc :bullets new-bullets))))
 
+(defn update-position-by-velocity
+  [{:keys [direction speed position] :as component} dt]
+  (assoc component :position
+    (math/translate position (math/scale direction (* speed delta-time)))))
+
 (def LIMIT-TOP 0)
 (def LIMIT-BOTTOM 1200)
 (def LIMIT-LEFT 0)
@@ -190,15 +195,18 @@
   "Update bullet position, if the bullet goes outside of the screen
   its sprite will be released and the bullet marked as deleted so it
   can be removed later"
-  [{:keys [position direction speed collision-rect view] :as bullet} delta-time]
-  (let [new-pos (math/translate position (math/scale direction (* speed delta-time)))
-        [x y] new-pos
-        delete (or (> LIMIT-TOP y) (< LIMIT-BOTTOM y) (> LIMIT-LEFT x) (< LIMIT-RIGHT x))]
-    (when delete
-      (pixi/remove-container view))
-    (assoc bullet
-      :position new-pos
-      :deleted delete)))
+  [bullet delta-time]
+  (let [new-bullet
+        (-> bullet
+          (update-position-by-velocity delta-time)
+          (fn [{:keys [position] :as bullet}]
+            (assoc bullet :deleted
+              (let [[x y] position]
+                (or (> LIMIT-TOP y) (< LIMIT-BOTTOM y)
+                  (> LIMIT-LEFT x) (< LIMIT-RIGHT x))))))]
+    (when (:deleted new-bullet)
+      (pixi/remove-container (:view new-bullet)))
+    new-bullet))
 
 (defn update-bullets
   "Update bullets removing the ones that are not visibile anymore"
@@ -212,10 +220,9 @@
 
 (defn update-enemy
   [enemy delta-time]
-  (let [new-enemy (enemy-behaviour/update-state enemy)
-        {:keys [direction speed position]} new-enemy
-        new-pos (math/translate position (math/scale direction (* speed delta-time)))]
-    (assoc new-enemy :position new-pos)))
+  (-> enemy
+    enemy-behaviour/update-state
+    (update-position-by-velocity delta-time)))
 
 (defn update-enemies
   "Update enemies, don't do a lot at this point"
@@ -229,10 +236,7 @@
 
 (defn move-player
   [state delta-time]
-  (update state :player
-    (fn [{:keys [position direction speed] :as player}]
-      (assoc player :position
-        (math/translate position (math/scale direction (* speed delta-time)))))))
+  (update state :player update-position-by-velocity delta-time))
 
 (comment
   (js/console.log (clj->js (:player @(:state scene))))
