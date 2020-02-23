@@ -102,7 +102,6 @@
   (element/render
     [:sprite {:texture "images/shmup/game/bullet.png"
               :anchor [0.5 0.5]
-              :damage 1
               :position position}]))
 
 (defn spawn-bullet
@@ -115,6 +114,7 @@
      :speed 130
      :direction direction
      :collision-rect [8 8]
+     :damage 1
      :view view}))
 
 (def FIRE-TIMEOUT-MS 0.3)
