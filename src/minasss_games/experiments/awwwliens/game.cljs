@@ -22,8 +22,8 @@
                                                          scene-key-up
                                                          scene-cleanup]]
             [minasss-games.pixi :as pixi]
-            [minasss-games.pixi.input :as input]
             [minasss-games.experiments.awwwliens.core :as core]
+            [minasss-games.experiments.awwwliens.intro :as intro]
             [minasss-games.experiments.awwwliens.view :as view]))
 
 (def scene {:id ::game
@@ -57,7 +57,7 @@
     ;; if energy <= 0 then it is game over
     (when (not (= old-energy new-energy))
       (if (>= 0 new-energy)
-        (director/start-scene minasss-games.experiments.awwwliens.intro/scene)
+        (director/start-scene intro/scene)
         (view/update-cow-energy new-energy)))))
 
 (defn world-changed-listener
