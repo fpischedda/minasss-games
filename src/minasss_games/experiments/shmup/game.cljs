@@ -9,7 +9,6 @@
             [minasss-games.gamepad :as gamepad]
             [minasss-games.math :as math]
             [minasss-games.pixi :as pixi]
-            [minasss-games.pixi.input :as input]
             [minasss-games.sound :as sound]
             [minasss-games.experiments.shmup.enemy-behaviour :as enemy-behaviour]))
 
@@ -121,11 +120,11 @@
 (def actions_ (atom {::fire-timeout FIRE-TIMEOUT-MS}))
 
 (defmethod scene-key-down ::game
-  [scene _native action]
+  [_scene _native action]
   (swap! actions_ assoc action true))
 
 (defmethod scene-key-up ::game
-  [scene _native action]
+  [_scene _native action]
   (swap! actions_ dissoc action))
 
 (def LAXE-UP 0)
@@ -184,12 +183,19 @@
 (defn update-position-by-velocity
   [{:keys [direction speed position] :as component} dt]
   (assoc component :position
-    (math/translate position (math/scale direction (* speed delta-time)))))
+    (math/translate position (math/scale direction (* speed dt)))))
 
 (def LIMIT-TOP 0)
 (def LIMIT-BOTTOM 1200)
 (def LIMIT-LEFT 0)
 (def LIMIT-RIGHT 640)
+
+(defn update-deleted
+  [{:keys [position] :as bullet}]
+  (assoc bullet :deleted
+    (let [[x y] position]
+      (or (> LIMIT-TOP y) (< LIMIT-BOTTOM y)
+        (> LIMIT-LEFT x) (< LIMIT-RIGHT x)))))
 
 (defn update-bullet
   "Update bullet position, if the bullet goes outside of the screen
@@ -199,11 +205,7 @@
   (let [new-bullet
         (-> bullet
           (update-position-by-velocity delta-time)
-          (fn [{:keys [position] :as bullet}]
-            (assoc bullet :deleted
-              (let [[x y] position]
-                (or (> LIMIT-TOP y) (< LIMIT-BOTTOM y)
-                  (> LIMIT-LEFT x) (< LIMIT-RIGHT x))))))]
+          update-deleted)]
     (when (:deleted new-bullet)
       (pixi/remove-container (:view new-bullet)))
     new-bullet))
