@@ -70,7 +70,7 @@
        :collision-rect [64 32]
        :direction [0 0]
        :speed 0
-       :energy 100
+       :energy 400
        :view view})))
 
 (defn make-player
