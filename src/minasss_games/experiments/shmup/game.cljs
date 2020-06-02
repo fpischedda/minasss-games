@@ -64,7 +64,6 @@
 (defn spawn-boss-enemy
   [position]
   (let [view (make-boss-element position)]
-    (pixi/add-child main-stage view)
     (enemy-behaviour/init-state ::enemy-behaviour/horizontal-ping-pong
       {:position position
        :collision-rect [64 32]
@@ -88,7 +87,6 @@
 (defn spawn-player
   [position]
   (let [view (make-player position)]
-    (pixi/add-child main-stage view)
     {:position position
      :energy 100
      :speed 100
@@ -190,55 +188,43 @@
 (def LIMIT-LEFT 0)
 (def LIMIT-RIGHT 640)
 
-(defn update-deleted
-  [{:keys [position] :as bullet}]
-  (assoc bullet :deleted
-    (let [[x y] position]
-      (or (> LIMIT-TOP y) (< LIMIT-BOTTOM y)
-        (> LIMIT-LEFT x) (< LIMIT-RIGHT x)))))
+(defn entity-is-out-of-boundaries
+  [{:keys [position boundaries]}]
+  (let [[x y] position
+        [top left bottom right] boundaries]
+    (or (> top y) (< bottom y)
+      (> left x) (< right x))))
 
-(defn update-bullet
-  "Update bullet position, if the bullet goes outside of the screen
-  its sprite will be released and the bullet marked as deleted so it
-  can be removed later"
-  [bullet delta-time]
-  (let [new-bullet
-        (-> bullet
-          (update-position-by-velocity delta-time)
-          update-deleted)]
-    (when (:deleted new-bullet)
-      (pixi/remove-container (:view new-bullet)))
-    new-bullet))
+(defn check-entity-against-boundaries
+  "If the entity goes outside of the screen
+  its sprite will be released and the entity
+  marked as deleted so it can be removed later"
+  [entity]
+  (if (and (some? (:boundaries entity)) (entity-is-out-of-boundaries entity))
+    (do
+      (pixi/remove-container (:view entity))
+      (assoc entity :deleted true))
+    entity))
 
-(defn update-bullets
-  "Update bullets removing the ones that are not visibile anymore"
-  [state delta-time]
-  (update state :bullets
-    (fn [bullets]
-      (->> bullets
-        (map #(update-bullet % delta-time))
+(defn entities-remove-if-out-of-boundaries
+  "Update entities removing the ones that are not visibile anymore"
+  [state]
+  (update state :entities
+    (fn [entities]
+      (->> entities
+        (map #(check-entity-against-boundaries %))
         (remove :deleted)
         (into [])))))
 
-(defn update-enemy
-  [enemy delta-time]
-  (-> enemy
-    enemy-behaviour/update-state
-    (update-position-by-velocity delta-time)))
-
-(defn update-enemies
+(defn entities-update-behavior
   "Update enemies, don't do a lot at this point"
-  [state delta-time]
+  [state]
   (update state :enemies
     (fn [enemies]
       (->> enemies
-        (map #(update-enemy % delta-time))
+        (map #((if-some (::ai %) (enemy-behaviour/update-state %) %)))
         (remove :deleted)
         (into [])))))
-
-(defn move-player
-  [state delta-time]
-  (update state :player update-position-by-velocity delta-time))
 
 (comment
   (js/console.log (clj->js (:player @(:state scene))))
@@ -270,6 +256,10 @@
             :bullets (remove bullets-to-remove (:bullets state))
             :enemies (remove enemies-to-remove (:enemies state))))))))
 
+(defn update-entity-view
+  [{:keys [view position]}]
+  (pixi/set-position view position))
+
 (defn update-view!
   "Side effecty function that sync sprites accordingly with scene state.
   Now this function returns the state even if it is not supposed to change
@@ -277,15 +267,17 @@
   `state management pipeline` and maybe in the future it can take care of
   adding or removing view elements."
   [state]
-  (let [{:keys [position view]} (:player state)]
-       (pixi/set-position view position))
-  ;; enemies do nothing at this time but lets prepare for the future
-  (doseq [{:keys [view position]} (:enemies state)]
-    (pixi/set-position view position))
-  ;; update active bullets
-  (doseq [{:keys [view position]} (:bullets state)]
-    (pixi/set-position view position))
+  (doseq [entity (:entities state)]
+    (update-entity-view entity))
   state)
+
+(defn update-positions
+  [state delta-time]
+  (update-in state [:entities] mapv
+    (fn [entity]
+      (if-some (:speed entity)
+        (update-position-by-velocity entity delta-time)
+        entity))))
 
 (defn update-game-state
   "This function updates a bounch of things:
@@ -299,10 +291,10 @@
   (handle-gamepad!)
   (-> state
     (handle-actions delta-time)
-    (move-player delta-time)
-    (update-bullets delta-time)
+    (update-positions delta-time)
+    entities-remove-if-out-of-boundaries
     handle-collisions
-    (update-enemies delta-time)
+    entities-update-behavior
     update-view!))
 
 (defmethod scene-update ::game
@@ -320,11 +312,12 @@
     (swap! (:state scene)
       (fn [state]
         (assoc state
-          :player (spawn-player [200 400])
-          :bullets []
-          :enemies [(spawn-enemy [200 200])
-                    (spawn-enemy [260 200])
-                    (spawn-boss-enemy [220 120])])))
+          :entities [(spawn-player [200 400])
+                     (spawn-enemy [200 200])
+                     (spawn-enemy [260 200])
+                     (spawn-boss-enemy [220 120])])))
+    (doall [entity (get-in @state [:state :entities])]
+      (pixi/add-child main-stage (:view entity)))
     (pixi/add-child app-stage main-stage)))
 
 (defmethod scene-cleanup ::game
