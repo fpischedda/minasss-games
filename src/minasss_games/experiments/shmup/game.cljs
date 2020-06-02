@@ -222,7 +222,7 @@
   (update state :enemies
     (fn [enemies]
       (->> enemies
-        (map #((if-some (::ai %) (enemy-behaviour/update-state %) %)))
+        (map #((if (some? (::enemy-behaviour/ai %)) (enemy-behaviour/update-state %) %)))
         (remove :deleted)
         (into [])))))
 
@@ -273,7 +273,7 @@
 
 (defn update-positions
   [state delta-time]
-  (update-in state [:entities] mapv
+  #_(update-in state [:entities] mapv
     (fn [entity]
       (if-some (:speed entity)
         (update-position-by-velocity entity delta-time)
@@ -299,7 +299,7 @@
 
 (defmethod scene-update ::game
   [scene delta-time]
-  (swap! (:state scene)
+  #_(swap! (:state scene)
     (fn [state]
       (when (some? state)
         (update-game-state state delta-time)))))
@@ -311,13 +311,14 @@
     (pixi/add-child main-stage background)
     (swap! (:state scene)
       (fn [state]
-        (assoc state
-          :entities [(spawn-player [200 400])
-                     (spawn-enemy [200 200])
-                     (spawn-enemy [260 200])
-                     (spawn-boss-enemy [220 120])])))
-    (doall [entity (get-in @state [:state :entities])]
-      (pixi/add-child main-stage (:view entity)))
+        (let [new-state (assoc state
+                          :entities [(spawn-player [200 400])
+                                     (spawn-enemy [200 200])
+                                     (spawn-enemy [260 200])
+                                     (spawn-boss-enemy [220 120])])]
+          (doseq [entity (:entities new-state)]
+            (pixi/add-child main-stage (:view entity)))
+          new-state)))
     (pixi/add-child app-stage main-stage)))
 
 (defmethod scene-cleanup ::game
