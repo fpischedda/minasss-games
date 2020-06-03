@@ -166,8 +166,8 @@
                 (::move-down actions) 1
                 :else 0)
         ;; spawn new bullets if fire is pressed (one shot every 0.3 seconds)
-        new-bullets (if (and (::fire actions) (>= 0 (::fire-timeout actions)))
-                      (let [player (:player state)]
+        #_new-bullets #_(if (and (::fire actions) (>= 0 (::fire-timeout actions)))
+                      (let [player (nth (:entities state) 0)]
                         (swap! actions_ assoc ::fire-timeout FIRE-TIMEOUT-MS)
                         (-> (:bullets state)
                           (conj (spawn-bullet player [0 -1]))
@@ -175,12 +175,12 @@
                           (conj (spawn-bullet player (math/normalize [-0.3 -1])))))
                       (:bullets state))]
     (-> state
-      (assoc-in [:player :direction] (math/normalize [dir-x dir-y]))
-      (assoc :bullets new-bullets))))
+      (assoc-in [:entities 0 :direction] (math/normalize [dir-x dir-y]))
+      #_(assoc :bullets new-bullets))))
 
 (defn update-position-by-velocity
-  [{:keys [direction speed position] :as component} dt]
-  (assoc component :position
+  [{:keys [direction speed position] :as entity} dt]
+  (assoc entity :position
     (math/translate position (math/scale direction (* speed dt)))))
 
 (def LIMIT-TOP 0)
@@ -219,10 +219,10 @@
 (defn entities-update-behavior
   "Update enemies, don't do a lot at this point"
   [state]
-  (update state :enemies
-    (fn [enemies]
-      (->> enemies
-        (map #((if (some? (::enemy-behaviour/ai %)) (enemy-behaviour/update-state %) %)))
+  (update-in state [:entities]
+    (fn [entities]
+      (->> entities
+        (map #(if (some? (::enemy-behaviour/ai %)) (enemy-behaviour/update-state %) %))
         (remove :deleted)
         (into [])))))
 
@@ -256,11 +256,11 @@
             :bullets (remove bullets-to-remove (:bullets state))
             :enemies (remove enemies-to-remove (:enemies state))))))))
 
-(defn update-entity-view
+(defn update-entity-view!
   [{:keys [view position]}]
   (pixi/set-position view position))
 
-(defn update-view!
+(defn entities-update-view!
   "Side effecty function that sync sprites accordingly with scene state.
   Now this function returns the state even if it is not supposed to change
   because this way it is easier to put this function in the
@@ -268,16 +268,18 @@
   adding or removing view elements."
   [state]
   (doseq [entity (:entities state)]
-    (update-entity-view entity))
+    (update-entity-view! entity))
   state)
 
 (defn update-positions
   [state delta-time]
-  #_(update-in state [:entities] mapv
-    (fn [entity]
-      (if-some (:speed entity)
-        (update-position-by-velocity entity delta-time)
-        entity))))
+  (update-in state [:entities]
+    (fn [entities]
+      (mapv (fn [entity]
+              (if (some? (:speed entity))
+                (update-position-by-velocity entity delta-time)
+                entity))
+        entities))))
 
 (defn update-game-state
   "This function updates a bounch of things:
@@ -288,18 +290,18 @@
   - view state of everything
   and returns the next state of the world"
   [state delta-time]
-  (handle-gamepad!)
+  ;; (handle-gamepad!)
   (-> state
     (handle-actions delta-time)
     (update-positions delta-time)
     entities-remove-if-out-of-boundaries
-    handle-collisions
+    ;; handle-collisions
     entities-update-behavior
-    update-view!))
+    entities-update-view!))
 
 (defmethod scene-update ::game
   [scene delta-time]
-  #_(swap! (:state scene)
+  (swap! (:state scene)
     (fn [state]
       (when (some? state)
         (update-game-state state delta-time)))))
