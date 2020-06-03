@@ -10,6 +10,7 @@
             [minasss-games.math :as math]
             [minasss-games.pixi :as pixi]
             [minasss-games.sound :as sound]
+            [minasss-games.experiments.shmup.entities :as entities]
             [minasss-games.experiments.shmup.enemy-behaviour :as enemy-behaviour]))
 
 (def scene {:id ::game
@@ -23,7 +24,7 @@
                           "ArrowLeft" ::move-left "h" ::move-left "a" ::move-left
                           "ArrowRight" ::move-right "l" ::move-right "d" ::move-right
                           "z" ::fire "m" ::fire}
-            :state (atom nil)})
+            :state (atom {:registry (entities/create-registry)})})
 
 (def main-stage (pixi/make-container))
 
@@ -92,7 +93,8 @@
      :speed 100
      :collision-rect [8 8]
      :direction [0 0]
-     :view view}))
+     :view view
+     :controller true}))
 
 (defn make-bullet
   [position]
@@ -157,6 +159,7 @@
 (defn handle-actions
   [state delta-time]
   (let [actions (swap! actions_ update ::fire-timeout - delta-time)
+
         dir-x (cond
                 (::move-left actions) -1
                 (::move-right actions) 1
@@ -175,7 +178,14 @@
                           (conj (spawn-bullet player (math/normalize [-0.3 -1])))))
                       (:bullets state))]
     (-> state
-      (assoc-in [:entities 0 :direction] (math/normalize [dir-x dir-y]))
+      (update-in [:entities]
+        #(mapv
+           (fn [entity]
+             (if (some? (:controller entity))
+               (assoc entity :direction (math/normalize [dir-x dir-y]))
+               entity))
+           %)
+        )
       #_(assoc :bullets new-bullets))))
 
 (defn update-position-by-velocity
@@ -292,12 +302,12 @@
   [state delta-time]
   ;; (handle-gamepad!)
   (-> state
-    (handle-actions delta-time)
-    (update-positions delta-time)
-    entities-remove-if-out-of-boundaries
-    ;; handle-collisions
-    entities-update-behavior
-    entities-update-view!))
+    ;; (handle-actions delta-time)
+    ;; (update-positions delta-time)
+    ;; entities-remove-if-out-of-boundaries
+    ;; ;; handle-collisions
+    ;; entities-update-behavior
+    #_entities-update-view!))
 
 (defmethod scene-update ::game
   [scene delta-time]
@@ -306,21 +316,26 @@
       (when (some? state)
         (update-game-state state delta-time)))))
 
+(defn mount-view-components
+  [registry parent-stage]
+  (doseq [entity (vals (:entities registry))]
+    (pixi/add-child parent-stage (:view entity)))
+  registry)
+
 ;; setup the view adding the enemies and the player
 (defmethod scene-ready ::game
   [scene app-stage]
   (let [background (pixi/make-sprite "images/shmup/game/background.png")]
-    (pixi/add-child main-stage background)
-    (swap! (:state scene)
-      (fn [state]
-        (let [new-state (assoc state
-                          :entities [(spawn-player [200 400])
-                                     (spawn-enemy [200 200])
-                                     (spawn-enemy [260 200])
-                                     (spawn-boss-enemy [220 120])])]
-          (doseq [entity (:entities new-state)]
-            (pixi/add-child main-stage (:view entity)))
-          new-state)))
+    (swap! (:state scene) update-in [:registry]
+      (fn [registry]
+        (-> registry
+          (entities/create-entity {:view background})
+          (entities/create-entity (spawn-player     [200 400]))
+          (entities/create-entity (spawn-enemy      [200 200]))
+          (entities/create-entity (spawn-enemy      [260 200]))
+          (entities/create-entity (spawn-boss-enemy [220 120]))
+          (mount-view-components main-stage)
+          )))
     (pixi/add-child app-stage main-stage)))
 
 (defmethod scene-cleanup ::game
