@@ -21,9 +21,10 @@
   "Return a map with the current status of the provided gamepad; right now
   only buttons are supported and returned in the :buttons key"
   [gamepad]
-  (let [buttons (oget gamepad "buttons")]
+  (let [buttons (oget gamepad "buttons")
+        axes (oget gamepad "axes")]
     {:buttons (mapv #(oget % "pressed") buttons)
-     :axes (oget gamepad "axes")}))
+     :axes (mapv #(oget % "value") axes)}))
 
 (defn gamepad-connected
   "Register new connected gamepad in the gamepads_ registry"
@@ -80,6 +81,17 @@
   (let [state (button-status gamepad-index button-index :status)
         old-state (button-status gamepad-index button-index :old-status)]
     (and old-state (not state))))
+
+(defn axis-status
+  ([gamepad-index axis-index]
+   (axis-status gamepad-index axis-status :status))
+  ([gamepad-index axis-index which-status]
+   (if-let [gamepad (get @gamepads_ gamepad-index)]
+     (-> gamepad
+       which-status
+       :axis
+       (nth axis-index))
+     0)))
 
 (defn init
   "Initialize gamepad system, register connected and disconnected event handlers"

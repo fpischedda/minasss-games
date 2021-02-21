@@ -2,8 +2,7 @@
   "A small experiment with PIXI javascript library"
   (:require [minasss-games.pixi :as pixi]
             [minasss-games.director :as director]
-            [minasss-games.experiments.awwwliens.intro :as awwwliens]))
-            ;; [minasss-games.experiments.harvest-bot :as harvest-bot]))
+            [minasss-games.experiments.shmup.game :as shmup]))
 
 (enable-console-print!)
 
@@ -12,7 +11,7 @@
   (let [app (pixi/make-app {:width (.-innerWidth js/window)
                             :height (.-innerHeight js/window)})]
     (director/init app)
-    (director/start-scene awwwliens/scene)
+    (director/start-scene shmup/scene)
     app))
 
 (defonce ^:export app (init))

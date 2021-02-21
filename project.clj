@@ -10,7 +10,8 @@
                  [org.clojure/clojurescript "1.10.597"]
                  [org.clojure/core.async  "0.4.500"]
                  [binaryage/oops "0.7.0"]
-                 [cljsjs/pixi "5.1.2-0"]]
+                 [cljsjs/pixi "5.1.2-0"]
+                 [cljsjs/howler "2.0.5-0"]]
 
   :plugins [[lein-figwheel "0.5.19"]
             [lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]]

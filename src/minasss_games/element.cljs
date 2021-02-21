@@ -78,8 +78,11 @@
 (defmethod make-element :animated-sprite
   [tag attrs]
   (let [container (pixi/make-animated-sprite (:spritesheet attrs) (:animation-name attrs))
-        cleaned-attrs (dissoc attrs :spritesheet :animation-name)]
-    (pixi/set-attributes container cleaned-attrs)))
+        cleaned-attrs (dissoc attrs :spritesheet :animation-name :autostart)]
+    (pixi/set-attributes container cleaned-attrs)
+    (when (:autostart attrs)
+      (.play container))
+    container))
 
 (defmethod make-element :text
   [tag attrs]
