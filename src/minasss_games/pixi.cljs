@@ -1,11 +1,11 @@
 (ns minasss-games.pixi
   "Simple wrapper around PIXI javascript library"
-  (:require [cljsjs.pixi]
+  (:require [pixi.js :as pixi]
             [oops.core :refer [oget oget+ oset!]]))
 
-(def Loader (oget js/PIXI.Loader "shared"))
+(def Loader (oget pixi.Loader "shared"))
 (def Resources (oget Loader "resources"))
-(def Ticker (oget js/PIXI.Ticker "shared"))
+(def Ticker (oget pixi.Ticker "shared"))
 
 (defn add-app-to-dom
   "Add the specified app to the DOM"
@@ -15,7 +15,7 @@
 (defn make-ticker
   "Create a ticker registering an handler"
   [handler-fn]
-  (let [ticker (js/PIXI.Ticker.)]
+  (let [ticker (pixi.Ticker.)]
     (.add ticker handler-fn)
     ticker))
 
@@ -27,11 +27,11 @@
 (defn make-app
   "Instantiate a PIXI app"
   ([options-map]
-   (let [app (js/PIXI.Application. (clj->js options-map))]
+   (let [app (pixi.Application. (clj->js options-map))]
      (add-app-to-dom app)
      app))
   ([width height]
-   (let [app (js/PIXI.Application. #js {:width width :height height})]
+   (let [app (pixi.Application. #js {:width width :height height})]
      (add-app-to-dom app)
      app)))
 
@@ -75,22 +75,22 @@
 (defn make-container
   "Create a PIXI container"
   []
-  (js/PIXI.Container.))
+  (pixi.Container.))
 
 (defn make-sprite
   "Create a sprite prividing a texture name"
   [texture-name]
-  (js/PIXI.Sprite. (get-texture texture-name)))
+  (pixi.Sprite. (get-texture texture-name)))
 
 (defn make-sprite-from-spritesheet
   "Create a sprite prividing a spritesheet name and texture name"
   [spritesheet-name texture-name]
-  (js/PIXI.Sprite. (get-spritesheet-texture spritesheet-name texture-name)))
+  (pixi.Sprite. (get-spritesheet-texture spritesheet-name texture-name)))
 
 (defn make-animated-sprite
   "Create a animated sprite prividing a spritesheet name"
   [spritesheet-name animation-name]
-  (js/PIXI.AnimatedSprite. (oget+ (oget (get-spritesheet spritesheet-name) "animations") animation-name)))
+  (pixi.AnimatedSprite. (oget+ (oget (get-spritesheet spritesheet-name) "animations") animation-name)))
 
 (defn add-child
   "Add child to provided parent container"
@@ -143,19 +143,19 @@
 (defn make-text-style
   "Create a text style to be used to create Text objects"
   [options-map]
-  (js/PIXI.TextStyle. (clj->js options-map)))
+  (pixi.TextStyle. (clj->js options-map)))
 
 (defn make-text
   "Create a text style to be used to create Text objects"
   ([text]
-   (js/PIXI.Text. text))
+   (pixi.Text. text))
   ([text style]
-   (js/PIXI.Text. text style)))
+   (pixi.Text. text style)))
 
 (defn make-graphics
   "Create a Graphics object, used to draw shapes"
   []
-  (js/PIXI.Graphics.))
+  (pixi.Graphics.))
 
 (defn set-position
   "Set position of any PIXI/Container subclass"

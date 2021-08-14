@@ -4,24 +4,27 @@
 
   PIXI.settings is an associative array so it is possible to access and set its
   properties using aget/aset"
-  (:require [oops.core :refer [oget oget+ oset!+]]))
+  (:require
+   [pixi.js :as pixi]
+   [oops.core :refer [oget oget+ oset!+]]))
 
+(def Settings (oget pixi "settings"))
+
+(def ScaleModeNearest pixi.SCALE_MODES.NEAREST)
+(def ScaleModeLinear pixi.SCALE_MODES.LINEAR)
+(def scale-modes {:nearest ScaleModeNearest
+                  :linear  ScaleModeLinear})
 (defn get-by-name
   [name]
-  (let [settings (oget js/PIXI "settings")]
-    (oget+ settings name)))
+  (oget+ Settings name))
 
 (defn set-by-name!
   [name value]
-  (let [settings (oget js/PIXI "settings")]
-    (oset!+ settings name value)))
+  (oset!+ Settings name value))
 
 (defmulti set!
   (fn [setting _param] setting))
 
 (defmethod set! :scale-mode
   [_setting scale-mode]
-  (let [mode (if (= :nearest scale-mode)
-               js/PIXI.SCALE_MODES.NEAREST
-               js/PIXI.SCALE_MODES.LINEAR)]
-    (set-by-name! "SCALE_MODE" mode)))
+  (set-by-name! "SCALE_MODE" (get scale-modes scale-mode ScaleModeNearest)))

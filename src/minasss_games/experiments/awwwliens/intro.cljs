@@ -7,12 +7,10 @@
              :as
              director
              :refer
-             [scene-cleanup scene-init scene-key-up scene-update scene-ready]]
+             [scene-cleanup scene-key-up scene-update scene-ready]]
             [minasss-games.element :as element]
             [minasss-games.gamepad :as gamepad]
-            [minasss-games.experiments.awwwliens.game :as game]
             [minasss-games.pixi :as pixi]
-            [minasss-games.pixi.input :as input]
             [minasss-games.screenplay :as screenplay]))
 
 (def clog js/console.log)
@@ -132,11 +130,10 @@
 
 (defmethod update-menu! ::select
   [_]
-  (let [app-stage (.-parent main-stage)]
-    (director/start-scene game/scene)))
+  (director/start-scene minasss-games.experiments.awwwliens.game/scene))
 
 (defmethod scene-key-up ::menu
-  [scene _native action]
+  [_scene _native action]
   (if (= ::restart-screenplay action)
     (screenplay/start intro-screenplay screenplay-listener)
     (update-menu! action)))
@@ -146,7 +143,7 @@
 (def BUTTON-A 4)
 
 (defmethod scene-update ::menu
-  [scene delta-time]
+  [_scene _delta-time]
   (cond
     (gamepad/button-pressed 0 BUTTON-A) (update-menu! ::select)
     (gamepad/button-pressed 0 DPAD-UP) (update-menu! ::move-up)
